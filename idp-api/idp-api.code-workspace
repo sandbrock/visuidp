@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../idp-ui"
+		}
+	],
+	"settings": {
+		"chatgpt.openOnStartup": false
+	}
+}

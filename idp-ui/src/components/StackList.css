@@ -1,0 +1,259 @@
+.stack-list {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.stack-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* Ensure the "Stacks" title aligns vertically with tabs */
+.stack-list-title-row {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center; /* centers title with filter bullets */
+}
+
+.stack-list-title-row h2 {
+  font-size: 1.25rem;
+  line-height: 32px; /* match approx pill height */
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(2px); /* optical baseline alignment */
+}
+
+.stack-list-header h2 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tab {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  line-height: 20px; /* pill content height */
+}
+
+.tab.active {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
+.create-stack-btn {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-stack-btn:hover {
+  background: var(--accent-primary-hover);
+}
+
+.create-stack-btn.primary {
+  background: #28a745;
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+.create-stack-btn.primary:hover {
+  background: #1e7e34;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 2px dashed var(--border-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.empty-state h3 {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.stack-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.stack-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.stack-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stack-card-header h3 {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Environment badge removed */
+
+.stack-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.stack-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.stack-meta strong {
+  color: var(--text-primary);
+}
+
+.collections {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1rem;
+}
+
+.collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.collection-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  padding: 10px 12px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.collection-btn.active,
+.collection-btn:hover {
+  border-color: var(--accent-primary);
+}
+
+.error-message {
+  text-align: center;
+  padding: 2rem;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+}
+
+.error-message h3 {
+  color: #721c24;
+  margin: 0 0 1rem 0;
+}
+
+.error-message p {
+  margin-bottom: 1.5rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-message button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.error-message button:hover {
+  background: #c82333;
+}
+
+/* High-specificity, scoped override to align title with pills */
+.stack-list > .stack-list-header > .stack-list-title-row > h2 {
+  margin: 0;
+  line-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(3px);
+}
+
+.stack-list > .stack-list-header .tabs {
+  align-items: center;
+}
+
+.stack-list > .stack-list-header .tab {
+  line-height: 20px;
+}

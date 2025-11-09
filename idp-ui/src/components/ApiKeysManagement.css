@@ -1,0 +1,417 @@
+/* Base container - works for both personal and admin modes */
+.api-keys-management {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Mode-specific classes for potential customization */
+.api-keys-management.mode-personal {
+  /* Personal mode styling - currently inherits base styles */
+}
+
+.api-keys-management.mode-admin {
+  /* Admin mode styling - currently inherits base styles */
+}
+
+.api-keys-management.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+/* Header section - consistent styling for both personal and admin modes */
+.api-keys-management .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.api-keys-management .header-content {
+  flex: 1;
+}
+
+/* Page title - works for both "My API Keys" (personal) and "API Keys Management" (admin) */
+.api-keys-management .header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Page description - adapts to mode-specific content */
+.api-keys-management .header-description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.api-keys-management .error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border: 1px solid #f5c6cb;
+}
+
+[data-theme="dark"] .api-keys-management .error-message {
+  background-color: #4a1a1a;
+  color: #ff6b6b;
+  border-color: #6a2a2a;
+}
+
+.api-keys-management .api-keys-table {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--shadow);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.api-keys-management table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.api-keys-management thead {
+  background: var(--bg-secondary);
+}
+
+.api-keys-management th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-primary);
+  white-space: nowrap;
+}
+
+.api-keys-management td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.api-keys-management tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+.api-keys-management tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Empty state container - supports different content for personal vs admin modes */
+.api-keys-management .empty-state-container {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--shadow);
+  padding: 60px 40px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.api-keys-management .empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.api-keys-management .empty-state-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+.api-keys-management .empty-state-description {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.api-keys-management .empty-state-benefits {
+  text-align: left;
+  display: inline-block;
+  margin: 0 0 32px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.api-keys-management .empty-state-benefits li {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-left: 28px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.api-keys-management .empty-state-benefits li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+[data-theme="dark"] .api-keys-management .empty-state-benefits li:before {
+  color: #66bb6a;
+}
+
+.api-keys-management .empty-state-benefits li:last-child {
+  margin-bottom: 0;
+}
+
+.api-keys-management .empty-state-action {
+  margin-bottom: 24px;
+}
+
+.api-keys-management .empty-state-help {
+  padding-top: 24px;
+  border-top: 1px solid var(--border-primary);
+}
+
+.api-keys-management .empty-state-help p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.api-keys-management .empty-state-help a {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.api-keys-management .empty-state-help a:hover {
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .api-keys-management .empty-state-help a {
+  color: #64b5f6;
+}
+
+/* Legacy empty state (kept for backward compatibility) */
+.api-keys-management .empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.api-keys-management .key-name {
+  font-weight: 500;
+}
+
+.api-keys-management .key-prefix code {
+  background: var(--bg-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.api-keys-management .date-cell {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Type badges */
+.api-keys-management .type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.api-keys-management .type-badge.type-user {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.api-keys-management .type-badge.type-system {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+[data-theme="dark"] .api-keys-management .type-badge.type-user {
+  background-color: #1a3a5a;
+  color: #64b5f6;
+}
+
+[data-theme="dark"] .api-keys-management .type-badge.type-system {
+  background-color: #3a1a4a;
+  color: #ba68c8;
+}
+
+/* Status badges */
+.api-keys-management .status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.api-keys-management .status-badge.status-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.api-keys-management .status-badge.status-expiring-soon {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.api-keys-management .status-badge.status-expired {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.api-keys-management .status-badge.status-revoked {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+[data-theme="dark"] .api-keys-management .status-badge.status-active {
+  background-color: #1a4a2a;
+  color: #6bff6b;
+}
+
+[data-theme="dark"] .api-keys-management .status-badge.status-expiring-soon {
+  background-color: #4a4a1a;
+  color: #ffff6b;
+}
+
+[data-theme="dark"] .api-keys-management .status-badge.status-expired {
+  background-color: #4a1a1a;
+  color: #ff6b6b;
+}
+
+[data-theme="dark"] .api-keys-management .status-badge.status-revoked {
+  background-color: #2a2a2a;
+  color: #9a9a9a;
+}
+
+/* Actions */
+.api-keys-management .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.api-keys-management .actions button {
+  min-width: 70px;
+}
+
+.api-keys-management .no-actions {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Improve button contrast in dark mode */
+[data-theme="dark"] .api-keys-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning):not(.e-danger):not(.e-info) {
+  background-color: #3a3a3a;
+  border-color: #555555;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .api-keys-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning):not(.e-danger):not(.e-info):hover {
+  background-color: #4a4a4a;
+  border-color: #666666;
+  color: #ffffff;
+}
+
+/* Info card */
+.api-keys-management .api-keys-info {
+  margin-top: 24px;
+}
+
+.api-keys-management .info-card {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+.api-keys-management .info-card h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.api-keys-management .info-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.api-keys-management .info-card li {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.api-keys-management .info-card li:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .api-keys-management .api-keys-table {
+    overflow-x: auto;
+  }
+
+  .api-keys-management table {
+    min-width: 1000px;
+  }
+}
+
+@media (max-width: 768px) {
+  .api-keys-management .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .api-keys-management .actions {
+    flex-direction: column;
+  }
+
+  .api-keys-management .actions button {
+    width: 100%;
+  }
+
+  .api-keys-management .empty-state-container {
+    padding: 40px 24px;
+  }
+
+  .api-keys-management .empty-state-icon {
+    font-size: 48px;
+  }
+
+  .api-keys-management .empty-state-title {
+    font-size: 20px;
+  }
+
+  .api-keys-management .empty-state-description {
+    font-size: 14px;
+  }
+
+  .api-keys-management .empty-state-benefits li {
+    font-size: 14px;
+  }
+}

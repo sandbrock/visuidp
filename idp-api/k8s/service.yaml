@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: idp-api
+  labels:
+    app: idp-api
+spec:
+  selector:
+    app: idp-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+

@@ -1,0 +1,150 @@
+http:
+  middlewares:
+    # CORS middleware for browser requests
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+          - HEAD
+        accessControlAllowOriginList:
+          - "http://localhost:8082"
+          - "http://localhost:8083"
+          - "https://localhost:8443"
+        accessControlAllowHeaders:
+          - "Accept"
+          - "Authorization" 
+          - "Content-Type"
+          - "X-Requested-With"
+          - "X-Forwarded-User"
+          - "X-Forwarded-Email"
+          - "X-Forwarded-Groups"
+          - "X-Forwarded-Preferred-Username"
+          - "X-Auth-Request-User"
+          - "X-Auth-Request-Email"
+          - "X-Auth-Request-Groups"
+          - "X-Auth-Request-Preferred-Username"
+          - "X-Auth-Request-Access-Token"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 86400
+
+    # Forwarded headers middleware
+    forwarded-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+          X-Forwarded-Host: "localhost:8443"
+          X-Forwarded-Port: "8443"
+    
+    # OAuth2 ForwardAuth middleware for authentication checks
+    oauth2-auth:
+      forwardAuth:
+        address: "http://oauth2-proxy:4180/oauth2/auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-Auth-Request-User"
+          - "X-Auth-Request-Email"  
+          - "X-Auth-Request-Groups"
+          - "X-Auth-Request-Preferred-Username"
+          - "X-Auth-Request-Access-Token"
+          - "Authorization"
+        authRequestHeaders:
+          - "Cookie"
+          - "X-Forwarded-For"
+          - "X-Forwarded-Host"
+          - "X-Forwarded-Proto"
+    
+    # Redirect root to /ui
+    redirectToUI:
+      redirectRegex:
+        regex: "^https://(.*)/$"
+        replacement: "https://${1}/ui/"
+        permanent: false
+
+  routers:
+    # OAuth2 proxy endpoints (login/callback/logout)
+    oauth2-proxy:
+      rule: "PathPrefix(`/oauth2`)"
+      service: oauth2-proxy-service
+      middlewares:
+        - cors-headers
+        - forwarded-headers
+      entryPoints:
+        - websecure
+      priority: 3000
+      tls: {}
+
+    # Health check endpoint (no auth)
+    health:
+      rule: "Path(`/api/q/health`)"
+      service: api-service
+      middlewares:
+        - cors-headers
+        - forwarded-headers
+      entryPoints:
+        - websecure
+      priority: 2000
+      tls: {}
+
+    # API routes with authentication
+    api:
+      rule: "PathPrefix(`/api`)"
+      service: api-service
+      middlewares:
+        - cors-headers
+        - forwarded-headers
+        - oauth2-auth
+      entryPoints:
+        - websecure
+      priority: 100
+      tls: {}
+
+    # UI routes - route through OAuth2-proxy for automatic login redirect
+    ui:
+      rule: "PathPrefix(`/ui`)"
+      service: oauth2-proxy-service
+      middlewares:
+        - cors-headers
+        - forwarded-headers
+      entryPoints:
+        - websecure
+      priority: 100
+      tls: {}
+    
+    # Root redirect to /ui
+    root:
+      rule: "Path(`/`)"
+      middlewares:
+        - cors-headers
+        - redirectToUI
+      entryPoints:
+        - websecure
+      priority: 50
+      service: noop
+      tls: {}
+
+  services:
+    # Quarkus API service - already serves at /api
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8082"
+        healthCheck:
+          path: "/api/q/health"
+          interval: 30s
+          timeout: 5s
+    
+    # OAuth2-proxy for authentication
+    oauth2-proxy-service:
+      loadBalancer:
+        servers:
+          - url: "http://oauth2-proxy:4180"
+    
+    # No-op service for redirects
+    noop:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:9999"
