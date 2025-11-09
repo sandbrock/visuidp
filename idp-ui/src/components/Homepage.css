@@ -1,0 +1,5 @@
+.homepage {
+  min-height: calc(100vh - 80px); /* Adjust based on header height */
+  background-color: var(--bg-secondary);
+  transition: background-color 0.3s ease;
+}

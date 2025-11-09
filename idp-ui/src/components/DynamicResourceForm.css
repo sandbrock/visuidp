@@ -1,0 +1,97 @@
+.dynamic-resource-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.dynamic-resource-form-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-secondary, #666);
+  font-style: italic;
+}
+
+.dynamic-form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.field-help-text {
+  color: var(--text-secondary, #666);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.field-error-text {
+  color: var(--error-color, #d32f2f);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.list-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 80px;
+  background-color: var(--input-bg, #fff);
+  color: var(--text-primary, #000);
+}
+
+.list-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 2px var(--primary-color-light, rgba(0, 123, 255, 0.1));
+}
+
+.list-textarea::placeholder {
+  color: var(--text-secondary, #999);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .list-textarea {
+  background-color: var(--input-bg-dark, #2a2a2a);
+  border-color: var(--border-color-dark, #444);
+  color: var(--text-primary-dark, #fff);
+}
+
+[data-theme="dark"] .list-textarea:focus {
+  border-color: var(--primary-color-dark, #4a9eff);
+  box-shadow: 0 0 0 2px var(--primary-color-light-dark, rgba(74, 158, 255, 0.2));
+}
+
+[data-theme="dark"] .field-help-text {
+  color: var(--text-secondary-dark, #aaa);
+}
+
+[data-theme="dark"] .field-error-text {
+  color: var(--error-color-dark, #f44336);
+}
+
+[data-theme="dark"] .dynamic-resource-form-empty {
+  color: var(--text-secondary-dark, #999);
+}
+
+/* Label styling for LIST fields */
+.field-wrapper label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary, #333);
+}
+
+[data-theme="dark"] .field-wrapper label {
+  color: var(--text-primary-dark, #ddd);
+}

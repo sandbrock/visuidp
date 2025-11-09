@@ -1,0 +1,83 @@
+.breadcrumb {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 0;
+}
+
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.5rem;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.breadcrumb-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.breadcrumb-separator {
+  font-size: 0.875rem;
+  user-select: none;
+}
+
+.breadcrumb-current {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Light theme */
+.light .breadcrumb-link {
+  color: #0066cc;
+}
+
+.light .breadcrumb-link:hover:not(:disabled) {
+  color: #0052a3;
+}
+
+.light .breadcrumb-separator {
+  color: #666;
+}
+
+.light .breadcrumb-current {
+  color: #333;
+}
+
+/* Dark theme */
+.dark .breadcrumb-link {
+  color: #4da6ff;
+}
+
+.dark .breadcrumb-link:hover:not(:disabled) {
+  color: #66b3ff;
+}
+
+.dark .breadcrumb-separator {
+  color: #999;
+}
+
+.dark .breadcrumb-current {
+  color: #e0e0e0;
+}

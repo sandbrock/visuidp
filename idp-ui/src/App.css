@@ -1,0 +1,523 @@
+/* Theme variables */
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f8f9fa;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-primary: #e1e5e9;
+  --border-secondary: #f0f0f0;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --accent-primary: #007bff;
+  --accent-primary-hover: #0056b3;
+  --accent-secondary: #e3f2fd;
+  --danger: #dc3545;
+  --danger-hover: #c82333;
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #383838;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --border-primary: #404040;
+  --border-secondary: #333333;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --accent-primary: #4dabf7;
+  --accent-primary-hover: #339af0;
+  --accent-secondary: #1e3a8a;
+  --danger: #f03e3e;
+  --danger-hover: #e03131;
+}
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* App layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  align-self: center;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.content-container h2 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.content-container p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+
+
+/* Error container */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-container h2 {
+  color: var(--danger);
+  margin-bottom: 1rem;
+}
+
+.error-container p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.error-container button {
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.error-container button:hover {
+  background: var(--accent-primary-hover);
+}
+
+/* Error and validation styling improvements */
+.error-message {
+  padding: 1rem !important;
+  border-radius: 6px !important;
+  border: 3px solid var(--danger) !important;
+  background: var(--bg-primary) !important;
+  position: relative;
+  color: var(--danger) !important;
+  box-sizing: border-box;
+  display: block;
+}
+
+[data-theme="dark"] .error-message {
+  background: rgba(240, 62, 62, 0.08) !important;
+  border: 3px solid #ff6b6b !important;
+  color: #ff6b6b !important;
+}
+
+/* Input validation error states */
+.e-error,
+.e-input-group.e-error,
+.e-float-input.e-error,
+.e-combobox.e-error {
+  border: 2px solid var(--danger) !important;
+  /* Also draw an inset shadow to guarantee visible edges even if outer borders
+     or pseudo-elements get clipped by vendor styles */
+  box-shadow: 0 0 0 2px var(--danger) inset !important;
+  outline: 3px solid var(--bg-secondary) !important;
+  outline-offset: 2px !important;
+}
+
+[data-theme="dark"] .e-error,
+[data-theme="dark"] .e-input-group.e-error,
+[data-theme="dark"] .e-float-input.e-error,
+[data-theme="dark"] .e-combobox.e-error {
+  border: 2px solid #ff6b6b !important;
+  box-shadow: 0 0 0 2px #ff6b6b inset !important;
+  outline: 3px solid var(--bg-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure ComboBox error state is visible */
+.environment-selector > div,
+.environment-combobox-wrapper {
+  position: relative;
+  /* Prevent any clipping of custom borders/outlines */
+  overflow: visible;
+}
+
+.e-combobox.e-input-group.e-error,
+.e-ddl.e-input-group.e-error {
+  position: relative !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+  /* Ensure pseudo-element borders are not clipped on any side */
+  overflow: visible !important;
+}
+
+/* Also ensure base input groups don’t clip focus/outline visuals */
+.e-combobox.e-input-group,
+.e-ddl.e-input-group {
+  overflow: visible;
+}
+
+/* And ensure the control wrapper variant also allows overflow */
+.e-combobox.e-control-wrapper,
+.e-ddl.e-control-wrapper,
+.e-combobox.e-input-group.e-control-wrapper,
+.e-ddl.e-input-group.e-control-wrapper {
+  overflow: visible !important;
+}
+
+.e-combobox.e-input-group.e-error::after,
+.e-ddl.e-input-group.e-error::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--danger);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+[data-theme="dark"] .e-combobox.e-input-group.e-error::after,
+[data-theme="dark"] .e-ddl.e-input-group.e-error::after {
+  border-color: #ff6b6b;
+}
+
+/* As a fallback, draw the error border on the wrapper itself when the
+   inner control is in an error state. This avoids any internal clipping
+   from Syncfusion styles that might hide the left/bottom edge. */
+.environment-selector > div:has(.e-input-group.e-error)::after,
+.environment-selector > div:has(.e-combobox.e-input-group.e-error)::after,
+.environment-selector > div:has(.e-ddl.e-input-group.e-error)::after,
+.environment-combobox-wrapper:has(.e-input-group.e-error)::after,
+.environment-combobox-wrapper:has(.e-combobox.e-input-group.e-error)::after,
+.environment-combobox-wrapper:has(.e-ddl.e-input-group.e-error)::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+[data-theme="dark"] .environment-selector > div:has(.e-input-group.e-error)::after,
+[data-theme="dark"] .environment-selector > div:has(.e-combobox.e-input-group.e-error)::after,
+[data-theme="dark"] .environment-selector > div:has(.e-ddl.e-input-group.e-error)::after,
+[data-theme="dark"] .environment-combobox-wrapper:has(.e-input-group.e-error)::after,
+[data-theme="dark"] .environment-combobox-wrapper:has(.e-combobox.e-input-group.e-error)::after,
+[data-theme="dark"] .environment-combobox-wrapper:has(.e-ddl.e-input-group.e-error)::after {
+  border-color: #ff6b6b;
+}
+
+[data-theme="dark"] .e-combobox.e-input-group.e-error,
+[data-theme="dark"] .e-ddl.e-input-group.e-error {
+  background: var(--bg-secondary) !important;
+}
+
+/* SyncFusion Dark Mode Overrides */
+[data-theme="dark"] .e-tab .e-tab-header .e-toolbar-item .e-tab-text {
+  color: var(--text-primary) !important;
+}
+
+/* ComboBox dark mode fixes */
+[data-theme="dark"] .e-combobox,
+[data-theme="dark"] .e-ddl.e-input-group.e-control-wrapper .e-input {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-combobox .e-input,
+[data-theme="dark"] .e-combobox .e-input-group-icon,
+[data-theme="dark"] .e-ddl .e-input-group-icon {
+  color: var(--text-primary) !important;
+}
+
+/* Fix dark mode dropdown button icon (avoid white square) */
+[data-theme="dark"] .e-input-group-icon,
+[data-theme="dark"] .e-input-group .e-input-group-icon,
+[data-theme="dark"] .e-ddl .e-input-group-icon,
+[data-theme="dark"] .e-combobox .e-input-group-icon {
+  background-color: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: transparent !important;
+}
+
+[data-theme="dark"] .e-input-group-icon svg,
+[data-theme="dark"] .e-input-group .e-input-group-icon svg,
+[data-theme="dark"] .e-ddl .e-input-group-icon svg,
+[data-theme="dark"] .e-combobox .e-input-group-icon svg {
+  fill: var(--text-primary) !important;
+  stroke: var(--text-primary) !important;
+}
+
+/* Hover/active styling for the icon in dark mode */
+[data-theme="dark"] .e-input-group-icon:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .e-combobox.e-input-group,
+[data-theme="dark"] .e-combobox .e-input-group.e-control-wrapper {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .e-combobox .e-clear-icon,
+[data-theme="dark"] .e-ddl .e-clear-icon {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .e-tab .e-tab-header .e-toolbar-item:not(.e-active) .e-tab-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .e-tab .e-tab-header {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .e-tab .e-content {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-btn {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-btn.e-primary {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .e-btn.e-outline {
+  background: transparent !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-btn.e-danger {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .e-input-group,
+[data-theme="dark"] .e-float-input input,
+[data-theme="dark"] .e-float-input textarea,
+[data-theme="dark"] .e-ddl,
+[data-theme="dark"] .e-dropdown {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .e-input-group input,
+[data-theme="dark"] .e-input-group textarea {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-float-input label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .e-dialog {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-dialog .e-dlg-header {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .e-dropdown-popup,
+[data-theme="dark"] .e-selectall-parent,
+[data-theme="dark"] .e-ddl-popup,
+[data-theme="dark"] .e-combobox-popup,
+[data-theme="dark"] .e-popup,
+[data-theme="dark"] .e-dropdownbase .e-list-parent {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .e-dropdown-popup .e-list-item,
+[data-theme="dark"] .e-selectall-parent .e-list-item,
+[data-theme="dark"] .e-ddl-popup .e-list-item {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-dropdown-popup .e-list-item:hover,
+[data-theme="dark"] .e-selectall-parent .e-list-item:hover,
+[data-theme="dark"] .e-ddl-popup .e-list-item:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .e-dropdown-popup .e-list-item.e-active,
+[data-theme="dark"] .e-selectall-parent .e-list-item.e-active,
+[data-theme="dark"] .e-ddl-popup .e-list-item.e-active,
+[data-theme="dark"] .e-ddl-popup .e-list-item.e-item-focus {
+  background: var(--accent-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dark mode: ensure empty state text in popups is readable */
+[data-theme="dark"] .e-dropdownbase .e-nodata,
+[data-theme="dark"] .e-dropdown-popup .e-nodata,
+[data-theme="dark"] .e-ddl .e-nodata,
+[data-theme="dark"] .e-ddl-popup .e-nodata,
+[data-theme="dark"] .e-dropdownbase .e-fixed-head {
+  color: var(--text-primary) !important;
+  background: var(--bg-secondary) !important;
+  opacity: 1 !important;
+}
+
+/* Additional AngryComboBox dropdown popup styling */
+[data-theme="dark"] .angry-combobox .e-dropdownbase,
+[data-theme="dark"] .angry-combobox .e-dropdownbase .e-ul,
+[data-theme="dark"] .angry-combobox .e-list-parent,
+[data-theme="dark"] .angry-combobox .e-content,
+[data-theme="dark"] .angry-combobox .e-popup-content,
+[data-theme="dark"] .angry-combobox-wrapper .e-dropdownbase,
+[data-theme="dark"] .angry-combobox-wrapper .e-dropdownbase .e-ul,
+[data-theme="dark"] .angry-combobox-wrapper .e-list-parent,
+[data-theme="dark"] .angry-combobox-wrapper .e-content,
+[data-theme="dark"] .angry-combobox-wrapper .e-popup-content {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+/* Global ComboBox popup styling - catches all ComboBox popups */
+[data-theme="dark"] .e-popup.e-combobox-popup,
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase,
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase .e-ul,
+[data-theme="dark"] .e-popup.e-combobox-popup .e-list-parent,
+[data-theme="dark"] .e-popup.e-combobox-popup .e-content,
+[data-theme="dark"] .e-combobox-popup,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase .e-ul,
+[data-theme="dark"] .e-combobox-popup .e-list-parent,
+[data-theme="dark"] .e-combobox-popup .e-content {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+/* ComboBox popup list items for dark mode */
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase .e-list-item,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase .e-list-item {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase .e-list-item:hover,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase .e-list-item:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase .e-list-item.e-active,
+[data-theme="dark"] .e-popup.e-combobox-popup .e-dropdownbase .e-list-item.e-item-focus,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase .e-list-item.e-active,
+[data-theme="dark"] .e-combobox-popup .e-dropdownbase .e-list-item.e-item-focus {
+  background: var(--accent-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Tab specific dark mode fixes for better visibility */
+[data-theme="dark"] .e-tab .e-tab-header .e-toolbar-item.e-active {
+  background: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .e-tab .e-tab-header .e-toolbar-item.e-active .e-tab-text {
+  color: var(--accent-primary) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .e-tab .e-tab-header .e-toolbar-item:hover .e-tab-text {
+  color: var(--accent-primary) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .content-container {
+    padding: 0 1rem;
+  }
+
+  .main-content {
+    padding: 1rem 0;
+  }
+}
+
+/* Global dropdown list item sizing for better readability */
+.e-dropdown-popup .e-list-item,
+.e-ddl-popup .e-list-item {
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  min-height: 36px;
+}
+
+/* AngryCheckBox: dark-mode visibility and alignment */
+[data-theme="dark"] .e-checkbox-wrapper.angry-checkbox,
+[data-theme="dark"] .e-checkbox-wrapper.angry-checkbox .e-label,
+[data-theme="dark"] .e-checkbox-wrapper.angry-checkbox .e-frame {
+  color: var(--text-primary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.e-checkbox-wrapper.angry-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 0;
+}
+
+.form-group .e-checkbox-wrapper.angry-checkbox {
+  /* Nudge to line up left edge with text/combobox inputs */
+  padding-left: 4px;
+  margin-left: 0;
+}
+
+.e-checkbox-wrapper.angry-checkbox .e-frame {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+}
+
+[data-theme="dark"] .e-checkbox-wrapper.angry-checkbox .e-frame {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}

@@ -1,0 +1,353 @@
+.resource-type-mapping-management {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.resource-type-mapping-management.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.resource-type-mapping-management .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.resource-type-mapping-management .header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.resource-type-mapping-management .legend {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.resource-type-mapping-management .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.resource-type-mapping-management .legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border-primary);
+}
+
+.resource-type-mapping-management .legend-color.complete {
+  background-color: #d4edda;
+}
+
+.resource-type-mapping-management .legend-color.incomplete {
+  background-color: #fff3cd;
+}
+
+.resource-type-mapping-management .legend-color.not-configured {
+  background-color: #f5f5f5;
+}
+
+.resource-type-mapping-management .mapping-grid-container {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--shadow);
+  overflow-x: auto;
+}
+
+.resource-type-mapping-management .mapping-grid {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.resource-type-mapping-management .mapping-grid thead {
+  background: var(--bg-secondary);
+}
+
+.resource-type-mapping-management .mapping-grid th {
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-primary);
+  text-align: left;
+}
+
+.resource-type-mapping-management .mapping-grid .resource-type-header {
+  min-width: 200px;
+  position: sticky;
+  left: 0;
+  background: var(--bg-secondary);
+  z-index: 10;
+}
+
+.resource-type-mapping-management .mapping-grid .cloud-provider-header {
+  min-width: 150px;
+  text-align: center;
+}
+
+.resource-type-mapping-management .mapping-grid .resource-type-cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-primary);
+  border-right: 2px solid var(--border-primary);
+  position: sticky;
+  left: 0;
+  background: var(--bg-primary);
+  z-index: 5;
+}
+
+.resource-type-mapping-management .mapping-grid .resource-type-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.resource-type-mapping-management .mapping-grid .resource-type-category {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.resource-type-mapping-management .mapping-grid .mapping-cell {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-primary);
+  border-right: 1px solid var(--border-primary);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.resource-type-mapping-management .mapping-grid .cell-status-area:hover {
+  opacity: 0.8;
+}
+
+.resource-type-mapping-management .mapping-grid .mapping-cell.complete {
+  background-color: #d4edda;
+}
+
+.resource-type-mapping-management .mapping-grid .mapping-cell.incomplete {
+  background-color: #fff3cd;
+}
+
+.resource-type-mapping-management .mapping-grid .mapping-cell.not-configured {
+  background-color: #f5f5f5;
+}
+
+.resource-type-mapping-management .mapping-grid .cell-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.resource-type-mapping-management .mapping-grid .cell-status-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.resource-type-mapping-management .mapping-grid .cell-status {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.resource-type-mapping-management .mapping-grid .cell-details {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.resource-type-mapping-management .mapping-grid .cell-location-type {
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+.resource-type-mapping-management .mapping-grid .cell-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.resource-type-mapping-management .mapping-grid .configure-properties-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary-color, #0078d4);
+  background: transparent;
+  border: 1px solid var(--primary-color, #0078d4);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.resource-type-mapping-management .mapping-grid .configure-properties-btn:hover {
+  background: var(--primary-color, #0078d4);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.resource-type-mapping-management .mapping-grid .configure-properties-btn:active {
+  transform: translateY(0);
+}
+
+.resource-type-mapping-management .mapping-grid .empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Modal Form Styles */
+.mapping-form {
+  padding: 20px;
+}
+
+.mapping-form .form-group {
+  margin-bottom: 20px;
+}
+
+.mapping-form .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.mapping-form .form-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.mapping-form .mapping-info {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.mapping-form .info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.mapping-form .info-row:last-child {
+  border-bottom: none;
+}
+
+.mapping-form .info-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mapping-form .status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mapping-form .status-badge.complete {
+  background-color: var(--success-bg, #d4edda);
+  color: var(--success-text, #155724);
+}
+
+.mapping-form .status-badge.incomplete {
+  background-color: var(--warning-bg, #fff3cd);
+  color: var(--warning-text, #856404);
+}
+
+.mapping-form .status-badge.not-configured {
+  background-color: var(--neutral-bg, #f5f5f5);
+  color: var(--text-secondary);
+}
+
+.mapping-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-primary);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .resource-type-mapping-management .mapping-grid .mapping-cell.complete {
+  background-color: #1a4a2a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .mapping-grid .mapping-cell.incomplete {
+  background-color: #4a4a1a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .mapping-grid .mapping-cell.not-configured {
+  background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .legend-color.complete {
+  background-color: #1a4a2a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .legend-color.incomplete {
+  background-color: #4a4a1a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .legend-color.not-configured {
+  background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .mapping-form .status-badge.complete {
+  background-color: #1a4a2a;
+  color: #6bff6b;
+}
+
+[data-theme="dark"] .resource-type-mapping-management .mapping-form .status-badge.incomplete {
+  background-color: #4a4a1a;
+  color: #ffff6b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .resource-type-mapping-management .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .resource-type-mapping-management .legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .resource-type-mapping-management .mapping-grid .resource-type-header,
+  .resource-type-mapping-management .mapping-grid .resource-type-cell {
+    position: static;
+  }
+}
