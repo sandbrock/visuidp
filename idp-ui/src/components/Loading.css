@@ -21,3 +21,40 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .loading-container {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .loading-container p {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .loading-spinner {
+  border: 4px solid var(--bg-tertiary);
+  border-top: 4px solid var(--frankenstein-skin);
+  border-right: 4px solid var(--frankenstein-bolt);
+  animation: frankenstein-spin 1.2s linear infinite;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+@keyframes frankenstein-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Loading dots animation */
+[data-theme="frankenstein"] .loading-container p::after {
+  content: '.';
+  animation: loading-dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes loading-dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}

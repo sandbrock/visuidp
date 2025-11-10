@@ -202,6 +202,285 @@
   border-color: #c82333;
 }
 
+/* Frankenstein theme support */
+[data-theme='frankenstein'] .modal-backdrop {
+  background-color: rgba(26, 29, 26, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+[data-theme='frankenstein'] .modal-dialog {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 4px solid var(--frankenstein-stitch);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9);
+  position: relative;
+}
+
+/* Prominent stitching effect on dialog border */
+[data-theme='frankenstein'] .modal-dialog::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Neck bolt decoration on dialog corners */
+[data-theme='frankenstein'] .modal-dialog::after {
+  content: '⬢';
+  position: absolute;
+  top: 12px;
+  right: 50px;
+  font-size: 16px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Enhanced modal appearance animation */
+[data-theme='frankenstein'] .modal-dialog-open {
+  animation: frankenstein-modal-appear 0.3s ease-out;
+}
+
+@keyframes frankenstein-modal-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Modal header with character-focused styling */
+[data-theme='frankenstein'] .modal-header {
+  background: var(--bg-secondary);
+  border-bottom: 3px solid var(--frankenstein-stitch);
+  position: relative;
+  z-index: 2;
+  padding-left: 3rem;
+}
+
+/* Bolt decoration on modal header using ::before */
+[data-theme='frankenstein'] .modal-header::before {
+  content: '⬢';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--frankenstein-bolt);
+  font-size: 18px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* Stitching effect on header border */
+[data-theme='frankenstein'] .modal-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 10px,
+    transparent 10px,
+    transparent 15px
+  );
+  pointer-events: none;
+}
+
+[data-theme='frankenstein'] .modal-title {
+  color: var(--frankenstein-skin);
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+[data-theme='frankenstein'] .modal-close-button {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+[data-theme='frankenstein'] .modal-close-button:hover {
+  color: var(--danger);
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: rotate(90deg);
+}
+
+[data-theme='frankenstein'] .modal-close-button:focus {
+  outline-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Modal content with proper contrast */
+[data-theme='frankenstein'] .modal-content {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure all text in modal content is readable */
+[data-theme='frankenstein'] .modal-content p,
+[data-theme='frankenstein'] .modal-content div,
+[data-theme='frankenstein'] .modal-content span,
+[data-theme='frankenstein'] .modal-content label {
+  color: var(--text-primary);
+}
+
+/* Modal footer */
+[data-theme='frankenstein'] .modal-footer {
+  background: var(--bg-secondary);
+  border-top: 2px solid var(--frankenstein-stitch);
+  position: relative;
+  z-index: 2;
+}
+
+/* Modal buttons with Frankenstein styling */
+[data-theme='frankenstein'] .modal-button {
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Visible stitching pattern on buttons */
+[data-theme='frankenstein'] .modal-button::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Character-focused hover effect */
+[data-theme='frankenstein'] .modal-button:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+[data-theme='frankenstein'] .modal-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+[data-theme='frankenstein'] .modal-button:focus {
+  outline-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Primary button with greenish skin tone */
+[data-theme='frankenstein'] .modal-button-primary {
+  background: var(--accent-primary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme='frankenstein'] .modal-button-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Secondary button */
+[data-theme='frankenstein'] .modal-button-secondary {
+  background-color: var(--bg-tertiary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--text-primary);
+}
+
+[data-theme='frankenstein'] .modal-button-secondary:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Success button with olive green */
+[data-theme='frankenstein'] .modal-button-success {
+  background-color: var(--success);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme='frankenstein'] .modal-button-success:hover:not(:disabled) {
+  background-color: var(--success-hover);
+  border-color: var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* Warning button with metallic bolt color */
+[data-theme='frankenstein'] .modal-button-warning {
+  background-color: var(--frankenstein-bolt);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme='frankenstein'] .modal-button-warning:hover:not(:disabled) {
+  background-color: #8a8d8a;
+  border-color: var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* Danger button with dark blood red */
+[data-theme='frankenstein'] .modal-button-danger {
+  background: var(--danger);
+  border-color: var(--frankenstein-stitch);
+  color: var(--text-primary);
+}
+
+[data-theme='frankenstein'] .modal-button-danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+  border-color: var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.7);
+}
+
+@keyframes frankenstein-pulse-danger {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+  }
+}
+
+@keyframes frankenstein-pulse-danger-hover {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 0, 110, 0.9);
+  }
+}
+
+/* Disabled state */
+[data-theme='frankenstein'] .modal-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .modal-dialog {
@@ -222,5 +501,11 @@
 
   .modal-button {
     width: 100%;
+  }
+
+  /* Frankenstein theme responsive adjustments */
+  [data-theme='frankenstein'] .modal-dialog::after {
+    right: 40px;
+    font-size: 12px;
   }
 }

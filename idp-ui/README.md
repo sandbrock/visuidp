@@ -2,6 +2,18 @@
 
 This React application is configured to work with OAuth2 Proxy for AWS Identity Center authentication. It runs on port 8083 and integrates with the IDP API backend through OAuth2 Proxy.
 
+## Themes
+
+The application supports three visual themes:
+
+- **Light Theme**: Clean, bright interface for daytime use
+- **Dark Theme**: Easy on the eyes for low-light environments
+- **Frankenstein Theme**: Halloween-inspired gothic laboratory aesthetic with electrical effects, stitching patterns, and purple/green color palette
+
+Toggle between themes using the theme switcher in the header (☀️ / 🌙 / ⚡).
+
+For detailed information about the Frankenstein theme, see [FRANKENSTEIN_THEME_DOCUMENTATION.md](FRANKENSTEIN_THEME_DOCUMENTATION.md).
+
 ## Architecture
 
 - **OAuth2 Proxy**: Port 8080 (Authentication Gateway)
@@ -242,6 +254,12 @@ Administrators have access to additional features:
 - **[Personal API Keys Guide](docs/PERSONAL_API_KEYS.md)** - Complete guide for managing your API keys
 - **[Admin Navigation Guide](docs/ADMIN_NAVIGATION.md)** - Admin dashboard navigation
 - **[Architecture Documentation](docs/ARCHITECTURE.md)** - Frontend architecture details
+
+### Theme Documentation
+
+- **[Frankenstein Theme Documentation](FRANKENSTEIN_THEME_DOCUMENTATION.md)** - Complete guide to the Frankenstein theme including color palette, CSS custom properties, animations, and usage examples
+- **[Frankenstein Accessibility Guide](FRANKENSTEIN_ACCESSIBILITY_TESTING_GUIDE.md)** - Accessibility testing and compliance information
+- **[Frankenstein Performance Summary](FRANKENSTEIN_PERFORMANCE_SUMMARY.md)** - Performance optimization details
 
 ### API Documentation
 

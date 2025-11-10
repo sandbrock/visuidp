@@ -128,3 +128,110 @@
   text-align: center;
   font-style: italic;
 }
+
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .angry-combobox-input-group {
+  background: var(--bg-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .angry-combobox-input-group:focus-within {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px var(--shadow),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+
+[data-theme="frankenstein"] .angry-combobox-input {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+[data-theme="frankenstein"] .angry-combobox-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+[data-theme="frankenstein"] .angry-combobox-input:disabled {
+  background: var(--bg-tertiary);
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .angry-combobox-clear,
+[data-theme="frankenstein"] .angry-combobox-arrow {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .angry-combobox-clear:hover,
+[data-theme="frankenstein"] .angry-combobox-arrow:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .angry-combobox-arrow {
+  border-left: 1px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .angry-combobox-arrow:disabled {
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+
+/* Dropdown popup with character styling */
+[data-theme="frankenstein"] .angry-combobox-dropdown {
+  background: var(--bg-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+/* Stitching effect on dropdown */
+[data-theme="frankenstein"] .angry-combobox-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* List items */
+[data-theme="frankenstein"] .angry-combobox-item {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-secondary);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .angry-combobox-item:last-child {
+  border-bottom: none;
+}
+
+/* Hover state with character colors */
+[data-theme="frankenstein"] .angry-combobox-item:hover,
+[data-theme="frankenstein"] .angry-combobox-item.highlighted {
+  background: var(--bg-tertiary);
+  color: var(--frankenstein-skin);
+}
+
+/* Active/selected state */
+[data-theme="frankenstein"] .angry-combobox-item.selected {
+  background: var(--accent-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-left: 3px solid var(--frankenstein-skin);
+}
+
+/* No data message */
+[data-theme="frankenstein"] .angry-combobox-no-data {
+  color: var(--text-secondary);
+  font-style: italic;
+}

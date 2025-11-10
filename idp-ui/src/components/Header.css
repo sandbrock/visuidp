@@ -91,6 +91,102 @@
   background: var(--danger-hover);
 }
 
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .app-header {
+  background: var(--bg-primary);
+  border-bottom: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Neck bolt decoration in header */
+[data-theme="frankenstein"] .app-header::before {
+  content: '⬢';
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Prominent stitching effect on header border */
+[data-theme="frankenstein"] .app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 8px,
+    transparent 8px,
+    transparent 12px
+  );
+}
+
+[data-theme="frankenstein"] .app-title a {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+[data-theme="frankenstein"] .app-title a:hover {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="frankenstein"] .nav-link {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="frankenstein"] .nav-link:hover {
+  color: var(--frankenstein-skin);
+  border-color: var(--frankenstein-stitch);
+  background: var(--bg-secondary);
+}
+
+[data-theme="frankenstein"] .nav-link.active {
+  color: var(--text-primary);
+  background: var(--accent-secondary);
+  border: 1px solid var(--frankenstein-stitch);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .user-name {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .user-email {
+  color: var(--text-secondary);
+}
+
+[data-theme="frankenstein"] .logout-button {
+  background: var(--danger);
+  border: 2px solid var(--danger);
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .logout-button:hover {
+  background: var(--danger-hover);
+  box-shadow: 0 0 15px rgba(255, 0, 110, 0.5),
+              inset 0 0 10px rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;

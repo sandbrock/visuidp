@@ -257,3 +257,189 @@
 .stack-list > .stack-list-header .tab {
   line-height: 20px;
 }
+
+/* Frankenstein Theme Styles */
+
+/* Stack list header and title */
+[data-theme="frankenstein"] .stack-list-header h2 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Dashboard cards - stack cards with stitching effect */
+[data-theme="frankenstein"] .stack-card {
+  background: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+/* Prominent stitching effect on stack cards */
+[data-theme="frankenstein"] .stack-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Neck bolt decoration in corner */
+[data-theme="frankenstein"] .stack-card::after {
+  content: '⬢';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .stack-card:hover {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 6px 20px var(--shadow);
+  transform: translateY(-3px);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="frankenstein"] .stack-card:hover::before {
+  opacity: 1;
+}
+
+/* Stack card header */
+[data-theme="frankenstein"] .stack-card-header h3 {
+  color: var(--text-primary);
+  position: relative;
+  z-index: 2;
+}
+
+/* Stack description */
+[data-theme="frankenstein"] .stack-description {
+  color: var(--text-secondary);
+}
+
+/* Badges with Frankenstein styling */
+[data-theme="frankenstein"] .badge {
+  background: var(--accent-secondary);
+  border: 1px solid var(--frankenstein-stitch);
+  color: var(--frankenstein-skin);
+}
+
+/* Stack metadata */
+[data-theme="frankenstein"] .stack-meta {
+  color: var(--text-secondary);
+}
+
+[data-theme="frankenstein"] .stack-meta strong {
+  color: var(--frankenstein-skin);
+}
+
+/* Empty state with laboratory aesthetic */
+[data-theme="frankenstein"] .empty-state {
+  background: var(--bg-secondary);
+  border: 3px dashed var(--frankenstein-stitch);
+  box-shadow: inset 0 2px 8px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .empty-state::before {
+  content: '⬢';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 48px;
+  opacity: 0.3;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .empty-state h3 {
+  color: var(--text-primary);
+  position: relative;
+  z-index: 1;
+  margin-top: 3rem;
+}
+
+[data-theme="frankenstein"] .empty-state p {
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+/* Tabs with character styling */
+[data-theme="frankenstein"] .tab {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--frankenstein-stitch);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .tab:hover {
+  border-color: var(--frankenstein-skin);
+  background: var(--bg-secondary);
+  color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .tab.active {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border-color: var(--frankenstein-stitch);
+  font-weight: 600;
+}
+
+/* Collections layout */
+[data-theme="frankenstein"] .collection-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .collection-btn:hover,
+[data-theme="frankenstein"] .collection-btn.active {
+  border-color: var(--frankenstein-skin);
+  background: var(--accent-secondary);
+  color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .collection-btn.e-primary {
+  background: var(--accent-primary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+/* Error message with danger styling */
+[data-theme="frankenstein"] .error-message {
+  background: var(--bg-secondary);
+  border: 3px solid var(--danger);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+  animation: pulse-danger 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .error-message h3 {
+  color: var(--danger);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .error-message p {
+  color: var(--text-secondary);
+}
+
+@keyframes pulse-danger {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(139, 0, 0, 0.6);
+  }
+}

@@ -259,3 +259,183 @@
     width: 100%;
   }
 }
+
+/* Frankenstein Theme Styles */
+
+/* Form container with laboratory aesthetic */
+[data-theme="frankenstein"] .stack-form {
+  background: var(--bg-primary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  position: relative;
+}
+
+/* Prominent stitching effect on form border */
+[data-theme="frankenstein"] .stack-form::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Form title with character styling */
+[data-theme="frankenstein"] .stack-form h2 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Form labels */
+[data-theme="frankenstein"] .form-group label,
+[data-theme="frankenstein"] .add-resource-section label {
+  color: var(--text-primary);
+}
+
+/* Form inputs with clear boundaries */
+[data-theme="frankenstein"] .form-group input,
+[data-theme="frankenstein"] .form-group textarea,
+[data-theme="frankenstein"] .form-group select,
+[data-theme="frankenstein"] .add-resource-select {
+  background: var(--bg-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+/* Input focus states with greenish skin tone */
+[data-theme="frankenstein"] .form-group input:focus,
+[data-theme="frankenstein"] .form-group textarea:focus,
+[data-theme="frankenstein"] .form-group select:focus,
+[data-theme="frankenstein"] .add-resource-select:focus {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px var(--shadow),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+
+/* Form actions border */
+[data-theme="frankenstein"] .form-actions {
+  border-top: 2px solid var(--frankenstein-stitch);
+  position: relative;
+  z-index: 1;
+}
+
+/* Form buttons */
+[data-theme="frankenstein"] .form-actions button {
+  background: var(--bg-tertiary);
+  border: 2px solid var(--frankenstein-stitch);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .form-actions button:hover {
+  background: var(--bg-secondary);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px var(--shadow);
+  transform: translateY(-1px);
+}
+
+/* Primary button with character styling */
+[data-theme="frankenstein"] .form-actions button.primary {
+  background: var(--accent-primary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .form-actions button.primary:hover {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px var(--shadow),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .form-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Resources section */
+[data-theme="frankenstein"] .resources-section {
+  border-top: 2px solid var(--frankenstein-stitch);
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .resources-section h3 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Resource items with prominent stitching effect */
+[data-theme="frankenstein"] .resource-item {
+  background: var(--bg-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  box-shadow: 0 2px 8px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .resource-item::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Remove resource button with danger styling */
+[data-theme="frankenstein"] .remove-resource-btn {
+  background: var(--danger);
+  border: 2px solid var(--frankenstein-stitch);
+  color: var(--text-primary);
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .remove-resource-btn:hover {
+  background: var(--danger-hover);
+  border-color: var(--danger-hover);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+[data-theme="frankenstein"] .remove-resource-btn:disabled {
+  opacity: 0.5;
+}
+
+/* Error message with danger styling */
+[data-theme="frankenstein"] .error-message {
+  background: var(--bg-secondary);
+  border: 3px solid var(--danger);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+/* Loading text */
+[data-theme="frankenstein"] .loading-text {
+  color: var(--text-secondary);
+}
+
+/* Modal overlay with darker background */
+[data-theme="frankenstein"] .stack-form-container {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+
