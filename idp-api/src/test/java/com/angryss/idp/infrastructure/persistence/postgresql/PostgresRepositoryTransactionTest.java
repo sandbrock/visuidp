@@ -33,8 +33,11 @@ class PostgresRepositoryTransactionTest {
     @Test
     void testSaveOperationIsTransactional() {
         // Given: A new stack entity
+        String uniqueName = "test-stack-" + UUID.randomUUID();
         Stack stack = new Stack();
-        stack.setName("test-stack-" + UUID.randomUUID());
+        stack.setName(uniqueName);
+        stack.setCloudName(uniqueName.replace("-", "_"));
+        stack.setRoutePath("/" + uniqueName.substring(0, Math.min(uniqueName.length(), 15)) + "/");
         stack.setStackType(StackType.INFRASTRUCTURE);
         stack.setCreatedBy("test-user@example.com");
         stack.setCreatedAt(LocalDateTime.now());
@@ -54,8 +57,11 @@ class PostgresRepositoryTransactionTest {
     @Test
     void testDeleteOperationIsTransactional() {
         // Given: A persisted stack
+        String uniqueName = "test-stack-delete-" + UUID.randomUUID();
         Stack stack = new Stack();
-        stack.setName("test-stack-delete-" + UUID.randomUUID());
+        stack.setName(uniqueName);
+        stack.setCloudName(uniqueName.replace("-", "_"));
+        stack.setRoutePath("/" + uniqueName.substring(0, Math.min(uniqueName.length(), 15)) + "/");
         stack.setStackType(StackType.INFRASTRUCTURE);
         stack.setCreatedBy("test-user@example.com");
         stack.setCreatedAt(LocalDateTime.now());
@@ -107,15 +113,21 @@ class PostgresRepositoryTransactionTest {
         team.setCreatedAt(LocalDateTime.now());
         team.setUpdatedAt(LocalDateTime.now());
 
+        String uniqueName1 = "test-stack-1-" + UUID.randomUUID();
         Stack stack1 = new Stack();
-        stack1.setName("test-stack-1-" + UUID.randomUUID());
+        stack1.setName(uniqueName1);
+        stack1.setCloudName(uniqueName1.replace("-", "_"));
+        stack1.setRoutePath("/" + uniqueName1.substring(0, Math.min(uniqueName1.length(), 15)) + "/");
         stack1.setStackType(StackType.INFRASTRUCTURE);
         stack1.setCreatedBy("test-user@example.com");
         stack1.setCreatedAt(LocalDateTime.now());
         stack1.setUpdatedAt(LocalDateTime.now());
 
+        String uniqueName2 = "test-stack-2-" + UUID.randomUUID();
         Stack stack2 = new Stack();
-        stack2.setName("test-stack-2-" + UUID.randomUUID());
+        stack2.setName(uniqueName2);
+        stack2.setCloudName(uniqueName2.replace("-", "_"));
+        stack2.setRoutePath("/" + uniqueName2.substring(0, Math.min(uniqueName2.length(), 15)) + "/");
         stack2.setStackType(StackType.RESTFUL_SERVERLESS);
         stack2.setCreatedBy("test-user@example.com");
         stack2.setCreatedAt(LocalDateTime.now());
@@ -144,8 +156,11 @@ class PostgresRepositoryTransactionTest {
     @Test
     void testUpdateOperationIsTransactional() {
         // Given: A persisted stack
+        String uniqueName = "test-stack-update-" + UUID.randomUUID();
         Stack stack = new Stack();
-        stack.setName("test-stack-update-" + UUID.randomUUID());
+        stack.setName(uniqueName);
+        stack.setCloudName(uniqueName.replace("-", "_"));
+        stack.setRoutePath("/" + uniqueName.substring(0, Math.min(uniqueName.length(), 15)) + "/");
         stack.setStackType(StackType.INFRASTRUCTURE);
         stack.setCreatedBy("test-user@example.com");
         stack.setCreatedAt(LocalDateTime.now());

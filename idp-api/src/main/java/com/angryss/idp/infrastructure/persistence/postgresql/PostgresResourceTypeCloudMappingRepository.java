@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;
 import com.angryss.idp.domain.repositories.ResourceTypeCloudMappingRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresResourceTypeCloudMappingRepository implements ResourceTypeCloudMappingRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public ResourceTypeCloudMapping save(ResourceTypeCloudMapping mapping) {
-        mapping.persist();
-        return mapping;
+        if (mapping.id != null && !entityManager.contains(mapping)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(mapping);
+        } else {
+            // New entity or already managed - use persist
+            mapping.persist();
+            return mapping;
+        }
     }
 
     @Override

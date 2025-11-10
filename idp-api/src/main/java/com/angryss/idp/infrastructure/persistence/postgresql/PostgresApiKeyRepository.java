@@ -5,6 +5,8 @@ import com.angryss.idp.domain.repositories.ApiKeyRepository;
 import com.angryss.idp.domain.valueobjects.ApiKeyType;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -15,11 +17,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresApiKeyRepository implements ApiKeyRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public ApiKey save(ApiKey apiKey) {
-        apiKey.persist();
-        return apiKey;
+        if (apiKey.id != null && !entityManager.contains(apiKey)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(apiKey);
+        } else {
+            // New entity or already managed - use persist
+            apiKey.persist();
+            return apiKey;
+        }
     }
 
     @Override

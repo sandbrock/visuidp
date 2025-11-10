@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.BlueprintResource;
 import com.angryss.idp.domain.repositories.BlueprintResourceRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresBlueprintResourceRepository implements BlueprintResourceRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public BlueprintResource save(BlueprintResource blueprintResource) {
-        blueprintResource.persist();
-        return blueprintResource;
+        if (blueprintResource.id != null && !entityManager.contains(blueprintResource)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(blueprintResource);
+        } else {
+            // New entity or already managed - use persist
+            blueprintResource.persist();
+            return blueprintResource;
+        }
     }
 
     @Override

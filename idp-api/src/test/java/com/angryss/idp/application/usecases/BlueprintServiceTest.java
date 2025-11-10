@@ -13,6 +13,7 @@ import com.angryss.idp.domain.valueobjects.sharedinfra.ContainerOrchestratorConf
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,20 +29,16 @@ public class BlueprintServiceTest {
 
     private UUID cloudProviderId;
     private UUID resourceTypeId;
+    
+    // Track created entities for cleanup
+    private List<UUID> createdBlueprintIds = new ArrayList<>();
+    private List<UUID> createdResourceTypeIds = new ArrayList<>();
+    private List<UUID> createdCloudProviderIds = new ArrayList<>();
 
     @BeforeEach
     @Transactional
     public void setup() {
-        // Clean up test data in correct order (children first due to foreign key constraints)
-        BlueprintResource.deleteAll();
-        Blueprint.deleteAll();
-        Stack.deleteAll();
-        ResourceType.deleteAll();
-        
-        // Note: Not deleting CloudProvider to avoid foreign key constraint issues with environments table
-        // Instead, we'll reuse existing cloud providers or create new ones if needed
-
-        // Find or create test cloud provider
+        // Find or create test cloud provider (reuse to avoid FK issues)
         CloudProvider cloudProvider = CloudProvider.<CloudProvider>find("name", "AWS")
             .firstResultOptional()
             .orElseGet(() -> {
@@ -50,18 +47,73 @@ public class BlueprintServiceTest {
                 cp.displayName = "Amazon Web Services";
                 cp.enabled = true;
                 cp.persist();
+                createdCloudProviderIds.add(cp.id);
                 return cp;
             });
         cloudProviderId = cloudProvider.id;
 
-        // Create test resource type
+        // Create test resource type with unique name to avoid duplicate key violations
         ResourceType resourceType = new ResourceType();
-        resourceType.name = "MANAGED_CONTAINER_ORCHESTRATOR";
+        resourceType.name = "MANAGED_CONTAINER_ORCHESTRATOR_" + UUID.randomUUID();
         resourceType.displayName = "Managed Container Orchestrator";
         resourceType.category = ResourceCategory.SHARED;
         resourceType.enabled = true;
         resourceType.persist();
         resourceTypeId = resourceType.id;
+        createdResourceTypeIds.add(resourceTypeId);
+    }
+    
+    @AfterEach
+    @Transactional
+    void cleanup() {
+        // Clean up in correct order (children first to respect foreign key constraints)
+        // 1. First delete any Stacks that reference the Blueprints
+        for (UUID blueprintId : createdBlueprintIds) {
+            Blueprint blueprint = Blueprint.findById(blueprintId);
+            if (blueprint != null) {
+                // Delete all stacks that reference this blueprint
+                if (blueprint.getStacks() != null && !blueprint.getStacks().isEmpty()) {
+                    // Create a copy to avoid ConcurrentModificationException
+                    Set<Stack> stacksToDelete = new HashSet<>(blueprint.getStacks());
+                    for (Stack stack : stacksToDelete) {
+                        // Delete StackResources first (cascade should handle this, but being explicit)
+                        if (stack.getStackResources() != null) {
+                            stack.getStackResources().clear();
+                        }
+                        stack.delete();
+                    }
+                }
+            }
+        }
+        
+        // 2. Then delete the Blueprints (BlueprintResources will be cascade deleted due to orphanRemoval)
+        for (UUID id : createdBlueprintIds) {
+            Blueprint blueprint = Blueprint.findById(id);
+            if (blueprint != null) {
+                blueprint.delete();
+            }
+        }
+        
+        // 3. Delete ResourceTypes
+        for (UUID id : createdResourceTypeIds) {
+            ResourceType resourceType = ResourceType.findById(id);
+            if (resourceType != null) {
+                resourceType.delete();
+            }
+        }
+        
+        // 4. Finally delete CloudProviders
+        for (UUID id : createdCloudProviderIds) {
+            CloudProvider cloudProvider = CloudProvider.findById(id);
+            if (cloudProvider != null) {
+                cloudProvider.delete();
+            }
+        }
+        
+        // Clear all tracking lists
+        createdBlueprintIds.clear();
+        createdResourceTypeIds.clear();
+        createdCloudProviderIds.clear();
     }
 
     @Test
@@ -69,7 +121,7 @@ public class BlueprintServiceTest {
     public void testCreateBlueprintWithResources() {
         // Given
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Test Blueprint");
+        createDto.setName("Test Blueprint " + UUID.randomUUID());
         createDto.setDescription("Test Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
@@ -85,11 +137,12 @@ public class BlueprintServiceTest {
 
         // When
         BlueprintResponseDto result = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(result.getId());
 
         // Then
         assertNotNull(result);
         assertNotNull(result.getId());
-        assertEquals("Test Blueprint", result.getName());
+        assertTrue(result.getName().startsWith("Test Blueprint"));
         assertNotNull(result.getResources());
         assertEquals(1, result.getResources().size());
         assertEquals("Test Resource", result.getResources().get(0).getName());
@@ -106,18 +159,19 @@ public class BlueprintServiceTest {
     public void testCreateBlueprintWithEmptyResourcesList() {
         // Given
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Blueprint Without Resources");
+        createDto.setName("Blueprint Without Resources " + UUID.randomUUID());
         createDto.setDescription("Test Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         createDto.setResources(new ArrayList<>());
 
         // When
         BlueprintResponseDto result = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(result.getId());
 
         // Then
         assertNotNull(result);
         assertNotNull(result.getId());
-        assertEquals("Blueprint Without Resources", result.getName());
+        assertTrue(result.getName().startsWith("Blueprint Without Resources"));
         assertTrue(result.getResources() == null || result.getResources().isEmpty());
 
         // Verify persistence
@@ -131,15 +185,17 @@ public class BlueprintServiceTest {
     public void testUpdateBlueprintWithNewResources() {
         // Given - Create blueprint using service (without resources)
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Original Blueprint");
+        String blueprintName = "Original Blueprint " + UUID.randomUUID();
+        createDto.setName(blueprintName);
         createDto.setDescription("Original Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         
         BlueprintResponseDto created = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(created.getId());
 
         // When - Update with new resources
         BlueprintCreateDto updateDto = new BlueprintCreateDto();
-        updateDto.setName("Original Blueprint");
+        updateDto.setName(blueprintName);
         updateDto.setDescription("Updated Description");
         updateDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
@@ -172,7 +228,8 @@ public class BlueprintServiceTest {
     public void testUpdateBlueprintReplacesOldResources() {
         // Given - Create blueprint with existing resources using service
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Blueprint With Resource");
+        String blueprintName = "Blueprint With Resource " + UUID.randomUUID();
+        createDto.setName(blueprintName);
         createDto.setDescription("Original Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         
@@ -187,11 +244,12 @@ public class BlueprintServiceTest {
         createDto.setResources(List.of(oldResourceDto));
         
         BlueprintResponseDto created = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(created.getId());
         UUID oldResourceId = created.getResources().get(0).getId();
 
         // When - Update with different resources
         BlueprintCreateDto updateDto = new BlueprintCreateDto();
-        updateDto.setName("Blueprint With Resource");
+        updateDto.setName(blueprintName);
         updateDto.setDescription("Updated Description");
         updateDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
@@ -222,7 +280,8 @@ public class BlueprintServiceTest {
     public void testUpdateBlueprintWithEmptyResourcesListDeletesAll() {
         // Given - Create blueprint with resources using service
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Blueprint With Resource");
+        String blueprintName = "Blueprint With Resource " + UUID.randomUUID();
+        createDto.setName(blueprintName);
         createDto.setDescription("Original Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         
@@ -237,11 +296,12 @@ public class BlueprintServiceTest {
         createDto.setResources(List.of(resourceDto));
         
         BlueprintResponseDto created = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(created.getId());
         UUID resourceId = created.getResources().get(0).getId();
 
         // When - Update with empty resources list
         BlueprintCreateDto updateDto = new BlueprintCreateDto();
-        updateDto.setName("Blueprint With Resource");
+        updateDto.setName(blueprintName);
         updateDto.setDescription("Updated Description");
         updateDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         updateDto.setResources(new ArrayList<>());
@@ -265,7 +325,7 @@ public class BlueprintServiceTest {
     public void testDeleteBlueprintCascadesToResources() {
         // Given - Create blueprint with resources using service
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Blueprint To Delete");
+        createDto.setName("Blueprint To Delete " + UUID.randomUUID());
         createDto.setDescription("Blueprint Description");
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
         
@@ -292,6 +352,8 @@ public class BlueprintServiceTest {
 
         BlueprintResource deletedResource = BlueprintResource.findById(resourceId);
         assertNull(deletedResource, "Resource should be cascade deleted");
+        
+        // Note: No need to track for cleanup since it's already deleted
     }
 
     @Test
@@ -301,7 +363,7 @@ public class BlueprintServiceTest {
         UUID invalidResourceTypeId = UUID.randomUUID();
 
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Test Blueprint");
+        createDto.setName("Test Blueprint " + UUID.randomUUID());
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
         BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
@@ -326,7 +388,7 @@ public class BlueprintServiceTest {
     public void testCreateBlueprintWithInvalidCloudProviderName() {
         // Given
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Test Blueprint");
+        createDto.setName("Test Blueprint " + UUID.randomUUID());
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
         BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
@@ -349,21 +411,23 @@ public class BlueprintServiceTest {
     @Test
     @Transactional
     public void testCreateBlueprintWithDisabledCloudProvider() {
-        // Given - Create disabled cloud provider
+        // Given - Create disabled cloud provider with unique name
         CloudProvider disabledProvider = new CloudProvider();
-        disabledProvider.name = "DISABLED_CLOUD";
+        String disabledCloudName = "DISABLED_CLOUD_" + UUID.randomUUID();
+        disabledProvider.name = disabledCloudName;
         disabledProvider.displayName = "Disabled Cloud";
         disabledProvider.enabled = false;
         disabledProvider.persist();
+        createdCloudProviderIds.add(disabledProvider.id);
 
         BlueprintCreateDto createDto = new BlueprintCreateDto();
-        createDto.setName("Test Blueprint");
+        createDto.setName("Test Blueprint " + UUID.randomUUID());
         createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
 
         BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
         resourceDto.setName("Test Resource");
         resourceDto.setBlueprintResourceTypeId(resourceTypeId);
-        resourceDto.setCloudType("DISABLED_CLOUD");
+        resourceDto.setCloudType(disabledCloudName);
         resourceDto.setConfiguration(new ContainerOrchestratorConfiguration());
 
         createDto.setResources(List.of(resourceDto));
@@ -374,7 +438,7 @@ public class BlueprintServiceTest {
         });
 
         assertTrue(exception.getMessage().contains("Cloud provider is not enabled"));
-        assertTrue(exception.getMessage().contains("DISABLED_CLOUD"));
+        assertTrue(exception.getMessage().contains(disabledCloudName));
     }
 
     /**

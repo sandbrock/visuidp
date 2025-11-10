@@ -46,6 +46,13 @@ public class AdminResourceConfigurationE2ETest {
         com.angryss.idp.domain.entities.EnvironmentEntity.deleteAll();
         com.angryss.idp.domain.entities.ResourceType.deleteAll();
         com.angryss.idp.domain.entities.CloudProvider.deleteAll();
+        
+        // Reset shared state IDs
+        cloudProviderId = null;
+        sharedResourceTypeId = null;
+        nonSharedResourceTypeId = null;
+        sharedMappingId = null;
+        nonSharedMappingId = null;
     }
 
     /**
@@ -310,11 +317,24 @@ public class AdminResourceConfigurationE2ETest {
             test05_AdminCreatesSharedResourceMapping();
         }
 
+        // Check if properties already exist (for idempotency when called multiple times)
+        int existingCount = given()
+            .header("X-Auth-Request-Email", ADMIN_USER)
+            .header("X-Auth-Request-Groups", ADMIN_GROUPS)
+            .when().get("/v1/admin/property-schemas/mapping/" + sharedMappingId)
+            .then()
+                .statusCode(200)
+            .extract().path("size()");
+        
+        if (existingCount >= 3) {
+            // Properties already exist, skip creation
+            return;
+        }
+
         // Create multiple properties using bulk create
-        String requestBody = String.format("""
+        String requestBody = """
             [
                 {
-                    "mappingId": "%s",
                     "propertyName": "clusterName",
                     "displayName": "Cluster Name",
                     "description": "Name of the ECS cluster",
@@ -323,7 +343,6 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 1
                 },
                 {
-                    "mappingId": "%s",
                     "propertyName": "minCapacity",
                     "displayName": "Minimum Capacity",
                     "description": "Minimum number of instances",
@@ -336,7 +355,6 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 2
                 },
                 {
-                    "mappingId": "%s",
                     "propertyName": "enableContainerInsights",
                     "displayName": "Enable Container Insights",
                     "description": "Enable CloudWatch Container Insights",
@@ -346,15 +364,17 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 3
                 }
             ]
-            """, sharedMappingId, sharedMappingId, sharedMappingId);
+            """;
 
         given()
             .header("X-Auth-Request-Email", ADMIN_USER)
             .header("X-Auth-Request-Groups", ADMIN_GROUPS)
             .contentType(ContentType.JSON)
+            .queryParam("mappingId", sharedMappingId)
             .body(requestBody)
             .when().post("/v1/admin/property-schemas/bulk")
             .then()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .body("$", hasSize(3))
                 .body("[0].propertyName", equalTo("clusterName"))
@@ -374,10 +394,23 @@ public class AdminResourceConfigurationE2ETest {
             test06_AdminCreatesNonSharedResourceMapping();
         }
 
-        String requestBody = String.format("""
+        // Check if properties already exist (for idempotency when called multiple times)
+        int existingCount = given()
+            .header("X-Auth-Request-Email", ADMIN_USER)
+            .header("X-Auth-Request-Groups", ADMIN_GROUPS)
+            .when().get("/v1/admin/property-schemas/mapping/" + nonSharedMappingId)
+            .then()
+                .statusCode(200)
+            .extract().path("size()");
+        
+        if (existingCount >= 3) {
+            // Properties already exist, skip creation
+            return;
+        }
+
+        String requestBody = """
             [
                 {
-                    "mappingId": "%s",
                     "propertyName": "instanceClass",
                     "displayName": "Instance Class",
                     "description": "RDS instance class",
@@ -386,7 +419,6 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 1
                 },
                 {
-                    "mappingId": "%s",
                     "propertyName": "allocatedStorage",
                     "displayName": "Allocated Storage (GB)",
                     "description": "Storage size in GB",
@@ -399,7 +431,6 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 2
                 },
                 {
-                    "mappingId": "%s",
                     "propertyName": "multiAz",
                     "displayName": "Multi-AZ Deployment",
                     "description": "Enable Multi-AZ for high availability",
@@ -409,12 +440,13 @@ public class AdminResourceConfigurationE2ETest {
                     "displayOrder": 3
                 }
             ]
-            """, nonSharedMappingId, nonSharedMappingId, nonSharedMappingId);
+            """;
 
         given()
             .header("X-Auth-Request-Email", ADMIN_USER)
             .header("X-Auth-Request-Groups", ADMIN_GROUPS)
             .contentType(ContentType.JSON)
+            .queryParam("mappingId", nonSharedMappingId)
             .body(requestBody)
             .when().post("/v1/admin/property-schemas/bulk")
             .then()
@@ -432,12 +464,16 @@ public class AdminResourceConfigurationE2ETest {
     @Test
     @Order(9)
     public void test09_AdminEnablesAllConfigurations() {
-        // Ensure we have all IDs
+        // Ensure we have all IDs and property schemas
         if (cloudProviderId == null) test01_AdminCreatesCloudProvider();
         if (sharedResourceTypeId == null) test03_AdminCreatesSharedResourceType();
         if (nonSharedResourceTypeId == null) test04_AdminCreatesNonSharedResourceType();
         if (sharedMappingId == null) test05_AdminCreatesSharedResourceMapping();
         if (nonSharedMappingId == null) test06_AdminCreatesNonSharedResourceMapping();
+        
+        // Ensure property schemas exist before enabling mappings
+        test07_AdminAddsPropertiesToSharedResourceMapping();
+        test08_AdminAddsPropertiesToNonSharedResourceMapping();
 
         // Enable cloud provider
         given()
@@ -473,6 +509,7 @@ public class AdminResourceConfigurationE2ETest {
             .queryParam("enabled", true)
             .when().patch("/v1/admin/resource-type-cloud-mappings/" + sharedMappingId + "/toggle")
             .then()
+                .log().ifValidationFails()
                 .statusCode(204);
 
         // Enable non-shared mapping

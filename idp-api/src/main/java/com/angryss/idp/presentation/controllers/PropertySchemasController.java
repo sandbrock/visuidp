@@ -147,13 +147,19 @@ public class PropertySchemasController {
             @Parameter(description = "Resource type cloud mapping ID", required = true) 
             @QueryParam("mappingId") UUID mappingId,
             @RequestBody(description = "List of property schema creation data", required = true)
-            @Valid List<PropertySchemaCreateDto> createDtos) {
+            List<PropertySchemaCreateDto> createDtos) {
         if (mappingId == null) {
             throw new BadRequestException("mappingId query parameter is required");
         }
         if (createDtos == null || createDtos.isEmpty()) {
             throw new BadRequestException("Request body must contain at least one property schema");
         }
+        
+        // Set mappingId on each DTO before validation
+        for (PropertySchemaCreateDto dto : createDtos) {
+            dto.setMappingId(mappingId);
+        }
+        
         try {
             List<PropertySchemaDto> created = propertySchemaService.bulkCreate(mappingId, createDtos);
             return Response.status(Response.Status.CREATED).entity(created).build();

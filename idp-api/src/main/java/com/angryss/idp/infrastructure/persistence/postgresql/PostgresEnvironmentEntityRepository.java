@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.EnvironmentEntity;
 import com.angryss.idp.domain.repositories.EnvironmentEntityRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresEnvironmentEntityRepository implements EnvironmentEntityRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public EnvironmentEntity save(EnvironmentEntity environmentEntity) {
-        environmentEntity.persist();
-        return environmentEntity;
+        if (environmentEntity.getId() != null && !entityManager.contains(environmentEntity)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(environmentEntity);
+        } else {
+            // New entity or already managed - use persist
+            environmentEntity.persist();
+            return environmentEntity;
+        }
     }
 
     @Override

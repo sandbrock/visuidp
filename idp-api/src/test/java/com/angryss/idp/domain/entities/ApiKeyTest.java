@@ -19,9 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @QuarkusTest
 class ApiKeyTest {
 
-    @Inject
-    EntityManager em;
-
     @Test
     @Transactional
     void testIsValid_ActiveNonExpiredNonRevokedKey() {
@@ -130,17 +127,16 @@ class ApiKeyTest {
         ApiKey apiKey = createTestApiKey("Test Key", 30);
         apiKey.lastUsedAt = null;
         apiKey.persist();
-        em.flush();
+        apiKey.flush();
 
         LocalDateTime beforeMark = LocalDateTime.now().minusSeconds(1);
 
         // When
         apiKey.markAsUsed();
-        em.flush();
-        em.clear();
+        apiKey.flush();
 
         // Then
-        ApiKey updatedKey = em.find(ApiKey.class, apiKey.id);
+        ApiKey updatedKey = ApiKey.findById(apiKey.id);
         assertNotNull(updatedKey.lastUsedAt, "Last used timestamp should be set");
         assertTrue(updatedKey.lastUsedAt.isAfter(beforeMark), "Last used timestamp should be recent");
     }
@@ -152,18 +148,17 @@ class ApiKeyTest {
         ApiKey apiKey = createTestApiKey("Test Key", 30);
         apiKey.lastUsedAt = LocalDateTime.now().minusDays(5);
         apiKey.persist();
-        em.flush();
+        apiKey.flush();
 
         LocalDateTime oldLastUsed = apiKey.lastUsedAt;
         LocalDateTime beforeMark = LocalDateTime.now().minusSeconds(1);
 
         // When
         apiKey.markAsUsed();
-        em.flush();
-        em.clear();
+        apiKey.flush();
 
         // Then
-        ApiKey updatedKey = em.find(ApiKey.class, apiKey.id);
+        ApiKey updatedKey = ApiKey.findById(apiKey.id);
         assertNotNull(updatedKey.lastUsedAt);
         assertTrue(updatedKey.lastUsedAt.isAfter(oldLastUsed), "Last used timestamp should be updated");
         assertTrue(updatedKey.lastUsedAt.isAfter(beforeMark), "Last used timestamp should be recent");
@@ -175,18 +170,17 @@ class ApiKeyTest {
         // Given
         ApiKey apiKey = createTestApiKey("Key to Revoke", 30);
         apiKey.persist();
-        em.flush();
+        apiKey.flush();
 
         String revokedBy = "admin@example.com";
         LocalDateTime beforeRevoke = LocalDateTime.now().minusSeconds(1);
 
         // When
         apiKey.revoke(revokedBy);
-        em.flush();
-        em.clear();
+        apiKey.flush();
 
         // Then
-        ApiKey revokedKey = em.find(ApiKey.class, apiKey.id);
+        ApiKey revokedKey = ApiKey.findById(apiKey.id);
         assertNotNull(revokedKey.revokedAt, "Revoked timestamp should be set");
         assertTrue(revokedKey.revokedAt.isAfter(beforeRevoke), "Revoked timestamp should be recent");
         assertEquals(revokedBy, revokedKey.revokedByEmail, "Revoked by email should be set");
@@ -332,7 +326,7 @@ class ApiKeyTest {
 
         // When
         apiKey.persist();
-        em.flush();
+        apiKey.flush();
 
         // Then
         assertNotNull(apiKey.createdAt, "Created at should be set by @PrePersist");
@@ -347,7 +341,7 @@ class ApiKeyTest {
 
         // When
         apiKey.persist();
-        em.flush();
+        apiKey.flush();
 
         // Then
         assertNotNull(apiKey.isActive, "Is active should be set by @PrePersist");
@@ -365,7 +359,7 @@ class ApiKeyTest {
         // When/Then - Should persist successfully
         assertDoesNotThrow(() -> {
             apiKey.persist();
-            em.flush();
+            apiKey.flush();
         });
     }
 
@@ -380,7 +374,7 @@ class ApiKeyTest {
         // When/Then - Should persist successfully
         assertDoesNotThrow(() -> {
             apiKey.persist();
-            em.flush();
+            apiKey.flush();
         });
     }
 
@@ -394,7 +388,7 @@ class ApiKeyTest {
         ApiKey apiKey1 = createTestApiKey("Key 1", 30);
         apiKey1.keyHash = hash;
         apiKey1.persist();
-        em.flush();
+        apiKey1.flush();
 
         ApiKey apiKey2 = createTestApiKey("Key 2", 30);
         apiKey2.keyHash = hash; // Same hash
@@ -402,7 +396,7 @@ class ApiKeyTest {
         // When/Then - Should fail due to unique constraint
         assertThrows(Exception.class, () -> {
             apiKey2.persist();
-            em.flush();
+            apiKey2.flush();
         }, "Duplicate key hash should violate unique constraint");
     }
 

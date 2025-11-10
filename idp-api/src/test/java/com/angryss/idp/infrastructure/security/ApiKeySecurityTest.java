@@ -27,7 +27,7 @@ public class ApiKeySecurityTest {
     private static final String OTHER_USER = "otheruser@example.com";
     private static final String TEST_ADMIN = "admin@example.com";
     private static final String TEST_GROUPS = "Users";
-    private static final String ADMIN_GROUPS = "Admins";
+    private static final String ADMIN_GROUPS = "IDP-Admins";
 
     @Inject
     ApiKeyService apiKeyService;
@@ -292,27 +292,29 @@ public class ApiKeySecurityTest {
     }
 
     @Test
-    
-    @Transactional
     public void testAdminCanAccessAllKeys() {
-        // Given - Create keys for different users
-        ApiKey userKey = new ApiKey();
-        userKey.keyName = "User Key";
-        userKey.keyHash = "$2a$12$test";
-        userKey.keyPrefix = "idp_user_test";
-        userKey.keyType = com.angryss.idp.domain.valueobjects.ApiKeyType.USER;
-        userKey.userEmail = TEST_USER;
-        userKey.createdByEmail = TEST_USER;
-        userKey.createdAt = java.time.LocalDateTime.now();
-        userKey.expiresAt = java.time.LocalDateTime.now().plusDays(30);
-        userKey.isActive = true;
-        userKey.persist();
+        // Given - Create a user key via REST endpoint to ensure it's committed
+        ApiKeyCreateDto createDto = new ApiKeyCreateDto();
+        createDto.setKeyName("User Key for Admin Test");
+        createDto.setExpirationDays(30);
+        
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType("application/json")
+            .body(createDto)
+            .when().post("/v1/api-keys/user")
+            .then()
+                .statusCode(201);
 
-        // When - Admin lists all keys
-        var allKeys = apiKeyService.listAllApiKeys();
-
-        // Then - Admin sees all keys
-        assertTrue(allKeys.size() >= 1);
+        // When - Admin lists all keys via REST endpoint
+        given()
+            .header("X-Auth-Request-Email", TEST_ADMIN)
+            .header("X-Auth-Request-Groups", ADMIN_GROUPS)
+            .when().get("/v1/api-keys/all")
+            .then()
+                .statusCode(200)
+                .body("size()", greaterThanOrEqualTo(1));
     }
 
     @Test

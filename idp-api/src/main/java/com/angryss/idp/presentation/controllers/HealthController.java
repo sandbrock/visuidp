@@ -1,5 +1,6 @@
 package com.angryss.idp.presentation.controllers;
 
+import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -15,6 +16,7 @@ import java.util.Map;
 @Path("/v1/health")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "Health", description = "Application health check operations")
+@Authenticated
 public class HealthController {
 
     @GET

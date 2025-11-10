@@ -88,6 +88,7 @@ public class AdminDashboardService {
         // Cloud provider statistics
         long totalProviders = cloudProviderRepository.count();
         long enabledProviders = cloudProviderRepository.findByEnabled(true).size();
+        statistics.put("cloudProviders", (int) totalProviders);  // Simple name for backward compatibility
         statistics.put("totalCloudProviders", (int) totalProviders);
         statistics.put("enabledCloudProviders", (int) enabledProviders);
         statistics.put("disabledCloudProviders", (int) (totalProviders - enabledProviders));
@@ -95,6 +96,7 @@ public class AdminDashboardService {
         // Resource type statistics
         long totalResourceTypes = resourceTypeRepository.count();
         long enabledResourceTypes = resourceTypeRepository.findByEnabled(true).size();
+        statistics.put("resourceTypes", (int) totalResourceTypes);  // Simple name for backward compatibility
         statistics.put("totalResourceTypes", (int) totalResourceTypes);
         statistics.put("enabledResourceTypes", (int) enabledResourceTypes);
         statistics.put("disabledResourceTypes", (int) (totalResourceTypes - enabledResourceTypes));
@@ -102,6 +104,7 @@ public class AdminDashboardService {
         // Mapping statistics
         long totalMappings = resourceTypeCloudMappingRepository.count();
         long enabledMappings = resourceTypeCloudMappingRepository.findByEnabled(true).size();
+        statistics.put("mappings", (int) totalMappings);  // Simple name for backward compatibility
         statistics.put("totalMappings", (int) totalMappings);
         statistics.put("enabledMappings", (int) enabledMappings);
         statistics.put("disabledMappings", (int) (totalMappings - enabledMappings));
@@ -117,6 +120,7 @@ public class AdminDashboardService {
         
         // Property schema statistics
         long totalProperties = propertySchemaRepository.count();
+        statistics.put("propertySchemas", (int) totalProperties);  // Simple name for backward compatibility
         statistics.put("totalPropertySchemas", (int) totalProperties);
         
         return statistics;

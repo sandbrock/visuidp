@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.StackResource;
 import com.angryss.idp.domain.repositories.StackResourceRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresStackResourceRepository implements StackResourceRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public StackResource save(StackResource stackResource) {
-        stackResource.persist();
-        return stackResource;
+        if (stackResource.id != null && !entityManager.contains(stackResource)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(stackResource);
+        } else {
+            // New entity or already managed - use persist
+            stackResource.persist();
+            return stackResource;
+        }
     }
 
     @Override
