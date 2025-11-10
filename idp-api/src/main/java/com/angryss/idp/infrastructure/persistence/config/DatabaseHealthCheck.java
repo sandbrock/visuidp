@@ -5,6 +5,7 @@ import io.agroal.api.AgroalDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -57,6 +58,7 @@ public class DatabaseHealthCheck implements HealthCheck {
      * @return HealthCheckResponse indicating database status with detailed metadata
      */
     @Override
+    @Transactional
     public HealthCheckResponse call() {
         String healthCheckName = "database-" + databaseProvider;
         HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named(healthCheckName);

@@ -370,6 +370,192 @@
   margin-bottom: 0;
 }
 
+/* Frankenstein Theme */
+[data-theme="frankenstein"] .api-keys-management .error-message {
+  background-color: rgba(139, 0, 0, 0.15);
+  color: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="frankenstein"] .api-keys-management .api-keys-table {
+  background: var(--bg-primary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .api-keys-management .api-keys-table::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .api-keys-management .api-keys-table::after {
+  content: '⬢';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .api-keys-management thead {
+  background: var(--bg-secondary);
+  border-bottom: 3px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .api-keys-management th {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="frankenstein"] .api-keys-management tbody tr:hover {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-container {
+  background: var(--bg-primary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-container::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-container::after {
+  content: '⬢';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-icon {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-benefits li:before {
+  color: var(--success);
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-help {
+  border-top: 2px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-help a {
+  color: var(--frankenstein-skin);
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .api-keys-management .empty-state-help a:hover {
+  color: var(--accent-primary);
+}
+
+[data-theme="frankenstein"] .api-keys-management .key-prefix code {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--frankenstein-stitch);
+  color: var(--frankenstein-skin);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .api-keys-management .type-badge.type-user {
+  background-color: var(--accent-secondary);
+  color: var(--frankenstein-skin);
+  border: 1px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .api-keys-management .type-badge.type-system {
+  background-color: var(--bg-tertiary);
+  color: var(--frankenstein-bolt);
+  border: 1px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .api-keys-management .status-badge.status-active {
+  background-color: rgba(107, 142, 35, 0.2);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+[data-theme="frankenstein"] .api-keys-management .status-badge.status-expiring-soon {
+  background-color: rgba(122, 125, 122, 0.2);
+  color: var(--frankenstein-bolt);
+  border: 1px solid var(--frankenstein-bolt);
+}
+
+[data-theme="frankenstein"] .api-keys-management .status-badge.status-expired {
+  background-color: rgba(139, 0, 0, 0.2);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+[data-theme="frankenstein"] .api-keys-management .status-badge.status-revoked {
+  background-color: rgba(74, 77, 74, 0.2);
+  color: var(--frankenstein-metal);
+  border: 1px solid var(--frankenstein-metal);
+}
+
+[data-theme="frankenstein"] .api-keys-management .info-card {
+  background: var(--bg-primary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .api-keys-management .info-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .api-keys-management .info-card::after {
+  content: '⬢';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .api-keys-management .info-card h3 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 /* Responsive design */
 @media (max-width: 1200px) {
   .api-keys-management .api-keys-table {

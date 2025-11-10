@@ -31,6 +31,50 @@
   --danger-hover: #e03131;
 }
 
+:root[data-theme="frankenstein"] {
+  /* Primary backgrounds - dark gray-green laboratory */
+  --bg-primary: #1a1d1a;
+  --bg-secondary: #252b25;
+  --bg-tertiary: #2f362f;
+  
+  /* Text colors - pale greenish-white corpse-like tone */
+  --text-primary: #d4e4d4;
+  --text-secondary: #9db89d;
+  
+  /* Borders - stitching and metal accents */
+  --border-primary: #4a5a4a;
+  --border-secondary: #3a453a;
+  
+  /* Shadows - dark, dramatic laboratory lighting */
+  --shadow: rgba(0, 0, 0, 0.5);
+  
+  /* Accent colors - greenish skin tone */
+  --accent-primary: #7a9b7a;
+  --accent-primary-hover: #5f7d5f;
+  --accent-secondary: #3d4f3d;
+  
+  /* Danger states - dark blood red */
+  --danger: #8b0000;
+  --danger-hover: #660000;
+  
+  /* Success states - olive drab green */
+  --success: #6b8e23;
+  --success-hover: #556b2f;
+  
+  /* Frankenstein-specific variables - character-focused */
+  --frankenstein-skin: #8ba888;
+  --frankenstein-stitch: #2d2520;
+  --frankenstein-bolt: #7a7d7a;
+  --frankenstein-scar: #6d7a6d;
+  --frankenstein-metal: #4a4d4a;
+  
+  /* Greenish skin texture - rough, patched appearance */
+  --frankenstein-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='5' seed='42' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.3 0.5 0.3 0 0 0.3 0.5 0.3 0 0 0.2 0.4 0.2 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%238ba888' filter='url(%23noise)' opacity='0.10'/%3E%3C/svg%3E");
+  
+  /* Smooth transitions for theme changes */
+  transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+}
+
 /* Reset and base styles */
 * {
   box-sizing: border-box;
@@ -45,7 +89,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 400ms ease, color 400ms ease;
+}
+
+/* Frankenstein theme - Laboratory texture background */
+[data-theme="frankenstein"] body {
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  background-attachment: fixed;
 }
 
 /* App layout */
@@ -80,6 +132,19 @@ body {
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 2rem;
+}
+
+/* Frankenstein theme - Laboratory texture on main content areas */
+[data-theme="frankenstein"] .main-content {
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  background-attachment: local;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .content-container {
+  position: relative;
 }
 
 
@@ -520,4 +585,1480 @@ body {
 [data-theme="dark"] .e-checkbox-wrapper.angry-checkbox .e-frame {
   background: var(--bg-secondary) !important;
   border-color: var(--border-primary) !important;
+}
+
+/* Frankenstein theme - Syncfusion button styles */
+[data-theme="frankenstein"] .e-btn {
+  border: 2px solid var(--border-primary) !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  color: var(--text-primary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+/* Stitching pattern on Syncfusion buttons using ::before pseudo-element */
+[data-theme="frankenstein"] .e-btn::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Show stitching on hover */
+[data-theme="frankenstein"] .e-btn:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+/* Electrical glow effect on hover with transform for tactile feedback */
+[data-theme="frankenstein"] .e-btn:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.4),
+              inset 0 0 10px rgba(157, 78, 221, 0.1) !important;
+  transform: translateY(-1px);
+  border-color: var(--accent-primary) !important;
+}
+
+[data-theme="frankenstein"] .e-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 10px rgba(157, 78, 221, 0.3),
+              inset 0 0 5px rgba(157, 78, 221, 0.1) !important;
+}
+
+/* Primary buttons with purple gradient */
+[data-theme="frankenstein"] .e-btn.e-primary {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #7b2cbf 100%) !important;
+  border-color: var(--accent-primary) !important;
+  color: white !important;
+}
+
+[data-theme="frankenstein"] .e-btn.e-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a1f8f 100%) !important;
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.6),
+              inset 0 0 15px rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--accent-primary-hover) !important;
+}
+
+/* Success buttons with toxic green */
+[data-theme="frankenstein"] .e-btn.e-success {
+  background-color: var(--success) !important;
+  border-color: var(--success) !important;
+  color: #1a1f1a !important;
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .e-btn.e-success:hover:not(:disabled) {
+  background-color: var(--success-hover) !important;
+  border-color: var(--success-hover) !important;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4),
+              inset 0 0 10px rgba(57, 255, 20, 0.2) !important;
+}
+
+/* Warning buttons with lightning bolt color */
+[data-theme="frankenstein"] .e-btn.e-warning {
+  background-color: var(--frankenstein-bolt) !important;
+  border-color: var(--frankenstein-bolt) !important;
+  color: #1a1f1a !important;
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .e-btn.e-warning:hover:not(:disabled) {
+  background-color: #e6c109 !important;
+  border-color: #e6c109 !important;
+  box-shadow: 0 0 15px rgba(255, 214, 10, 0.5),
+              inset 0 0 10px rgba(255, 214, 10, 0.2) !important;
+}
+
+/* Danger buttons with pulsing animation */
+[data-theme="frankenstein"] .e-btn.e-danger {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+  color: white !important;
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .e-btn.e-danger:hover:not(:disabled) {
+  background: var(--danger-hover) !important;
+  border-color: var(--danger-hover) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.7),
+              inset 0 0 15px rgba(255, 0, 110, 0.2) !important;
+  animation: frankenstein-pulse-danger-hover 1s ease-in-out infinite;
+}
+
+/* Info buttons */
+[data-theme="frankenstein"] .e-btn.e-info {
+  background-color: var(--accent-secondary) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="frankenstein"] .e-btn.e-info:hover:not(:disabled) {
+  background-color: #4a2570 !important;
+  border-color: var(--accent-primary-hover) !important;
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.4) !important;
+}
+
+/* Outline variant */
+[data-theme="frankenstein"] .e-btn.e-outline {
+  background-color: transparent !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="frankenstein"] .e-btn.e-outline:hover:not(:disabled) {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 10px rgba(157, 78, 221, 0.3) !important;
+}
+
+/* Small button variant */
+[data-theme="frankenstein"] .e-btn.e-small {
+  font-size: 0.875rem;
+}
+
+/* Disabled state */
+[data-theme="frankenstein"] .e-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* Focus state with electrical glow */
+[data-theme="frankenstein"] .e-btn:focus-visible {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.5) !important;
+}
+
+/* ============================================
+   FRANKENSTEIN THEME ANIMATIONS
+   ============================================ */
+
+/* Electrical glow effect - pulsing purple electrical energy */
+@keyframes frankenstein-electrical-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.8),
+                0 0 40px rgba(157, 78, 221, 0.4);
+  }
+}
+
+/* Intense electrical glow for hover states */
+@keyframes frankenstein-electrical-glow-intense {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5),
+                0 0 30px rgba(157, 78, 221, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.9),
+                0 0 50px rgba(157, 78, 221, 0.6),
+                0 0 70px rgba(157, 78, 221, 0.3);
+  }
+}
+
+/* Pulsing animation for danger buttons */
+@keyframes frankenstein-pulse-danger {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+  }
+}
+
+/* Intense pulsing for danger button hover */
+@keyframes frankenstein-pulse-danger-hover {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 0, 110, 0.9);
+  }
+}
+
+/* Lightning flash effect - quick bright flash */
+@keyframes frankenstein-lightning-flash {
+  0%, 50%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 5px rgba(255, 214, 10, 0.3);
+  }
+  25% {
+    opacity: 0.3;
+    text-shadow: 0 0 20px rgba(255, 214, 10, 0.8),
+                 0 0 30px rgba(255, 214, 10, 0.6);
+  }
+  75% {
+    opacity: 0.5;
+    text-shadow: 0 0 15px rgba(255, 214, 10, 0.6);
+  }
+}
+
+/* Slower lightning flash for ambient effects */
+@keyframes frankenstein-lightning-flash-slow {
+  0%, 90%, 100% {
+    opacity: 1;
+  }
+  93%, 97% {
+    opacity: 0.4;
+  }
+  95% {
+    opacity: 1;
+    filter: brightness(1.5);
+  }
+}
+
+/* Spark effect - quick electrical spark */
+@keyframes frankenstein-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Glow pulse for success states */
+@keyframes frankenstein-glow-success {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.6),
+                0 0 30px rgba(57, 255, 20, 0.3);
+  }
+}
+
+/* Glow pulse for warning states */
+@keyframes frankenstein-glow-warning {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 214, 10, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 214, 10, 0.6),
+                0 0 30px rgba(255, 214, 10, 0.3);
+  }
+}
+
+/* Stitching appear animation */
+@keyframes frankenstein-stitch-appear {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Bolt rotation for loading/processing states */
+@keyframes frankenstein-bolt-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Electrical charge buildup */
+@keyframes frankenstein-charge-buildup {
+  0% {
+    box-shadow: 0 0 5px rgba(157, 78, 221, 0.2);
+    border-color: var(--border-primary);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5),
+                inset 0 0 10px rgba(157, 78, 221, 0.2);
+    border-color: var(--accent-primary);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.8),
+                0 0 40px rgba(157, 78, 221, 0.4),
+                inset 0 0 15px rgba(157, 78, 221, 0.3);
+    border-color: var(--frankenstein-bolt);
+  }
+}
+
+/* Fade in with electrical effect */
+@keyframes frankenstein-fade-in-electric {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    box-shadow: 0 0 0 rgba(157, 78, 221, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  }
+}
+
+/* Shake effect for errors */
+@keyframes frankenstein-shake-error {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Shimmer effect for interactive elements */
+@keyframes frankenstein-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Heartbeat pulse for critical alerts */
+@keyframes frankenstein-heartbeat {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
+  }
+  10% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.7);
+  }
+  20% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
+  }
+  30% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.7);
+  }
+  40%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
+  }
+}
+
+/* Theme transition effect - smooth color transitions */
+@keyframes frankenstein-theme-transition {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.5);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   FRANKENSTEIN ANIMATION UTILITY CLASSES
+   ============================================ */
+
+/* Apply electrical glow animation */
+[data-theme="frankenstein"] .electrical-glow {
+  animation: frankenstein-electrical-glow 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .electrical-glow-intense {
+  animation: frankenstein-electrical-glow-intense 1.5s ease-in-out infinite;
+}
+
+/* Apply lightning flash animation */
+[data-theme="frankenstein"] .lightning-flash {
+  animation: frankenstein-lightning-flash 1.5s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .lightning-flash-slow {
+  animation: frankenstein-lightning-flash-slow 4s ease-in-out infinite;
+}
+
+/* Apply spark effect */
+[data-theme="frankenstein"] .spark-effect {
+  animation: frankenstein-spark 0.6s ease-out;
+}
+
+/* Apply success glow */
+[data-theme="frankenstein"] .glow-success {
+  animation: frankenstein-glow-success 2s ease-in-out infinite;
+}
+
+/* Apply warning glow */
+[data-theme="frankenstein"] .glow-warning {
+  animation: frankenstein-glow-warning 2s ease-in-out infinite;
+}
+
+/* Apply charge buildup animation */
+[data-theme="frankenstein"] .charge-buildup {
+  animation: frankenstein-charge-buildup 2s ease-in-out forwards;
+}
+
+/* Apply fade in with electrical effect */
+[data-theme="frankenstein"] .fade-in-electric {
+  animation: frankenstein-fade-in-electric 0.5s ease-out forwards;
+}
+
+/* Apply shake error animation */
+[data-theme="frankenstein"] .shake-error {
+  animation: frankenstein-shake-error 0.5s ease-in-out;
+}
+
+/* Apply heartbeat animation */
+[data-theme="frankenstein"] .heartbeat {
+  animation: frankenstein-heartbeat 2s ease-in-out infinite;
+}
+
+/* Smooth transitions for theme switching */
+[data-theme="frankenstein"] * {
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: 400ms;
+  transition-timing-function: ease;
+}
+
+/* Prevent transition on transform and opacity for performance */
+[data-theme="frankenstein"] *:not(.no-transition) {
+  transition-property: background-color, color, border-color, box-shadow;
+}
+
+/* Elements that should animate with transform/opacity */
+[data-theme="frankenstein"] .animate-transform {
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+/* Disable transitions during page load to prevent flash */
+[data-theme="frankenstein"] .preload * {
+  transition: none !important;
+}
+
+/* ============================================
+   END FRANKENSTEIN ANIMATIONS
+   ============================================ */
+
+/* Frankenstein theme - Global card and container styling */
+[data-theme="frankenstein"] .card,
+[data-theme="frankenstein"] .content-card,
+[data-theme="frankenstein"] .form-container,
+[data-theme="frankenstein"] .stack-card,
+[data-theme="frankenstein"] .blueprint-card,
+[data-theme="frankenstein"] .api-key-card,
+[data-theme="frankenstein"] .admin-card,
+[data-theme="frankenstein"] .stats-card,
+[data-theme="frankenstein"] .resource-card {
+  background: var(--bg-primary) !important;
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 3px solid var(--frankenstein-stitch) !important;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  position: relative;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+/* Prominent stitching effect on card borders using ::before pseudo-element */
+[data-theme="frankenstein"] .card::before,
+[data-theme="frankenstein"] .content-card::before,
+[data-theme="frankenstein"] .form-container::before,
+[data-theme="frankenstein"] .stack-card::before,
+[data-theme="frankenstein"] .blueprint-card::before,
+[data-theme="frankenstein"] .api-key-card::before,
+[data-theme="frankenstein"] .admin-card::before,
+[data-theme="frankenstein"] .stats-card::before,
+[data-theme="frankenstein"] .resource-card::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Neck bolt decorations in corners using ::after pseudo-element */
+[data-theme="frankenstein"] .card::after,
+[data-theme="frankenstein"] .content-card::after,
+[data-theme="frankenstein"] .form-container::after,
+[data-theme="frankenstein"] .stack-card::after,
+[data-theme="frankenstein"] .blueprint-card::after,
+[data-theme="frankenstein"] .api-key-card::after,
+[data-theme="frankenstein"] .admin-card::after,
+[data-theme="frankenstein"] .stats-card::after,
+[data-theme="frankenstein"] .resource-card::after {
+  content: '⬢';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* Second bolt decoration in opposite corner using background-image */
+[data-theme="frankenstein"] .card,
+[data-theme="frankenstein"] .content-card,
+[data-theme="frankenstein"] .form-container,
+[data-theme="frankenstein"] .stack-card,
+[data-theme="frankenstein"] .blueprint-card,
+[data-theme="frankenstein"] .api-key-card,
+[data-theme="frankenstein"] .admin-card,
+[data-theme="frankenstein"] .stats-card,
+[data-theme="frankenstein"] .resource-card {
+  background-image: 
+    radial-gradient(circle at 8px 8px, var(--frankenstein-bolt) 3px, transparent 3px),
+    var(--frankenstein-texture);
+  background-repeat: no-repeat, repeat;
+  background-position: left 8px bottom 8px, 0 0;
+  background-size: 6px 6px, 200px 200px;
+}
+
+/* Enhanced shadow on card hover */
+[data-theme="frankenstein"] .card:hover,
+[data-theme="frankenstein"] .content-card:hover,
+[data-theme="frankenstein"] .stack-card:hover,
+[data-theme="frankenstein"] .blueprint-card:hover,
+[data-theme="frankenstein"] .api-key-card:hover,
+[data-theme="frankenstein"] .admin-card:hover,
+[data-theme="frankenstein"] .resource-card:hover {
+  border-color: var(--frankenstein-skin) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
+}
+
+/* Card headers with Frankenstein styling */
+[data-theme="frankenstein"] .card-header,
+[data-theme="frankenstein"] .content-card-header,
+[data-theme="frankenstein"] .form-header {
+  color: var(--frankenstein-bolt);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--frankenstein-stitch);
+  position: relative;
+}
+
+/* Stitching effect on card header border */
+[data-theme="frankenstein"] .card-header::after,
+[data-theme="frankenstein"] .content-card-header::after,
+[data-theme="frankenstein"] .form-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 10px,
+    transparent 10px,
+    transparent 15px
+  );
+}
+
+/* Card body content */
+[data-theme="frankenstein"] .card-body,
+[data-theme="frankenstein"] .content-card-body {
+  color: var(--text-primary);
+}
+
+/* Card footer with subtle separation */
+[data-theme="frankenstein"] .card-footer,
+[data-theme="frankenstein"] .content-card-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-secondary);
+}
+
+/* Content container with Frankenstein styling */
+[data-theme="frankenstein"] .content-container {
+  position: relative;
+}
+
+[data-theme="frankenstein"] .content-container h2,
+[data-theme="frankenstein"] .content-container h3 {
+  color: var(--frankenstein-bolt);
+  text-shadow: 0 0 8px rgba(157, 78, 221, 0.2);
+}
+
+[data-theme="frankenstein"] .content-container p {
+  color: var(--text-secondary);
+}
+
+/* Section dividers with stitching effect */
+[data-theme="frankenstein"] .section-divider,
+[data-theme="frankenstein"] hr {
+  border: none;
+  height: 2px;
+  background: var(--border-primary);
+  position: relative;
+  margin: 2rem 0;
+}
+
+[data-theme="frankenstein"] .section-divider::after,
+[data-theme="frankenstein"] hr::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 10px,
+    transparent 10px,
+    transparent 15px
+  );
+}
+
+/* Panel and section containers */
+[data-theme="frankenstein"] .panel,
+[data-theme="frankenstein"] .section,
+[data-theme="frankenstein"] .container-box {
+  background: var(--bg-secondary) !important;
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 2px solid var(--frankenstein-stitch) !important;
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  position: relative;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Subtle stitching on panels */
+[data-theme="frankenstein"] .panel::before,
+[data-theme="frankenstein"] .section::before,
+[data-theme="frankenstein"] .container-box::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* List containers with Frankenstein styling */
+[data-theme="frankenstein"] .list-container,
+[data-theme="frankenstein"] .items-list {
+  background: var(--bg-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* List items with hover effects */
+[data-theme="frankenstein"] .list-item,
+[data-theme="frankenstein"] .item-row {
+  background: var(--bg-secondary);
+  border: 1px solid var(--frankenstein-stitch);
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .list-item:hover,
+[data-theme="frankenstein"] .item-row:hover {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: translateX(4px);
+}
+
+/* Grid layouts for cards */
+[data-theme="frankenstein"] .card-grid,
+[data-theme="frankenstein"] .cards-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* Ensure consistent spacing and padding */
+[data-theme="frankenstein"] .card,
+[data-theme="frankenstein"] .content-card,
+[data-theme="frankenstein"] .form-container {
+  margin-bottom: 1.5rem;
+}
+
+/* Last card in a container shouldn't have bottom margin */
+[data-theme="frankenstein"] .card:last-child,
+[data-theme="frankenstein"] .content-card:last-child,
+[data-theme="frankenstein"] .form-container:last-child {
+  margin-bottom: 0;
+}
+
+/* Nested cards with slightly different styling */
+[data-theme="frankenstein"] .card .card,
+[data-theme="frankenstein"] .content-card .content-card {
+  background: var(--bg-secondary) !important;
+  border: 2px solid var(--frankenstein-stitch) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Error container with Frankenstein styling */
+[data-theme="frankenstein"] .error-container {
+  background: var(--bg-primary);
+  border: 3px solid var(--danger);
+  border-radius: 8px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="frankenstein"] .error-container::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+[data-theme="frankenstein"] .error-container h2 {
+  color: var(--danger);
+  text-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+}
+
+[data-theme="frankenstein"] .error-container p {
+  color: var(--text-secondary);
+}
+
+/* Success/info containers */
+[data-theme="frankenstein"] .success-container,
+[data-theme="frankenstein"] .info-container {
+  background: var(--bg-primary);
+  border: 3px solid var(--frankenstein-skin);
+  border-radius: 8px;
+  padding: 1.5rem;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .success-container {
+  border-color: var(--success);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Frankenstein theme - Modal/Dialog styling */
+[data-theme="frankenstein"] .e-dialog {
+  background: var(--bg-primary) !important;
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 4px solid var(--frankenstein-stitch) !important;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px;
+  position: relative;
+}
+
+/* Prominent stitching effect on dialog border */
+[data-theme="frankenstein"] .e-dialog::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Dialog header with character-focused styling */
+[data-theme="frankenstein"] .e-dialog .e-dlg-header {
+  background: var(--bg-secondary) !important;
+  border-bottom: 3px solid var(--frankenstein-stitch) !important;
+  color: var(--frankenstein-skin) !important;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 1rem 1.5rem 1rem 3rem;
+  position: relative;
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Bolt decoration on dialog header using ::before */
+[data-theme="frankenstein"] .e-dialog .e-dlg-header::before {
+  content: '⬢';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--frankenstein-bolt);
+  font-size: 18px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* Stitching effect on header border */
+[data-theme="frankenstein"] .e-dialog .e-dlg-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 10px,
+    transparent 10px,
+    transparent 15px
+  );
+  pointer-events: none;
+}
+
+/* Dialog header text */
+[data-theme="frankenstein"] .e-dialog .e-dlg-header .e-dlg-header-content {
+  color: var(--frankenstein-skin) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Dialog close button */
+[data-theme="frankenstein"] .e-dialog .e-dlg-header .e-dlg-closeicon-btn {
+  color: var(--text-secondary) !important;
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .e-dialog .e-dlg-header .e-dlg-closeicon-btn:hover {
+  color: var(--danger) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: rotate(90deg);
+}
+
+/* Dialog content with proper contrast */
+[data-theme="frankenstein"] .e-dialog .e-dlg-content {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure text in dialog content is readable */
+[data-theme="frankenstein"] .e-dialog .e-dlg-content p,
+[data-theme="frankenstein"] .e-dialog .e-dlg-content div,
+[data-theme="frankenstein"] .e-dialog .e-dlg-content span {
+  color: var(--text-primary) !important;
+}
+
+/* Dialog footer */
+[data-theme="frankenstein"] .e-dialog .e-footer-content {
+  background: var(--bg-secondary) !important;
+  border-top: 2px solid var(--frankenstein-stitch) !important;
+  padding: 1rem 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Dialog overlay with dark shadow */
+[data-theme="frankenstein"] .e-dlg-overlay {
+  background: rgba(26, 29, 26, 0.9) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced shadow on modal appearance */
+[data-theme="frankenstein"] .e-dialog.e-popup-open {
+  animation: frankenstein-modal-appear 0.3s ease-out;
+}
+
+@keyframes frankenstein-modal-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Additional bolt decoration on dialog top-right corner */
+[data-theme="frankenstein"] .e-dialog::after {
+  content: '⬢';
+  position: absolute;
+  top: 12px;
+  right: 50px;
+  font-size: 16px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Ensure proper spacing for dialog buttons */
+[data-theme="frankenstein"] .e-dialog .e-footer-content .e-btn + .e-btn {
+  margin-left: 0.75rem;
+}
+
+/* Dialog input fields maintain Frankenstein styling */
+[data-theme="frankenstein"] .e-dialog .e-input-group,
+[data-theme="frankenstein"] .e-dialog .e-float-input input,
+[data-theme="frankenstein"] .e-dialog .e-float-input textarea {
+  background: var(--bg-secondary) !important;
+  border: 2px solid var(--frankenstein-stitch) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="frankenstein"] .e-dialog .e-input-group:focus-within,
+[data-theme="frankenstein"] .e-dialog .e-float-input:focus-within {
+  border-color: var(--frankenstein-skin) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Dialog labels */
+[data-theme="frankenstein"] .e-dialog .e-float-input label,
+[data-theme="frankenstein"] .e-dialog label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="frankenstein"] .e-dialog .e-float-input.e-input-focus label,
+[data-theme="frankenstein"] .e-dialog .e-float-input.e-valid-input label {
+  color: var(--frankenstein-skin) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   FRANKENSTEIN THEME - ERROR STATE STYLING
+   ============================================ */
+
+/* Error message containers with electrical danger glow */
+[data-theme="frankenstein"] .error-message {
+  padding: 1rem !important;
+  border-radius: 6px !important;
+  border: 3px solid var(--danger) !important;
+  background: var(--bg-primary) !important;
+  position: relative;
+  color: var(--danger) !important;
+  box-sizing: border-box;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6),
+              0 0 15px rgba(255, 0, 110, 0.4),
+              inset 0 0 10px rgba(255, 0, 110, 0.1);
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+/* Prominent stitching effect on error messages */
+[data-theme="frankenstein"] .error-message::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Lightning bolt icon for error messages */
+[data-theme="frankenstein"] .error-message::after {
+  content: '⚡';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  color: var(--danger);
+  opacity: 0.7;
+  animation: frankenstein-lightning-flash 1.5s ease-in-out infinite;
+}
+
+/* Validation error text */
+[data-theme="frankenstein"] .error-text,
+[data-theme="frankenstein"] .validation-error,
+[data-theme="frankenstein"] .field-error {
+  color: var(--danger) !important;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-shadow: 0 0 5px rgba(255, 0, 110, 0.2);
+}
+
+/* Error icon in validation messages */
+[data-theme="frankenstein"] .error-text::before,
+[data-theme="frankenstein"] .validation-error::before,
+[data-theme="frankenstein"] .field-error::before {
+  content: '⚠';
+  font-size: 1rem;
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+/* Input validation error states - Syncfusion components */
+[data-theme="frankenstein"] .e-error,
+[data-theme="frankenstein"] .e-input-group.e-error,
+[data-theme="frankenstein"] .e-float-input.e-error,
+[data-theme="frankenstein"] .e-combobox.e-error,
+[data-theme="frankenstein"] .e-ddl.e-error {
+  border: 2px solid var(--danger) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1) !important;
+  background: var(--bg-secondary) !important;
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+/* Error state focus - enhanced electrical glow */
+[data-theme="frankenstein"] .e-error:focus,
+[data-theme="frankenstein"] .e-input-group.e-error:focus-within,
+[data-theme="frankenstein"] .e-float-input.e-error:focus-within,
+[data-theme="frankenstein"] .e-combobox.e-error:focus-within,
+[data-theme="frankenstein"] .e-ddl.e-error:focus-within {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.6),
+              0 0 30px rgba(255, 0, 110, 0.3),
+              inset 0 0 10px rgba(255, 0, 110, 0.2) !important;
+  outline: none !important;
+}
+
+/* ComboBox error state with pseudo-element border */
+[data-theme="frankenstein"] .e-combobox.e-input-group.e-error::after,
+[data-theme="frankenstein"] .e-ddl.e-input-group.e-error::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--danger);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4);
+}
+
+/* Error state for custom Angry components */
+[data-theme="frankenstein"] .angry-textbox.error,
+[data-theme="frankenstein"] .angry-textbox[aria-invalid="true"],
+[data-theme="frankenstein"] .angry-combobox-input-group.error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1);
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+/* Error state focus for Angry components */
+[data-theme="frankenstein"] .angry-textbox.error:focus,
+[data-theme="frankenstein"] .angry-textbox[aria-invalid="true"]:focus,
+[data-theme="frankenstein"] .angry-combobox-input-group.error:focus-within {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.6),
+              0 0 30px rgba(255, 0, 110, 0.3),
+              inset 0 0 10px rgba(255, 0, 110, 0.2) !important;
+}
+
+/* Error labels with electrical glow */
+[data-theme="frankenstein"] .e-float-input.e-error label,
+[data-theme="frankenstein"] .angry-textbox.error + .angry-textbox-label,
+[data-theme="frankenstein"] .angry-textbox[aria-invalid="true"] + .angry-textbox-label {
+  color: var(--danger) !important;
+  text-shadow: 0 0 8px rgba(255, 0, 110, 0.3);
+  font-weight: 600;
+}
+
+/* Error container with enhanced styling */
+[data-theme="frankenstein"] .error-container {
+  background: var(--bg-primary) !important;
+  border: 3px solid var(--danger) !important;
+  border-radius: 8px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7),
+              0 0 30px rgba(255, 0, 110, 0.4);
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+/* Prominent stitching effect on error container */
+[data-theme="frankenstein"] .error-container::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Error container heading */
+[data-theme="frankenstein"] .error-container h2,
+[data-theme="frankenstein"] .error-container h3 {
+  color: var(--danger) !important;
+  text-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
+  font-weight: 700;
+}
+
+/* Error container text */
+[data-theme="frankenstein"] .error-container p {
+  color: var(--text-secondary) !important;
+}
+
+/* Error container button */
+[data-theme="frankenstein"] .error-container button,
+[data-theme="frankenstein"] .error-container .e-btn {
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+/* Alert/notification error states */
+[data-theme="frankenstein"] .alert-error,
+[data-theme="frankenstein"] .notification-error,
+[data-theme="frankenstein"] .toast-error {
+  background: var(--bg-primary) !important;
+  border: 3px solid var(--danger) !important;
+  border-radius: 6px;
+  padding: 1rem;
+  color: var(--danger) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6),
+              0 0 15px rgba(255, 0, 110, 0.4),
+              inset 0 0 10px rgba(255, 0, 110, 0.1);
+  position: relative;
+}
+
+/* Lightning bolt on alerts */
+[data-theme="frankenstein"] .alert-error::before,
+[data-theme="frankenstein"] .notification-error::before,
+[data-theme="frankenstein"] .toast-error::before {
+  content: '⚡';
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--danger);
+  opacity: 0.8;
+  animation: frankenstein-lightning-flash 1.5s ease-in-out infinite;
+}
+
+/* Adjust padding for alerts with icon */
+[data-theme="frankenstein"] .alert-error,
+[data-theme="frankenstein"] .notification-error,
+[data-theme="frankenstein"] .toast-error {
+  padding-left: 3.5rem;
+}
+
+/* Form validation summary */
+[data-theme="frankenstein"] .validation-summary,
+[data-theme="frankenstein"] .form-errors {
+  background: var(--bg-primary);
+  border: 3px solid var(--danger);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6),
+              0 0 15px rgba(255, 0, 110, 0.3);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .validation-summary::before,
+[data-theme="frankenstein"] .form-errors::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Validation summary title */
+[data-theme="frankenstein"] .validation-summary h4,
+[data-theme="frankenstein"] .form-errors h4 {
+  color: var(--danger);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 8px rgba(255, 0, 110, 0.3);
+  font-weight: 700;
+}
+
+/* Validation summary list */
+[data-theme="frankenstein"] .validation-summary ul,
+[data-theme="frankenstein"] .form-errors ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+[data-theme="frankenstein"] .validation-summary li,
+[data-theme="frankenstein"] .form-errors li {
+  color: var(--danger);
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+[data-theme="frankenstein"] .validation-summary li::before,
+[data-theme="frankenstein"] .form-errors li::before {
+  content: '⚠';
+  position: absolute;
+  left: 0;
+  color: var(--danger);
+  font-size: 1rem;
+}
+
+/* Required field indicator with electrical glow */
+[data-theme="frankenstein"] .required-indicator,
+[data-theme="frankenstein"] .field-required::after {
+  color: var(--danger);
+  text-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+}
+
+/* Inline error messages */
+[data-theme="frankenstein"] .inline-error,
+[data-theme="frankenstein"] .help-text-error {
+  color: var(--danger) !important;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  text-shadow: 0 0 5px rgba(255, 0, 110, 0.2);
+}
+
+/* Error badge/tag */
+[data-theme="frankenstein"] .badge-error,
+[data-theme="frankenstein"] .tag-error,
+[data-theme="frankenstein"] .chip-error {
+  background: var(--danger) !important;
+  color: white !important;
+  border: 1px solid var(--danger-hover);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+/* Error icon standalone */
+[data-theme="frankenstein"] .error-icon {
+  color: var(--danger);
+  font-size: 1.25rem;
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+/* Shake animation for error inputs on validation */
+[data-theme="frankenstein"] .error-shake,
+[data-theme="frankenstein"] .validation-shake {
+  animation: frankenstein-shake-error 0.5s ease-in-out;
+}
+
+/* Error pulse animation - subtle pulsing glow */
+@keyframes frankenstein-error-pulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+                inset 0 0 5px rgba(255, 0, 110, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 0, 110, 0.6),
+                inset 0 0 8px rgba(255, 0, 110, 0.15);
+  }
+}
+
+/* Ensure error borders are clearly visible with high contrast */
+[data-theme="frankenstein"] .e-error,
+[data-theme="frankenstein"] .e-input-group.e-error,
+[data-theme="frankenstein"] .e-float-input.e-error,
+[data-theme="frankenstein"] .angry-textbox.error,
+[data-theme="frankenstein"] .angry-combobox-input-group.error {
+  /* Contrast ratio: #ff006e on #1a1f1a = 6.8:1 (WCAG AA compliant) */
+  border-color: var(--danger) !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Wrapper error state for complex components */
+[data-theme="frankenstein"] .environment-selector > div:has(.e-input-group.e-error)::after,
+[data-theme="frankenstein"] .environment-selector > div:has(.e-combobox.e-input-group.e-error)::after,
+[data-theme="frankenstein"] .environment-selector > div:has(.e-ddl.e-input-group.e-error)::after,
+[data-theme="frankenstein"] .environment-combobox-wrapper:has(.e-input-group.e-error)::after,
+[data-theme="frankenstein"] .environment-combobox-wrapper:has(.e-combobox.e-input-group.e-error)::after,
+[data-theme="frankenstein"] .environment-combobox-wrapper:has(.e-ddl.e-input-group.e-error)::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4);
+}
+
+/* Ensure overflow visible for error borders */
+[data-theme="frankenstein"] .environment-selector > div,
+[data-theme="frankenstein"] .environment-combobox-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+/* Error state for checkboxes and radio buttons */
+[data-theme="frankenstein"] .e-checkbox-wrapper.e-error .e-frame,
+[data-theme="frankenstein"] .e-radio-wrapper.e-error .e-frame {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 8px rgba(255, 0, 110, 0.3);
+}
+
+/* Error state for date pickers */
+[data-theme="frankenstein"] .e-datepicker.e-error,
+[data-theme="frankenstein"] .e-datetimepicker.e-error {
+  border: 2px solid var(--danger) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1) !important;
+}
+
+/* Error state for textareas */
+[data-theme="frankenstein"] textarea.e-error,
+[data-theme="frankenstein"] .angry-textbox-multiline.error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1);
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   END FRANKENSTEIN ERROR STATE STYLING
+   ============================================ */
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+/* Respect user's motion preferences for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="frankenstein"] *,
+  [data-theme="frankenstein"] *::before,
+  [data-theme="frankenstein"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable all Frankenstein animations */
+  [data-theme="frankenstein"] .electrical-glow,
+  [data-theme="frankenstein"] .electrical-glow-intense,
+  [data-theme="frankenstein"] .lightning-flash,
+  [data-theme="frankenstein"] .lightning-flash-slow,
+  [data-theme="frankenstein"] .spark-effect,
+  [data-theme="frankenstein"] .glow-success,
+  [data-theme="frankenstein"] .glow-warning,
+  [data-theme="frankenstein"] .charge-buildup,
+  [data-theme="frankenstein"] .fade-in-electric,
+  [data-theme="frankenstein"] .shake-error,
+  [data-theme="frankenstein"] .heartbeat {
+    animation: none !important;
+  }
+
+  /* Keep static visual effects but remove motion */
+  [data-theme="frankenstein"] .e-btn:hover,
+  [data-theme="frankenstein"] .card:hover,
+  [data-theme="frankenstein"] .list-item:hover {
+    transform: none !important;
+  }
+
+  /* Maintain focus indicators without animation */
+  [data-theme="frankenstein"] .e-btn:focus-visible,
+  [data-theme="frankenstein"] .e-input-group:focus-within {
+    transition: none !important;
+  }
+}
+
+/* ============================================
+   END REDUCED MOTION SUPPORT
+   ============================================ */
+
+/* Responsive adjustments for cards */
+@media (max-width: 768px) {
+  [data-theme="frankenstein"] .card,
+  [data-theme="frankenstein"] .content-card,
+  [data-theme="frankenstein"] .form-container {
+    padding: 1rem;
+  }
+
+  [data-theme="frankenstein"] .card::before,
+  [data-theme="frankenstein"] .content-card::before,
+  [data-theme="frankenstein"] .form-container::before {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+
+  [data-theme="frankenstein"] .card-grid,
+  [data-theme="frankenstein"] .cards-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Responsive dialog adjustments */
+  [data-theme="frankenstein"] .e-dialog {
+    max-width: 95vw !important;
+  }
+
+  [data-theme="frankenstein"] .e-dialog .e-dlg-header,
+  [data-theme="frankenstein"] .e-dialog .e-dlg-content,
+  [data-theme="frankenstein"] .e-dialog .e-footer-content {
+    padding: 1rem;
+  }
+
+  /* Responsive error message adjustments */
+  [data-theme="frankenstein"] .error-message,
+  [data-theme="frankenstein"] .error-container {
+    padding: 0.75rem;
+  }
+
+  [data-theme="frankenstein"] .error-message::after {
+    top: 6px;
+    right: 6px;
+    font-size: 14px;
+  }
 }

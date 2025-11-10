@@ -447,3 +447,385 @@
     transition: none;
   }
 }
+
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .infrastructure-controls {
+  background-color: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 6px 16px var(--shadow);
+  position: relative;
+}
+
+/* Prominent stitching effect on controls */
+[data-theme="frankenstein"] .infrastructure-controls::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .environment-selector label {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .environment-dropdown {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .environment-dropdown:focus {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px var(--shadow),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .environment-dropdown option {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Infrastructure combobox Frankenstein styling */
+[data-theme="frankenstein"] .infra-combobox.e-input-group,
+[data-theme="frankenstein"] .infra-combobox.e-input-group.e-control-wrapper {
+  border: 2px solid var(--frankenstein-stitch) !important;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .infra-combobox.e-input-group.e-input-focus,
+[data-theme="frankenstein"] .infra-combobox.e-control-wrapper.e-input-focus {
+  border-color: var(--frankenstein-skin) !important;
+  box-shadow: 0 2px 8px var(--shadow),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="frankenstein"] .infra-combobox input.e-input {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+[data-theme="frankenstein"] .no-environment-selected {
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border: 2px dashed var(--frankenstein-stitch);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .infrastructure-list {
+  background-color: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 6px 16px var(--shadow);
+  position: relative;
+}
+
+/* Prominent stitching effect on infrastructure list */
+[data-theme="frankenstein"] .infrastructure-list::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .infrastructure-list h3 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+[data-theme="frankenstein"] .infrastructure-list p {
+  color: var(--text-secondary);
+}
+
+[data-theme="frankenstein"] .infrastructure-placeholder {
+  background-color: var(--bg-primary);
+  border: 2px dashed var(--frankenstein-stitch);
+  color: var(--text-secondary);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Infrastructure Form Frankenstein Styling */
+[data-theme="frankenstein"] .infrastructure-form {
+  background: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 6px 16px var(--shadow);
+  position: relative;
+}
+
+/* Prominent stitching effect on form */
+[data-theme="frankenstein"] .infrastructure-form::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .infrastructure-form h3,
+[data-theme="frankenstein"] .infrastructure-form h4 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+[data-theme="frankenstein"] .infrastructure-form h5 {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-group label {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-group input,
+[data-theme="frankenstein"] .infrastructure-form .form-group textarea {
+  background-color: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-group input:focus,
+[data-theme="frankenstein"] .infrastructure-form .form-group textarea:focus {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 8px var(--shadow),
+              inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-group input::placeholder,
+[data-theme="frankenstein"] .infrastructure-form .form-group textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions {
+  border-top: 2px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px var(--shadow);
+  transform: translateY(-2px);
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button.primary {
+  background: var(--accent-primary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .infrastructure-form .form-actions button.primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px var(--shadow),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Error state styling */
+[data-theme="frankenstein"] .infrastructure-form .form-group.error input,
+[data-theme="frankenstein"] .infrastructure-form .form-group.error textarea {
+  border-color: var(--danger);
+  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.4);
+}
+
+[data-theme="frankenstein"] .error-message {
+  background: rgba(139, 0, 0, 0.15);
+  border: 2px solid var(--danger);
+  color: var(--text-primary);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Resources table styling */
+[data-theme="frankenstein"] .resources-table {
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 6px 16px var(--shadow);
+}
+
+[data-theme="frankenstein"] .table-header {
+  background: var(--bg-tertiary);
+  border-bottom: 3px solid var(--frankenstein-stitch);
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .table-row {
+  border-bottom: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .table-row:hover {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Cloud provider badges */
+[data-theme="frankenstein"] .infrastructure-list span[style*="background: var(--bg-secondary)"] {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--frankenstein-stitch);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Config form sections */
+[data-theme="frankenstein"] .config-form {
+  background: var(--bg-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Cloud-specific properties section */
+[data-theme="frankenstein"] .infrastructure-form > form > div[style*="border: 1px solid"] {
+  border: 3px solid var(--frankenstein-stitch) !important;
+  background: var(--bg-primary) !important;
+  box-shadow: 0 6px 16px var(--shadow);
+}
+
+[data-theme="frankenstein"] .infrastructure-form > form > div[style*="border: 1px solid"] > div[style*="borderBottom"] {
+  border-bottom: 3px solid var(--frankenstein-stitch) !important;
+}
+
+/* Loading state */
+[data-theme="frankenstein"] .loading-state {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Button styling for infrastructure controls */
+[data-theme="frankenstein"] .infrastructure-controls button.e-btn {
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-btn::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-btn:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px var(--shadow);
+  transform: translateY(-2px);
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-primary {
+  background: var(--accent-primary);
+  border-color: var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px var(--shadow),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-danger {
+  background: var(--danger);
+  border-color: var(--frankenstein-stitch);
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .infrastructure-controls button.e-danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
+}
+
+/* Resource action buttons */
+[data-theme="frankenstein"] .table-row button.e-btn {
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .table-row button.e-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 8px var(--shadow);
+  transform: translateY(-1px);
+}
+
+[data-theme="frankenstein"] .table-row button.e-danger {
+  background: var(--danger);
+  border-color: var(--frankenstein-stitch);
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .table-row button.e-danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
+}
+
+/* Infrastructure resources section */
+[data-theme="frankenstein"] .infrastructure-resources h4 {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .infrastructure-resources button.e-primary {
+  background: var(--accent-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+[data-theme="frankenstein"] .infrastructure-resources button.e-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 4px 12px var(--shadow),
+              inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}

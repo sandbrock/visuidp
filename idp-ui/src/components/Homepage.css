@@ -3,3 +3,31 @@
   background-color: var(--bg-secondary);
   transition: background-color 0.3s ease;
 }
+
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .homepage {
+  background-color: var(--bg-primary);
+  position: relative;
+}
+
+/* Add laboratory texture to homepage */
+[data-theme="frankenstein"] .homepage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content is above texture */
+[data-theme="frankenstein"] .homepage > * {
+  position: relative;
+  z-index: 1;
+}

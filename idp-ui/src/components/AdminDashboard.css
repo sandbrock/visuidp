@@ -322,3 +322,231 @@
   background-color: #4a3a1a;
   color: #ffcc6b;
 }
+
+/* Frankenstein Theme */
+[data-theme="frankenstein"] .admin-dashboard {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .dashboard-header h2 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Statistics Cards with Stitching Effects */
+[data-theme="frankenstein"] .stat-card {
+  background: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .stat-card::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .stat-card::after {
+  content: '⬢';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 14px;
+  color: var(--frankenstein-bolt);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .stat-card:hover {
+  box-shadow: 0 6px 16px var(--shadow);
+  border-color: var(--frankenstein-skin);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="frankenstein"] .stat-icon {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .stat-value {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="frankenstein"] .stat-label {
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="frankenstein"] .stat-detail {
+  color: var(--text-secondary);
+}
+
+/* Incomplete Mappings Section */
+[data-theme="frankenstein"] .incomplete-mappings-section {
+  background: var(--bg-secondary);
+  border: 3px solid var(--frankenstein-stitch);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .incomplete-mappings-section::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .incomplete-mappings-section h3 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+[data-theme="frankenstein"] .section-description {
+  color: var(--text-secondary);
+}
+
+[data-theme="frankenstein"] .incomplete-mapping-card {
+  background: var(--bg-primary);
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .incomplete-mapping-card:hover {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px var(--shadow);
+  background: var(--bg-secondary);
+}
+
+[data-theme="frankenstein"] .mapping-title {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .mapping-location {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--frankenstein-stitch);
+}
+
+/* Configuration Overview */
+[data-theme="frankenstein"] .configuration-overview h3 {
+  color: var(--frankenstein-skin);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+[data-theme="frankenstein"] .overview-section h4 {
+  color: var(--frankenstein-skin);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="frankenstein"] .overview-item {
+  background: var(--bg-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .overview-item:hover {
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 4px 8px var(--shadow);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="frankenstein"] .item-name {
+  color: var(--text-primary);
+}
+
+/* Frankenstein Badges */
+[data-theme="frankenstein"] .status-badge.enabled {
+  background-color: rgba(107, 142, 35, 0.2);
+  color: var(--success);
+  border: 1px solid var(--success);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .status-badge.disabled {
+  background-color: rgba(139, 0, 0, 0.2);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .category-badge {
+  border: 1px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .category-badge.category-shared {
+  background-color: rgba(122, 155, 122, 0.2);
+  color: var(--frankenstein-skin);
+  border-color: var(--frankenstein-skin);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .category-badge.category-non_shared {
+  background-color: rgba(122, 125, 122, 0.2);
+  color: var(--frankenstein-bolt);
+  border-color: var(--frankenstein-bolt);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .category-badge.category-both {
+  background-color: rgba(45, 37, 32, 0.3);
+  color: var(--text-secondary);
+  border-color: var(--frankenstein-stitch);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .completeness-badge.complete {
+  background-color: rgba(107, 142, 35, 0.2);
+  color: var(--success);
+  border: 1px solid var(--success);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .completeness-badge.incomplete {
+  background-color: rgba(122, 125, 122, 0.2);
+  color: var(--frankenstein-bolt);
+  border: 1px solid var(--frankenstein-bolt);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Empty State */
+[data-theme="frankenstein"] .empty-state {
+  color: var(--text-secondary);
+}
+
+/* Loading and Error States */
+[data-theme="frankenstein"] .admin-dashboard.loading,
+[data-theme="frankenstein"] .admin-dashboard.error {
+  color: var(--text-primary);
+}
+
+[data-theme="frankenstein"] .error-message {
+  color: var(--danger);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 15px 20px;
+  background: rgba(139, 0, 0, 0.15);
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--shadow);
+}

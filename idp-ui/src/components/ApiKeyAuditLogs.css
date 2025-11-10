@@ -328,6 +328,185 @@
   }
 }
 
+/* Frankenstein Theme */
+[data-theme="frankenstein"] .api-key-audit-logs .error-message {
+  background-color: rgba(255, 0, 110, 0.15);
+  color: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.2);
+}
+
+[data-theme="frankenstein"] .filters-section {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .filters-section::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .filters-section h3 {
+  color: var(--frankenstein-bolt);
+  text-shadow: 0 0 5px rgba(157, 78, 221, 0.3);
+}
+
+[data-theme="frankenstein"] .filters-actions {
+  border-top: 1px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .audit-logs-table {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .audit-logs-table::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="frankenstein"] .audit-logs-table table {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .audit-logs-table thead {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border-bottom: 2px solid var(--frankenstein-stitch);
+}
+
+[data-theme="frankenstein"] .audit-logs-table th {
+  color: var(--frankenstein-bolt);
+  text-shadow: 0 0 5px rgba(157, 78, 221, 0.3);
+}
+
+[data-theme="frankenstein"] .audit-logs-table tbody tr:hover {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 0 10px rgba(157, 78, 221, 0.1);
+}
+
+[data-theme="frankenstein"] .key-prefix-cell code {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  color: var(--frankenstein-bolt);
+  box-shadow: inset 0 0 5px rgba(157, 78, 221, 0.1);
+}
+
+[data-theme="frankenstein"] .action-create {
+  background-color: rgba(57, 255, 20, 0.2);
+  color: var(--success);
+  border: 1px solid var(--success);
+  box-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+}
+
+[data-theme="frankenstein"] .action-rotate {
+  background-color: rgba(157, 78, 221, 0.2);
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 0 5px rgba(157, 78, 221, 0.3);
+}
+
+[data-theme="frankenstein"] .action-revoke {
+  background-color: rgba(255, 0, 110, 0.2);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+}
+
+[data-theme="frankenstein"] .action-auth {
+  background-color: rgba(255, 214, 10, 0.2);
+  color: var(--frankenstein-bolt);
+  border: 1px solid var(--frankenstein-bolt);
+  box-shadow: 0 0 5px rgba(255, 214, 10, 0.3);
+}
+
+[data-theme="frankenstein"] .action-fail {
+  background-color: rgba(255, 0, 110, 0.2);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+  animation: pulse-fail 2s ease-in-out infinite;
+}
+
+@keyframes pulse-fail {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+  }
+}
+
+[data-theme="frankenstein"] .action-default {
+  background-color: rgba(108, 117, 125, 0.2);
+  color: var(--frankenstein-metal);
+  border: 1px solid var(--frankenstein-metal);
+}
+
+[data-theme="frankenstein"] .pagination .page-number {
+  border: 2px solid var(--border-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .pagination .page-number:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
+}
+
+[data-theme="frankenstein"] .pagination .page-number.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.6);
+}
+
+[data-theme="frankenstein"] .audit-logs-info .info-card {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  box-shadow: 0 4px 12px var(--shadow);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .audit-logs-info .info-card::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .audit-logs-info .info-card h3 {
+  color: var(--frankenstein-bolt);
+  text-shadow: 0 0 5px rgba(157, 78, 221, 0.3);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .api-key-audit-logs {
