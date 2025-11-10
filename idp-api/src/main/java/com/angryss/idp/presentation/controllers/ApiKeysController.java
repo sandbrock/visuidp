@@ -303,6 +303,7 @@ public class ApiKeysController {
      */
     @POST
     @Path("/{id}/rotate")
+    @Consumes(MediaType.WILDCARD)  // Override class-level @Consumes since this endpoint doesn't require a body
     @Operation(
         summary = "Rotate API key",
         description = """

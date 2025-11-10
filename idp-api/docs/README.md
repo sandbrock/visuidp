@@ -18,6 +18,22 @@ The IDP API supports multiple database backends through a pluggable architecture
 - **[Database Troubleshooting](DATABASE_TROUBLESHOOTING.md)** - Common issues, solutions, and debugging tips for both database providers
 - **[DynamoDB Testing](DYNAMODB_TESTING.md)** - Guide for testing with DynamoDB Local
 
+## Transaction Management & Monitoring
+
+- **[Transaction Management Guide](TRANSACTION_MANAGEMENT_GUIDE.md)** - Best practices for transaction management and connection handling
+- **[Connection Pool Monitoring](CONNECTION_POOL_MONITORING.md)** - Guide to monitoring database connection pool metrics
+- **[Alerting Thresholds](ALERTING_THRESHOLDS.md)** - Recommended alert configurations and response runbooks
+- **[Connection Pool Fix](CONNECTION_POOL_FIX.md)** - Details on connection pool configuration changes
+- **[Audit Checklist](AUDIT_CHECKLIST.md)** - Checklist for reviewing transaction management compliance
+
+## Testing
+
+- **[Testing Guide](TESTING_GUIDE.md)** ⭐ - Comprehensive guide for running and writing tests with different database providers, authentication, and transaction management
+- **[Test Troubleshooting Guide](TEST_TROUBLESHOOTING_GUIDE.md)** - Detailed troubleshooting for common test failures
+- **[DynamoDB Testing](DYNAMODB_TESTING.md)** - Guide for testing with DynamoDB Local
+- **[Repository Transaction Test Patterns](REPOSITORY_TRANSACTION_TEST_PATTERNS.md)** - Patterns for testing repository transactions
+- **[Test Transaction Configuration](TEST_TRANSACTION_CONFIGURATION.md)** - Test-specific transaction setup
+
 ## API Documentation
 
 - **[API Documentation](API_DOCUMENTATION.md)** - REST API reference and endpoint documentation
@@ -37,8 +53,9 @@ Start here if you're developing features or fixing bugs:
 
 1. [Architecture](ARCHITECTURE.md) - Understand the Clean Architecture structure
 2. [Database Quick Reference](DATABASE_QUICK_REFERENCE.md) - Learn how to work with repositories
-3. [Database Architecture](DATABASE_ARCHITECTURE.md) - Deep dive into the database abstraction layer
-4. [API Documentation](API_DOCUMENTATION.md) - REST API contracts and examples
+3. [Testing Guide](TESTING_GUIDE.md) - Learn how to run and write tests
+4. [Database Architecture](DATABASE_ARCHITECTURE.md) - Deep dive into the database abstraction layer
+5. [API Documentation](API_DOCUMENTATION.md) - REST API contracts and examples
 
 ### For DevOps/Operations
 
@@ -94,7 +111,9 @@ The database provider is selected via a single configuration property: `idp.data
 
 - **Add a new entity**: See [Database Quick Reference](DATABASE_QUICK_REFERENCE.md#creating-a-new-repository)
 - **Configure database**: See [Database Configuration](DATABASE_CONFIGURATION.md)
-- **Run tests**: See [DynamoDB Testing](DYNAMODB_TESTING.md)
+- **Run tests**: See [Testing Guide](TESTING_GUIDE.md)
+- **Write new tests**: See [Testing Guide](TESTING_GUIDE.md#writing-new-tests)
+- **Troubleshoot test failures**: See [Test Troubleshooting Guide](TEST_TROUBLESHOOTING_GUIDE.md)
 - **Deploy to production**: See [Database Configuration](DATABASE_CONFIGURATION.md#production-deployment)
 - **Troubleshoot issues**: See [Database Troubleshooting](DATABASE_TROUBLESHOOTING.md)
 

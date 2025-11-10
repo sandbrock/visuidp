@@ -16,7 +16,6 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
@@ -28,7 +27,6 @@ import java.util.*;
  * This mechanism has priority 0, making it execute before the TraefikAuthenticationMechanism (priority 1).
  * If no API key is present, it falls through to allow OAuth2 Proxy authentication.
  */
-@Alternative
 @Priority(0)
 @ApplicationScoped
 public class ApiKeyAuthenticationMechanism implements HttpAuthenticationMechanism {
@@ -73,48 +71,59 @@ public class ApiKeyAuthenticationMechanism implements HttpAuthenticationMechanis
      * Validates the API key against the database.
      * Checks hash, expiration, and active status.
      * Updates last_used_at timestamp on successful validation.
+     * 
+     * Note: This method runs on the IO thread, so we use Uni.createFrom().item() with runSubscriptionOn()
+     * to execute blocking database operations on a worker thread.
      */
-    @Transactional
     Uni<ApiKey> validateApiKey(String plainKey, String keyPrefix, RoutingContext context) {
         return Uni.createFrom().item(() -> {
-            // Find API key by prefix
-            List<ApiKey> keys = ApiKey.find("keyPrefix", keyPrefix).list();
-            
-            if (keys.isEmpty()) {
-                logFailedAuthentication(keyPrefix, getSourceIp(context), "Key not found");
-                throw new SecurityException("Invalid API key");
+            return performValidation(plainKey, keyPrefix, context);
+        }).runSubscriptionOn(io.smallrye.mutiny.infrastructure.Infrastructure.getDefaultWorkerPool());
+    }
+
+    /**
+     * Performs the actual validation logic with database operations.
+     * This runs on a worker thread to avoid blocking the IO thread.
+     */
+    @Transactional
+    ApiKey performValidation(String plainKey, String keyPrefix, RoutingContext context) {
+        // Find API key by prefix
+        List<ApiKey> keys = ApiKey.find("keyPrefix", keyPrefix).list();
+        
+        if (keys.isEmpty()) {
+            logFailedAuthentication(keyPrefix, getSourceIp(context), "Key not found");
+            throw new SecurityException("Invalid API key");
+        }
+
+        // There should only be one key with this prefix, but handle multiple just in case
+        ApiKey matchedKey = null;
+        for (ApiKey key : keys) {
+            if (validationService.verifyKeyHash(plainKey, key.keyHash)) {
+                matchedKey = key;
+                break;
             }
+        }
 
-            // There should only be one key with this prefix, but handle multiple just in case
-            ApiKey matchedKey = null;
-            for (ApiKey key : keys) {
-                if (validationService.verifyKeyHash(plainKey, key.keyHash)) {
-                    matchedKey = key;
-                    break;
-                }
-            }
+        if (matchedKey == null) {
+            logFailedAuthentication(keyPrefix, getSourceIp(context), "Hash verification failed");
+            throw new SecurityException("Invalid API key");
+        }
 
-            if (matchedKey == null) {
-                logFailedAuthentication(keyPrefix, getSourceIp(context), "Hash verification failed");
-                throw new SecurityException("Invalid API key");
-            }
+        // Check if key is valid (active, not revoked, not expired)
+        if (!matchedKey.isValid()) {
+            String reason = determineInvalidReason(matchedKey);
+            logFailedAuthentication(keyPrefix, getSourceIp(context), reason);
+            throw new SecurityException(reason);
+        }
 
-            // Check if key is valid (active, not revoked, not expired)
-            if (!matchedKey.isValid()) {
-                String reason = determineInvalidReason(matchedKey);
-                logFailedAuthentication(keyPrefix, getSourceIp(context), reason);
-                throw new SecurityException(reason);
-            }
+        // Update last used timestamp
+        matchedKey.markAsUsed();
+        matchedKey.persist();
 
-            // Update last used timestamp
-            matchedKey.markAsUsed();
-            matchedKey.persist();
+        // Log successful authentication
+        logSuccessfulAuthentication(matchedKey, getSourceIp(context));
 
-            // Log successful authentication
-            logSuccessfulAuthentication(matchedKey, getSourceIp(context));
-
-            return matchedKey;
-        });
+        return matchedKey;
     }
 
     /**

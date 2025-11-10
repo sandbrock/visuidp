@@ -8,6 +8,8 @@ import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;
 import com.angryss.idp.domain.repositories.PropertySchemaRepository;
 import com.angryss.idp.domain.repositories.ResourceTypeCloudMappingRepository;
 import com.angryss.idp.infrastructure.security.AuditLogged;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,9 @@ public class PropertySchemaService {
 
     @Inject
     ResourceTypeCloudMappingRepository resourceTypeCloudMappingRepository;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     /**
      * Retrieves all property schemas for a specific mapping.
@@ -90,7 +95,7 @@ public class PropertySchemaService {
         propertySchema.description = createDto.getDescription();
         propertySchema.dataType = createDto.getDataType();
         propertySchema.required = createDto.getRequired();
-        propertySchema.defaultValue = createDto.getDefaultValue();
+        propertySchema.defaultValue = convertDefaultValueToJsonString(createDto.getDefaultValue());
         propertySchema.validationRules = createDto.getValidationRules();
         propertySchema.displayOrder = createDto.getDisplayOrder();
 
@@ -126,7 +131,7 @@ public class PropertySchemaService {
             propertySchema.required = updateDto.getRequired();
         }
         if (updateDto.getDefaultValue() != null) {
-            propertySchema.defaultValue = updateDto.getDefaultValue();
+            propertySchema.defaultValue = convertDefaultValueToJsonString(updateDto.getDefaultValue());
         }
         if (updateDto.getValidationRules() != null) {
             propertySchema.validationRules = updateDto.getValidationRules();
@@ -200,7 +205,7 @@ public class PropertySchemaService {
                 propertySchema.description = createDto.getDescription();
                 propertySchema.dataType = createDto.getDataType();
                 propertySchema.required = createDto.getRequired();
-                propertySchema.defaultValue = createDto.getDefaultValue();
+                propertySchema.defaultValue = convertDefaultValueToJsonString(createDto.getDefaultValue());
                 propertySchema.validationRules = createDto.getValidationRules();
                 propertySchema.displayOrder = createDto.getDisplayOrder();
 
@@ -259,5 +264,32 @@ public class PropertySchemaService {
         dto.setValidationRules(propertySchema.validationRules);
         dto.setDisplayOrder(propertySchema.displayOrder);
         return dto;
+    }
+
+    /**
+     * Converts a default value object to a JSON string for JSONB storage.
+     * This handles the conversion of primitive types (Boolean, Number, String) to JSON strings
+     * to avoid ClassCastException when Hibernate tries to serialize to JSONB.
+     *
+     * @param value The default value object (can be Boolean, Number, String, or null)
+     * @return The JSON string representation, or null if value is null
+     * @throws IllegalArgumentException if the value cannot be serialized to JSON
+     */
+    private String convertDefaultValueToJsonString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        
+        // If already a string, return as-is
+        if (value instanceof String) {
+            return (String) value;
+        }
+        
+        // For primitive types (Boolean, Number), serialize to JSON string
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Cannot serialize default value to JSON: " + value, e);
+        }
     }
 }

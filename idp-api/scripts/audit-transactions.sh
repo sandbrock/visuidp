@@ -37,7 +37,11 @@ grep -rn "\.persist()" "$PROJECT_ROOT/src/main/java" --include="*.java" | while 
     
     # Check if the method containing this line has @Transactional
     # Get 20 lines before the persist call to check for @Transactional
-    context=$(sed -n "$((linenum-20)),$((linenum))p" "$file")
+    start_line=$((linenum-20))
+    if [ $start_line -lt 1 ]; then
+        start_line=1
+    fi
+    context=$(sed -n "${start_line},${linenum}p" "$file")
     
     if ! echo "$context" | grep -q "@Transactional"; then
         log "⚠️  POTENTIAL ISSUE: $file:$linenum"
@@ -58,7 +62,11 @@ grep -rn "\.delete()" "$PROJECT_ROOT/src/main/java" --include="*.java" | while r
     fi
     
     # Check if the method containing this line has @Transactional
-    context=$(sed -n "$((linenum-20)),$((linenum))p" "$file")
+    start_line=$((linenum-20))
+    if [ $start_line -lt 1 ]; then
+        start_line=1
+    fi
+    context=$(sed -n "${start_line},${linenum}p" "$file")
     
     if ! echo "$context" | grep -q "@Transactional"; then
         log "⚠️  POTENTIAL ISSUE: $file:$linenum"

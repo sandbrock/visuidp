@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.AdminAuditLog;
 import com.angryss.idp.domain.repositories.AdminAuditLogRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
@@ -15,11 +17,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresAdminAuditLogRepository implements AdminAuditLogRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public AdminAuditLog save(AdminAuditLog adminAuditLog) {
-        adminAuditLog.persist();
-        return adminAuditLog;
+        if (adminAuditLog.getId() != null && !entityManager.contains(adminAuditLog)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(adminAuditLog);
+        } else {
+            // New entity or already managed - use persist
+            adminAuditLog.persist();
+            return adminAuditLog;
+        }
     }
 
     @Override

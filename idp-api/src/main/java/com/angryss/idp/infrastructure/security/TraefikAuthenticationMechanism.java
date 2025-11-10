@@ -11,7 +11,6 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Alternative;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.Arrays;
@@ -20,7 +19,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Alternative
 @Priority(1)
 @ApplicationScoped
 public class TraefikAuthenticationMechanism implements HttpAuthenticationMechanism {

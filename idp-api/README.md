@@ -63,7 +63,28 @@ Note on test vs. runtime paths:
 
 Notes:
 - We disabled Hibernate’s auto-DDL in dev/prod to avoid conflicts (`schema-management.strategy=validate`).
-- Test profile uses H2 with schema auto-created for fast iteration.
+- Test profile uses PostgreSQL with drop-and-create for test isolation.
+
+## Testing
+
+The application includes comprehensive test coverage for both PostgreSQL and DynamoDB implementations.
+
+**Run Tests**:
+```bash
+# Run all tests (PostgreSQL by default)
+./mvnw test
+
+# Run DynamoDB tests
+./mvnw test -Dtest="*Dynamo*Test"
+
+# Run specific test class
+./mvnw test -Dtest=StackServiceTest
+```
+
+**Documentation**:
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive guide for running and writing tests
+- **[Test Troubleshooting Guide](docs/TEST_TROUBLESHOOTING_GUIDE.md)** - Solutions for common test failures
+- **[DynamoDB Testing](docs/DYNAMODB_TESTING.md)** - Guide for testing with DynamoDB Local
 
 ## API Documentation
 

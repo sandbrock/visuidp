@@ -27,8 +27,11 @@ cat QUICK_START.txt
 6. **docs/TRANSACTION_MANAGEMENT_GUIDE.md** - Developer guide with examples and best practices
 7. **.kiro/steering/transaction-management.md** - Coding standards (auto-included in Kiro)
 
+### For Monitoring
+8. **docs/CONNECTION_POOL_MONITORING.md** - Guide to monitoring connection pool metrics
+
 ### Tools
-8. **scripts/audit-transactions.sh** - Automated scanning tool
+9. **scripts/audit-transactions.sh** - Automated scanning tool
 
 ## 📖 Reading Order
 
@@ -97,6 +100,8 @@ curl http://localhost:8082/api/q/health/ready | jq
 ```bash
 curl http://localhost:8082/api/q/health/ready | jq '.checks[] | select(.name | contains("database"))'
 ```
+
+See **CONNECTION_POOL_MONITORING.md** for detailed monitoring guide.
 
 ## 📊 Success Metrics
 

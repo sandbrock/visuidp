@@ -26,6 +26,7 @@ public class ApiKeyAuthenticationMechanismTest {
 
     private static final String TEST_USER = "testuser@example.com";
     private static final String TEST_GROUPS = "Users";
+    private static final String ADMIN_GROUPS = "IDP-Admins";
 
     @Inject
     ApiKeyService apiKeyService;
@@ -240,7 +241,6 @@ public class ApiKeyAuthenticationMechanismTest {
     }
 
     @Test
-    @Transactional
     public void testSystemApiKey_HasAdminRole() {
         // Given - Create a system API key
         ApiKeyCreateDto createDto = new ApiKeyCreateDto();
@@ -249,7 +249,7 @@ public class ApiKeyAuthenticationMechanismTest {
         
         var createResponse = given()
             .header("X-Auth-Request-Email", "admin@example.com")
-            .header("X-Auth-Request-Groups", "Admins")
+            .header("X-Auth-Request-Groups", ADMIN_GROUPS)
             .contentType("application/json")
             .body(createDto)
             .when().post("/v1/api-keys/system")

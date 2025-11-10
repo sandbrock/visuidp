@@ -12,8 +12,6 @@ import io.quarkus.security.Authenticated;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -31,15 +29,11 @@ import java.util.stream.Collectors;
 @Authenticated
 public class BlueprintResourcesController {
 
-    @Inject
-    EntityManager em;
-
     @GET
     @Operation(summary = "List blueprint resources", description = "Retrieves all blueprint resource instances")
     @APIResponse(responseCode = "200", description = "Blueprint resources retrieved successfully")
     public List<BlueprintResourceResponseDto> list() {
-        List<BlueprintResource> list = em.createQuery("select s from BlueprintResource s order by s.createdAt desc", BlueprintResource.class)
-                .getResultList();
+        List<BlueprintResource> list = BlueprintResource.listAll();
         return list.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
@@ -64,8 +58,7 @@ public class BlueprintResourcesController {
         if (dto.getCloudSpecificProperties() != null) {
             entity.setCloudSpecificProperties(dto.getCloudSpecificProperties());
         }
-        em.persist(entity);
-        em.flush();
+        entity.persist();
 
         BlueprintResourceResponseDto resp = toResponse(entity);
         return Response.created(URI.create("/v1/blueprint-resources/" + entity.id)).entity(resp).build();
@@ -77,7 +70,7 @@ public class BlueprintResourcesController {
     @APIResponse(responseCode = "200", description = "Blueprint resource retrieved successfully")
     @APIResponse(responseCode = "404", description = "Not found")
     public BlueprintResourceResponseDto getById(@PathParam("id") UUID id) {
-        BlueprintResource entity = em.find(BlueprintResource.class, id);
+        BlueprintResource entity = BlueprintResource.findById(id);
         if (entity == null) {
             throw new NotFoundException("Blueprint resource not found: " + id);
         }
@@ -91,7 +84,7 @@ public class BlueprintResourcesController {
     @APIResponse(responseCode = "200", description = "Blueprint resource updated successfully")
     @APIResponse(responseCode = "404", description = "Not found")
     public BlueprintResourceResponseDto update(@PathParam("id") UUID id, @Valid BlueprintResourceCreateDto dto) {
-        BlueprintResource entity = em.find(BlueprintResource.class, id);
+        BlueprintResource entity = BlueprintResource.findById(id);
         if (entity == null) {
             throw new NotFoundException("Blueprint resource not found: " + id);
         }
@@ -112,9 +105,8 @@ public class BlueprintResourcesController {
         if (dto.getCloudSpecificProperties() != null) {
             entity.setCloudSpecificProperties(dto.getCloudSpecificProperties());
         }
-        // updatedAt handled by @PreUpdate on flush
+        // updatedAt handled by @PreUpdate
 
-        em.flush();
         return toResponse(entity);
     }
 
@@ -125,11 +117,11 @@ public class BlueprintResourcesController {
     @APIResponse(responseCode = "204", description = "Deleted successfully")
     @APIResponse(responseCode = "404", description = "Not found")
     public Response delete(@PathParam("id") UUID id) {
-        BlueprintResource entity = em.find(BlueprintResource.class, id);
+        BlueprintResource entity = BlueprintResource.findById(id);
         if (entity == null) {
             throw new NotFoundException("Blueprint resource not found: " + id);
         }
-        em.remove(entity);
+        entity.delete();
         return Response.noContent().build();
     }
 

@@ -181,7 +181,6 @@ public class ApiKeysControllerTest {
     // ========== List User API Keys Tests ==========
 
     @Test
-    @Transactional
     public void testListUserApiKeys_Success() {
         // Create test keys
         createTestUserKey(TEST_USER, "User Key 1");
@@ -200,7 +199,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testListUserApiKeys_OnlyOwnKeys() {
         // Create keys for different users
         createTestUserKey(TEST_USER, "User 1 Key");
@@ -238,7 +236,6 @@ public class ApiKeysControllerTest {
     // ========== List All API Keys Tests ==========
 
     @Test
-    @Transactional
     public void testListAllApiKeys_Success() {
         // Create keys for different users and system
         createTestUserKey(TEST_USER, "User Key 1");
@@ -268,7 +265,6 @@ public class ApiKeysControllerTest {
     // ========== Get API Key By ID Tests ==========
 
     @Test
-    @Transactional
     public void testGetApiKeyById_Success() {
         UUID keyId = createTestUserKey(TEST_USER, "Test Key");
 
@@ -296,7 +292,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testGetApiKeyById_OtherUsersKey_Forbidden() {
         UUID keyId = createTestUserKey("otheruser@example.com", "Other User Key");
 
@@ -309,7 +304,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testGetApiKeyById_Admin_CanAccessAnyKey() {
         UUID keyId = createTestUserKey(TEST_USER, "User Key");
 
@@ -325,7 +319,6 @@ public class ApiKeysControllerTest {
     // ========== Rotate API Key Tests ==========
 
     @Test
-    @Transactional
     public void testRotateApiKey_Success() {
         UUID originalKeyId = createTestUserKey(TEST_USER, "Key to Rotate");
 
@@ -359,7 +352,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testRotateApiKey_OtherUsersKey_Forbidden() {
         UUID keyId = createTestUserKey("otheruser@example.com", "Other User Key");
 
@@ -372,14 +364,11 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testRotateApiKey_RevokedKey_BadRequest() {
         UUID keyId = createTestUserKey(TEST_USER, "Revoked Key");
         
-        // Revoke the key
-        ApiKey key = ApiKey.findById(keyId);
-        key.revoke(TEST_USER);
-        key.persist();
+        // Revoke the key in a separate transaction
+        revokeTestKey(keyId);
 
         given()
             .header("X-Auth-Request-Email", TEST_USER)
@@ -392,7 +381,6 @@ public class ApiKeysControllerTest {
     // ========== Revoke API Key Tests ==========
 
     @Test
-    @Transactional
     public void testRevokeApiKey_Success() {
         UUID keyId = createTestUserKey(TEST_USER, "Key to Revoke");
 
@@ -423,7 +411,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testRevokeApiKey_OtherUsersKey_Forbidden() {
         UUID keyId = createTestUserKey("otheruser@example.com", "Other User Key");
 
@@ -436,7 +423,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testRevokeApiKey_Admin_CanRevokeAnyKey() {
         UUID keyId = createTestUserKey(TEST_USER, "User Key");
 
@@ -451,7 +437,6 @@ public class ApiKeysControllerTest {
     // ========== Update API Key Name Tests ==========
 
     @Test
-    @Transactional
     public void testUpdateApiKeyName_Success() {
         UUID keyId = createTestUserKey(TEST_USER, "Original Name");
 
@@ -485,7 +470,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testUpdateApiKeyName_DuplicateName() {
         createTestUserKey(TEST_USER, "Existing Name");
         UUID keyId = createTestUserKey(TEST_USER, "Original Name");
@@ -503,7 +487,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testUpdateApiKeyName_OtherUsersKey_Forbidden() {
         UUID keyId = createTestUserKey("otheruser@example.com", "Other User Key");
         Map<String, String> body = Map.of("keyName", "New Name");
@@ -519,7 +502,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testUpdateApiKeyName_MissingKeyName() {
         UUID keyId = createTestUserKey(TEST_USER, "Test Key");
         Map<String, String> body = Map.of();
@@ -537,7 +519,6 @@ public class ApiKeysControllerTest {
     // ========== Get Audit Logs Tests ==========
 
     @Test
-    @Transactional
     public void testGetAuditLogs_Success() {
         // Create some audit logs
         createTestAuditLog(TEST_USER, "API_KEY_CREATED");
@@ -553,7 +534,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testGetAuditLogs_FilterByUserEmail() {
         createTestAuditLog(TEST_USER, "API_KEY_CREATED");
         createTestAuditLog("otheruser@example.com", "API_KEY_CREATED");
@@ -570,7 +550,6 @@ public class ApiKeysControllerTest {
     }
 
     @Test
-    @Transactional
     public void testGetAuditLogs_FilterByDateRange() {
         LocalDateTime now = LocalDateTime.now();
         String startDate = now.minusDays(1).format(DateTimeFormatter.ISO_DATE_TIME);
@@ -616,7 +595,10 @@ public class ApiKeysControllerTest {
     UUID createTestUserKey(String userEmail, String keyName) {
         ApiKey key = new ApiKey();
         key.keyName = keyName;
-        key.keyHash = "$2a$12$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOP";
+        // Use a unique hash for each test key to avoid constraint violations
+        // BCrypt hash format: $2a$12$[22 char salt][31 char hash] = 60 chars total
+        String uniquePart = UUID.randomUUID().toString().replace("-", "");
+        key.keyHash = "$2a$12$" + uniquePart + uniquePart.substring(0, 21); // 7 + 32 + 21 = 60 chars
         key.keyPrefix = "idp_user_test";
         key.keyType = ApiKeyType.USER;
         key.userEmail = userEmail;
@@ -632,7 +614,10 @@ public class ApiKeysControllerTest {
     UUID createTestSystemKey(String keyName) {
         ApiKey key = new ApiKey();
         key.keyName = keyName;
-        key.keyHash = "$2a$12$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOP";
+        // Use a unique hash for each test key to avoid constraint violations
+        // BCrypt hash format: $2a$12$[22 char salt][31 char hash] = 60 chars total
+        String uniquePart = UUID.randomUUID().toString().replace("-", "");
+        key.keyHash = "$2a$12$" + uniquePart + uniquePart.substring(0, 21); // 7 + 32 + 21 = 60 chars
         key.keyPrefix = "idp_system_test";
         key.keyType = ApiKeyType.SYSTEM;
         key.userEmail = null;
@@ -654,6 +639,15 @@ public class ApiKeysControllerTest {
             Map.of("test", "data")
         );
         log.persist();
+    }
+
+    @Transactional
+    void revokeTestKey(UUID keyId) {
+        ApiKey key = ApiKey.findById(keyId);
+        if (key != null) {
+            key.revoke(TEST_USER);
+            key.persist();
+        }
     }
 
     void assertNotNull(Object obj) {

@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.Domain;
 import com.angryss.idp.domain.repositories.DomainRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresDomainRepository implements DomainRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public Domain save(Domain domain) {
-        domain.persist();
-        return domain;
+        if (domain.getId() != null && !entityManager.contains(domain)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(domain);
+        } else {
+            // New entity or already managed - use persist
+            domain.persist();
+            return domain;
+        }
     }
 
     @Override

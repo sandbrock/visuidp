@@ -4,6 +4,8 @@ import com.angryss.idp.domain.entities.Team;
 import com.angryss.idp.domain.repositories.TeamRepository;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -14,11 +16,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresTeamRepository implements TeamRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public Team save(Team team) {
-        team.persist();
-        return team;
+        if (team.getId() != null && !entityManager.contains(team)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(team);
+        } else {
+            // New entity or already managed - use persist
+            team.persist();
+            return team;
+        }
     }
 
     @Override

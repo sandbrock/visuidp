@@ -6,7 +6,6 @@ import com.angryss.idp.infrastructure.persistence.dynamodb.mapper.DynamoEntityMa
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.jboss.logging.Logger;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
@@ -16,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@Named("dynamodb")
 @IfBuildProperty(name = "idp.database.provider", stringValue = "dynamodb")
 public class DynamoDomainRepository implements DomainRepository {
 

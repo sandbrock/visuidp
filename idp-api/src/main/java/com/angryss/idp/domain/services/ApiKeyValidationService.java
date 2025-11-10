@@ -88,18 +88,18 @@ public class ApiKeyValidationService {
     }
 
     /**
-     * Extracts the key prefix from an API key for logging purposes.
-     * Returns the first 12 characters of the key.
+     * Extracts the key prefix from an API key for database lookup and logging purposes.
+     * Returns the first 20 characters of the key to match the stored prefix.
      *
      * @param apiKey The API key
      * @return The key prefix, or empty string if key is invalid
      */
     public String extractKeyPrefix(String apiKey) {
-        if (apiKey == null || apiKey.length() < 12) {
+        if (apiKey == null || apiKey.length() < 20) {
             return "";
         }
 
-        return apiKey.substring(0, 12);
+        return apiKey.substring(0, 20);
     }
 
     /**

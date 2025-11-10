@@ -134,10 +134,14 @@ public class DatabaseHealthCheck implements HealthCheck {
             
             // Get connection pool statistics
             var metrics = ds.getMetrics();
+            var config = ds.getConfiguration();
+            int maxPoolSize = config.connectionPoolConfiguration().maxSize();
+            
             responseBuilder
                 .withData("connectionPool.active", metrics.activeCount())
                 .withData("connectionPool.available", metrics.availableCount())
-                .withData("connectionPool.max", metrics.maxUsedCount())
+                .withData("connectionPool.max", maxPoolSize)
+                .withData("connectionPool.maxUsed", metrics.maxUsedCount())
                 .withData("connectionPool.awaiting", metrics.awaitingCount())
                 .withData("connectionPool.created", metrics.creationCount())
                 .withData("connectionPool.destroyed", metrics.destroyCount());

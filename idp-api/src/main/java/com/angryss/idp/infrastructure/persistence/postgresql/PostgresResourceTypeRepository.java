@@ -5,6 +5,8 @@ import com.angryss.idp.domain.repositories.ResourceTypeRepository;
 import com.angryss.idp.domain.valueobjects.ResourceCategory;
 import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -15,11 +17,20 @@ import java.util.UUID;
 @IfBuildProperty(name = "idp.database.provider", stringValue = "postgresql", enableIfMissing = true)
 public class PostgresResourceTypeRepository implements ResourceTypeRepository {
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Override
     @Transactional
     public ResourceType save(ResourceType resourceType) {
-        resourceType.persist();
-        return resourceType;
+        if (resourceType.id != null && !entityManager.contains(resourceType)) {
+            // Entity has an ID but is detached - use merge
+            return entityManager.merge(resourceType);
+        } else {
+            // New entity or already managed - use persist
+            resourceType.persist();
+            return resourceType;
+        }
     }
 
     @Override
