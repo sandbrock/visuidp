@@ -1,0 +1,429 @@
+# Implementation Plan
+
+- [x] 1. Extend V2 migration script structure
+  - Open file `idp-api/src/main/resources/db/migration/V2__data.sql`
+  - Add section comment for AWS resource type cloud mappings
+  - Add section comments for AWS property schemas (S3, RDS, EKS, Service Bus)
+  - Define UUID constants for the 4 AWS mappings
+  - Add documentation about ON CONFLICT clauses
+  - _Requirements: 5.1, 5.2, 9.1, 12.3_
+
+- [x] 2. Implement resource type cloud mappings for AWS
+  - Write INSERT statement for Storage + AWS mapping with S3 Terraform module URL
+  - Write INSERT statement for Relational Database Server + AWS mapping with RDS Terraform module URL
+  - Write INSERT statement for Managed Container Orchestrator + AWS mapping with EKS Terraform module URL
+  - Write INSERT statement for Service Bus + AWS mapping with SNS Terraform module URL
+  - Reference the known UUIDs from cloud_providers and resource_types tables (defined earlier in V2)
+  - Add ON CONFLICT DO NOTHING clause to each INSERT
+  - Set module_location_type to 'GIT' for all mappings
+  - Set enabled to true for all mappings
+  - _Requirements: 5.1, 5.2, 5.3, 5.4, 9.1, 9.2, 9.3, 10.1, 10.2, 10.3, 10.4_
+
+- [x] 3. Implement AWS Storage (S3) property schemas
+- [x] 3.1 Create storageClass property
+  - Write INSERT statement with property_name 'storageClass'
+  - Set display_name to 'Storage Class'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'STANDARD'
+  - Define validation_rules with allowedValues: STANDARD, STANDARD_IA, ONEZONE_IA, GLACIER, DEEP_ARCHIVE, INTELLIGENT_TIERING
+  - Set display_order to 10
+  - Add description explaining storage class options
+  - _Requirements: 1.1, 1.2, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2, 11.3_
+
+- [x] 3.2 Create versioning property
+  - Write INSERT statement with property_name 'versioning'
+  - Set display_name to 'Versioning Status'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'Enabled'
+  - Define validation_rules with allowedValues: Enabled, Suspended, Disabled
+  - Set display_order to 20
+  - Add description explaining versioning
+  - _Requirements: 1.1, 1.3, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2_
+
+- [x] 3.3 Create encryption property
+  - Write INSERT statement with property_name 'encryption'
+  - Set display_name to 'Server-Side Encryption'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'AES256'
+  - Define validation_rules with allowedValues: AES256, aws:kms
+  - Set display_order to 30
+  - Add description explaining encryption options
+  - _Requirements: 1.1, 1.4, 5.5, 6.1, 6.2, 7.1, 7.3, 8.2, 11.1, 11.2_
+
+- [x] 3.4 Create publicAccessBlock property
+  - Write INSERT statement with property_name 'publicAccessBlock'
+  - Set display_name to 'Block Public Access'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to true
+  - Set display_order to 40
+  - Add description explaining public access blocking
+  - _Requirements: 1.1, 1.5, 5.5, 6.4, 7.1, 7.3, 11.2_
+
+- [x] 3.5 Create lifecycleDays property
+  - Write INSERT statement with property_name 'lifecycleDays'
+  - Set display_name to 'Lifecycle Transition Days'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Define validation_rules with min: 1, max: 3650
+  - Set display_order to 50
+  - Add description explaining lifecycle transitions
+  - _Requirements: 1.1, 5.5, 6.3, 8.1, 11.2_
+
+- [x] 3.6 Create objectLockEnabled property
+  - Write INSERT statement with property_name 'objectLockEnabled'
+  - Set display_name to 'Object Lock Enabled'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 60
+  - Add description explaining object lock
+  - _Requirements: 1.1, 5.5, 6.4, 7.1, 11.2_
+
+- [x] 4. Implement AWS RDS property schemas
+- [x] 4.1 Create engine property
+  - Write INSERT statement with property_name 'engine'
+  - Set display_name to 'Database Engine'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'postgres'
+  - Define validation_rules with allowedValues: mysql, postgres, mariadb, oracle-ee, oracle-se2, sqlserver-ex, sqlserver-web, sqlserver-se, sqlserver-ee
+  - Set display_order to 10
+  - Add description explaining database engines
+  - _Requirements: 2.1, 2.2, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2, 11.3_
+
+- [x] 4.2 Create engineVersion property
+  - Write INSERT statement with property_name 'engineVersion'
+  - Set display_name to 'Engine Version'
+  - Set data_type to 'STRING'
+  - Set required to true
+  - Set display_order to 20
+  - Add description explaining engine versions
+  - _Requirements: 2.1, 2.3, 5.5, 6.1, 6.2, 11.1, 11.2_
+
+- [x] 4.3 Create instanceClass property
+  - Write INSERT statement with property_name 'instanceClass'
+  - Set display_name to 'Instance Class'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'db.t3.small'
+  - Define validation_rules with allowedValues: db.t3.micro, db.t3.small, db.t3.medium, db.t3.large, db.m5.large, db.m5.xlarge, db.m5.2xlarge, db.r5.large, db.r5.xlarge
+  - Set display_order to 30
+  - Add description explaining instance classes
+  - _Requirements: 2.1, 2.4, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2_
+
+- [x] 4.4 Create allocatedStorage property
+  - Write INSERT statement with property_name 'allocatedStorage'
+  - Set display_name to 'Allocated Storage (GB)'
+  - Set data_type to 'NUMBER'
+  - Set required to true
+  - Set default_value to 20
+  - Define validation_rules with min: 20, max: 65536
+  - Set display_order to 40
+  - Add description explaining storage allocation
+  - _Requirements: 2.1, 2.5, 5.5, 6.1, 6.3, 7.1, 7.2, 8.1, 11.1, 11.2_
+
+- [x] 4.5 Create multiAZ property
+  - Write INSERT statement with property_name 'multiAZ'
+  - Set display_name to 'Multi-AZ Deployment'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 50
+  - Add description explaining Multi-AZ
+  - _Requirements: 2.1, 2.6, 5.5, 6.4, 7.1, 7.2, 11.2_
+
+- [x] 4.6 Create backupRetentionPeriod property
+  - Write INSERT statement with property_name 'backupRetentionPeriod'
+  - Set display_name to 'Backup Retention (Days)'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 7
+  - Define validation_rules with min: 0, max: 35
+  - Set display_order to 60
+  - Add description explaining backup retention
+  - _Requirements: 2.1, 2.7, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 4.7 Create storageEncrypted property
+  - Write INSERT statement with property_name 'storageEncrypted'
+  - Set display_name to 'Storage Encryption'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to true
+  - Set display_order to 70
+  - Add description explaining storage encryption
+  - _Requirements: 2.1, 5.5, 6.4, 7.1, 7.3, 11.2_
+
+- [x] 4.8 Create publiclyAccessible property
+  - Write INSERT statement with property_name 'publiclyAccessible'
+  - Set display_name to 'Publicly Accessible'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 80
+  - Add description explaining public accessibility
+  - _Requirements: 2.1, 5.5, 6.4, 7.1, 7.3, 11.2_
+
+- [x] 5. Implement AWS EKS property schemas
+- [x] 5.1 Create kubernetesVersion property
+  - Write INSERT statement with property_name 'kubernetesVersion'
+  - Set display_name to 'Kubernetes Version'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to '1.30'
+  - Define validation_rules with allowedValues: 1.28, 1.29, 1.30, 1.31
+  - Set display_order to 10
+  - Add description explaining Kubernetes versions
+  - _Requirements: 3.1, 3.2, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2, 11.3_
+
+- [x] 5.2 Create nodeInstanceType property
+  - Write INSERT statement with property_name 'nodeInstanceType'
+  - Set display_name to 'Node Instance Type'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 't3.medium'
+  - Define validation_rules with allowedValues: t3.small, t3.medium, t3.large, t3.xlarge, m5.large, m5.xlarge, m5.2xlarge, c5.large, c5.xlarge
+  - Set display_order to 20
+  - Add description explaining node instance types
+  - _Requirements: 3.1, 3.3, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2_
+
+- [x] 5.3 Create desiredNodeCount property
+  - Write INSERT statement with property_name 'desiredNodeCount'
+  - Set display_name to 'Desired Node Count'
+  - Set data_type to 'NUMBER'
+  - Set required to true
+  - Set default_value to 2
+  - Define validation_rules with min: 1, max: 100
+  - Set display_order to 30
+  - Add description explaining desired node count
+  - _Requirements: 3.1, 3.4, 5.5, 6.1, 6.3, 7.1, 7.2, 8.1, 11.1, 11.2_
+
+- [x] 5.4 Create minNodeCount property
+  - Write INSERT statement with property_name 'minNodeCount'
+  - Set display_name to 'Minimum Node Count'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 1
+  - Define validation_rules with min: 1, max: 100
+  - Set display_order to 40
+  - Add description explaining minimum node count
+  - _Requirements: 3.1, 3.5, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 5.5 Create maxNodeCount property
+  - Write INSERT statement with property_name 'maxNodeCount'
+  - Set display_name to 'Maximum Node Count'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 4
+  - Define validation_rules with min: 1, max: 100
+  - Set display_order to 50
+  - Add description explaining maximum node count
+  - _Requirements: 3.1, 3.6, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 5.6 Create enableClusterAutoscaler property
+  - Write INSERT statement with property_name 'enableClusterAutoscaler'
+  - Set display_name to 'Enable Cluster Autoscaler'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 60
+  - Add description explaining cluster autoscaler
+  - _Requirements: 3.1, 3.7, 5.5, 6.4, 7.1, 7.2, 11.2_
+
+- [x] 5.7 Create nodeVolumeSize property
+  - Write INSERT statement with property_name 'nodeVolumeSize'
+  - Set display_name to 'Node Volume Size (GB)'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 20
+  - Define validation_rules with min: 20, max: 1000
+  - Set display_order to 70
+  - Add description explaining node volume size
+  - _Requirements: 3.1, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 6. Implement AWS Service Bus property schemas
+- [x] 6.1 Create serviceType property
+  - Write INSERT statement with property_name 'serviceType'
+  - Set display_name to 'Service Type'
+  - Set data_type to 'LIST'
+  - Set required to true
+  - Set default_value to 'SQS'
+  - Define validation_rules with allowedValues: SNS, SQS, EventBridge
+  - Set display_order to 10
+  - Add description explaining service types
+  - _Requirements: 4.1, 4.2, 5.5, 6.1, 6.2, 7.1, 7.2, 8.2, 11.1, 11.2, 11.3_
+
+- [x] 6.2 Create messageRetentionPeriod property
+  - Write INSERT statement with property_name 'messageRetentionPeriod'
+  - Set display_name to 'Message Retention (Seconds)'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 345600
+  - Define validation_rules with min: 60, max: 1209600
+  - Set display_order to 20
+  - Add description explaining message retention
+  - _Requirements: 4.1, 4.3, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 6.3 Create visibilityTimeout property
+  - Write INSERT statement with property_name 'visibilityTimeout'
+  - Set display_name to 'Visibility Timeout (Seconds)'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 30
+  - Define validation_rules with min: 0, max: 43200
+  - Set display_order to 30
+  - Add description explaining visibility timeout
+  - _Requirements: 4.1, 4.4, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 6.4 Create fifoQueue property
+  - Write INSERT statement with property_name 'fifoQueue'
+  - Set display_name to 'FIFO Queue'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 40
+  - Add description explaining FIFO queues
+  - _Requirements: 4.1, 4.5, 5.5, 6.4, 7.1, 7.2, 11.2_
+
+- [x] 6.5 Create contentBasedDeduplication property
+  - Write INSERT statement with property_name 'contentBasedDeduplication'
+  - Set display_name to 'Content-Based Deduplication'
+  - Set data_type to 'BOOLEAN'
+  - Set required to false
+  - Set default_value to false
+  - Set display_order to 50
+  - Add description explaining content-based deduplication
+  - _Requirements: 4.1, 5.5, 6.4, 7.1, 7.2, 11.2_
+
+- [x] 6.6 Create maxMessageSize property
+  - Write INSERT statement with property_name 'maxMessageSize'
+  - Set display_name to 'Max Message Size (Bytes)'
+  - Set data_type to 'NUMBER'
+  - Set required to false
+  - Set default_value to 262144
+  - Define validation_rules with min: 1024, max: 262144
+  - Set display_order to 60
+  - Add description explaining max message size
+  - _Requirements: 4.1, 5.5, 6.3, 7.1, 7.2, 8.1, 11.2_
+
+- [x] 7. Test migration on clean database
+  - Stop and remove existing database container
+  - Start fresh PostgreSQL container
+  - Run Flyway migrations (V1 schema, V2 data with AWS properties)
+  - Verify all 4 resource_type_cloud_mappings are created
+  - Verify all property_schemas are created (6 for S3, 8 for RDS, 7 for EKS, 6 for Service Bus)
+  - Verify foreign key relationships are correct
+  - Query database to confirm data integrity
+  - _Requirements: 5.1, 5.2, 5.3, 5.4, 9.1, 9.2, 9.3_
+
+- [x] 8. Test frontend integration with AWS Storage properties
+  - Start backend application
+  - Start frontend application
+  - Navigate to Infrastructure page
+  - Create new Blueprint
+  - Add Storage resource
+  - Select AWS as cloud provider
+  - Verify dynamic form displays all 6 S3 properties
+  - Verify required fields are marked with asterisk
+  - Verify default values are pre-populated
+  - Fill in required properties
+  - Save resource
+  - Verify resource is saved with cloud-specific properties in database
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 7.1, 7.4, 8.3_
+
+- [x] 9. Test frontend integration with AWS RDS properties
+  - Navigate to Infrastructure page
+  - Create new Blueprint
+  - Add Relational Database Server resource
+  - Select AWS as cloud provider
+  - Verify dynamic form displays all 8 RDS properties
+  - Verify required fields are marked with asterisk
+  - Verify default values are pre-populated
+  - Fill in required properties (engine, engineVersion, instanceClass, allocatedStorage)
+  - Save resource
+  - Verify resource is saved with cloud-specific properties in database
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 7.1, 7.4, 8.3_
+
+- [x] 10. Test frontend integration with AWS EKS properties
+  - Navigate to Infrastructure page
+  - Create new Blueprint
+  - Add Managed Container Orchestrator resource
+  - Select AWS as cloud provider
+  - Verify dynamic form displays all 7 EKS properties
+  - Verify required fields are marked with asterisk
+  - Verify default values are pre-populated
+  - Fill in required properties (kubernetesVersion, nodeInstanceType, desiredNodeCount)
+  - Save resource
+  - Verify resource is saved with cloud-specific properties in database
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 7.1, 7.4, 8.3_
+
+- [x] 11. Test frontend integration with AWS Service Bus properties
+  - Navigate to Infrastructure page
+  - Create new Blueprint
+  - Add Service Bus resource
+  - Select AWS as cloud provider
+  - Verify dynamic form displays all 6 Service Bus properties
+  - Verify required fields are marked with asterisk
+  - Verify default values are pre-populated
+  - Fill in required property (serviceType)
+  - Save resource
+  - Verify resource is saved with cloud-specific properties in database
+  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 7.1, 7.4, 8.3_
+
+- [x] 12. Test property validation
+  - Create Blueprint with AWS Storage resource
+  - Leave required field empty (storageClass)
+  - Attempt to save
+  - Verify validation error is displayed
+  - Fill in required field
+  - Enter invalid value for lifecycleDays (e.g., 0 or 5000)
+  - Verify validation error is displayed
+  - Enter valid value
+  - Verify error clears and form can be submitted
+  - _Requirements: 8.1, 8.2, 8.3, 8.4_
+
+- [x] 13. Test Stack resource configuration with AWS properties
+  - Navigate to Development page
+  - Create new Stack
+  - Add Relational Database resource (non-shared)
+  - Select AWS as cloud provider
+  - Verify dynamic form displays RDS properties
+  - Fill in required properties
+  - Save Stack
+  - Verify Stack resource is saved with cloud-specific properties
+  - _Requirements: 2.1, 7.1, 7.4, 8.3_
+
+- [x] 14. Verify help text and descriptions
+  - Create Blueprint with each AWS resource type
+  - Verify each property displays description text
+  - Verify descriptions are helpful and reference AWS terminology
+  - Verify descriptions explain valid value ranges for numeric properties
+  - Verify descriptions explain impact of boolean properties
+  - _Requirements: 6.1, 6.2, 6.3, 6.4_
+
+- [x] 15. Test theme compatibility
+  - Load Infrastructure page with AWS resource form
+  - Verify form displays correctly in light theme
+  - Toggle to dark theme
+  - Verify form displays correctly in dark theme
+  - Verify all property inputs are readable and styled correctly
+  - _Requirements: 7.1_
+
+- [x] 16. Verify Terraform module locations
+  - Query resource_type_cloud_mappings table
+  - Verify terraform_module_location is set for all AWS mappings
+  - Verify module_location_type is 'GIT' for all AWS mappings
+  - Verify enabled is true for all AWS mappings
+  - Verify URLs point to terraform-aws-modules repositories
+  - _Requirements: 10.1, 10.2, 10.3, 10.4_
+
+- [x] 17. Document migration and testing results
+  - Document migration execution time
+  - Document number of records created
+  - Document any issues encountered during testing
+  - Update README or documentation with AWS property information
+  - Ensure V2 migration has clear comments explaining each section
+  - _Requirements: 5.1, 12.3_

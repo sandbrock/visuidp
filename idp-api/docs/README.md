@@ -18,6 +18,13 @@ The IDP API supports multiple database backends through a pluggable architecture
 - **[Database Troubleshooting](DATABASE_TROUBLESHOOTING.md)** - Common issues, solutions, and debugging tips for both database providers
 - **[DynamoDB Testing](DYNAMODB_TESTING.md)** - Guide for testing with DynamoDB Local
 
+### Data Migrations
+
+- **V2 Migration** - Seeds initial data including cloud providers, resource types, environments, and AWS property schemas
+  - **AWS Property Schemas**: 27 property schemas for AWS resources (S3, RDS, EKS, SNS/SQS)
+  - **Resource Type Cloud Mappings**: 4 mappings linking resource types to AWS with Terraform module locations
+  - See `src/main/resources/db/migration/V2__data.sql` for details
+
 ## Transaction Management & Monitoring
 
 - **[Transaction Management Guide](TRANSACTION_MANAGEMENT_GUIDE.md)** - Best practices for transaction management and connection handling
@@ -105,12 +112,29 @@ The application can be configured to use either:
 
 The database provider is selected via a single configuration property: `idp.database.provider`
 
+### Dynamic Infrastructure Forms
+
+The application uses property schemas to dynamically generate forms for configuring cloud resources:
+
+- **Property Schemas**: Define configurable properties for each resource type and cloud provider combination
+- **AWS Properties**: 27 property schemas for AWS resources (S3, RDS, EKS, SNS/SQS) initialized via V2 migration
+- **Validation Rules**: JSONB-based validation rules for data types, allowed values, and numeric ranges
+- **Default Values**: Sensible defaults following cloud provider best practices
+- **Dynamic Rendering**: Frontend automatically renders forms based on property schemas
+
+AWS property schemas include:
+- **Storage (S3)**: 6 properties for bucket configuration (storage class, versioning, encryption, etc.)
+- **RDS**: 8 properties for database configuration (engine, instance class, storage, etc.)
+- **EKS**: 7 properties for Kubernetes cluster configuration (version, node types, autoscaling, etc.)
+- **Service Bus (SNS/SQS)**: 6 properties for messaging configuration (service type, retention, FIFO, etc.)
+
 ## Quick Links
 
 ### Common Tasks
 
 - **Add a new entity**: See [Database Quick Reference](DATABASE_QUICK_REFERENCE.md#creating-a-new-repository)
 - **Configure database**: See [Database Configuration](DATABASE_CONFIGURATION.md)
+- **Add property schemas for new cloud provider**: See `src/main/resources/db/migration/V2__data.sql` for AWS examples
 - **Run tests**: See [Testing Guide](TESTING_GUIDE.md)
 - **Write new tests**: See [Testing Guide](TESTING_GUIDE.md#writing-new-tests)
 - **Troubleshoot test failures**: See [Test Troubleshooting Guide](TEST_TROUBLESHOOTING_GUIDE.md)

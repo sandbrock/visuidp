@@ -13,7 +13,7 @@ import {
 import { apiService } from '../services/api';
 import type { Domain, Category } from '../services/api';
 import type { User } from '../types/auth';
-import type { CloudProvider, ResourceType, PropertySchema } from '../types/admin';
+import type { CloudProvider, ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 // SyncFusion imports
 import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input';
@@ -61,9 +61,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     resourceTypeId: string;
     name: string;
     configuration: Record<string, unknown>;
-    schema: Record<string, PropertySchema>;
   }>>([]);
-  const [loadingSchema, setLoadingSchema] = useState(false);
 
   // Focus the name input when the form mounts
   useEffect(() => {
@@ -126,41 +124,16 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       setSelectedCategoryId(stack.categoryId || null);
       
       // Load resources if editing
-      if (stack.resources && stack.resources.length > 0 && stack.cloudProviderId) {
-        loadResourceSchemas(stack.resources, stack.cloudProviderId);
+      if (stack.resources && stack.resources.length > 0) {
+        const resourcesData = stack.resources.map(resource => ({
+          resourceTypeId: resource.resourceTypeId,
+          name: resource.name,
+          configuration: resource.configuration,
+        }));
+        setSelectedResources(resourcesData);
       }
     }
   }, [stack]);
-
-  // Load resource schemas for existing resources
-  const loadResourceSchemas = async (resources: StackResource[], cloudProviderId: string) => {
-    const resourcesWithSchemas = await Promise.all(
-      resources.map(async (resource) => {
-        try {
-          const schema = await apiService.getResourceSchemaForStack(
-            resource.resourceTypeId,
-            cloudProviderId,
-            user.email
-          );
-          return {
-            resourceTypeId: resource.resourceTypeId,
-            name: resource.name,
-            configuration: resource.configuration,
-            schema,
-          };
-        } catch (err) {
-          console.error('Failed to load schema for resource:', err);
-          return {
-            resourceTypeId: resource.resourceTypeId,
-            name: resource.name,
-            configuration: resource.configuration,
-            schema: {},
-          };
-        }
-      })
-    );
-    setSelectedResources(resourcesWithSchemas);
-  };
 
   useEffect(() => {
     const languages = getSupportedLanguages(formData.stackType);
@@ -294,35 +267,20 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
 
 
 
-  const handleAddResource = async (resourceTypeId: string) => {
+  const handleAddResource = (resourceTypeId: string) => {
     if (!formData.cloudProviderId) {
       setError('Please select a cloud provider first');
       return;
     }
 
-    setLoadingSchema(true);
-    try {
-      const schema = await apiService.getResourceSchemaForStack(
-        resourceTypeId,
-        formData.cloudProviderId,
-        user.email
-      );
-      
-      const resourceType = availableResourceTypes.find(rt => rt.id === resourceTypeId);
-      const newResource = {
-        resourceTypeId,
-        name: resourceType?.displayName || 'New Resource',
-        configuration: {},
-        schema,
-      };
-      
-      setSelectedResources(prev => [...prev, newResource]);
-    } catch (err) {
-      console.error('Failed to load resource schema:', err);
-      setError('Failed to load resource configuration schema');
-    } finally {
-      setLoadingSchema(false);
-    }
+    const resourceType = availableResourceTypes.find(rt => rt.id === resourceTypeId);
+    const newResource = {
+      resourceTypeId,
+      name: resourceType?.displayName || 'New Resource',
+      configuration: {},
+    };
+    
+    setSelectedResources(prev => [...prev, newResource]);
   };
 
   const handleRemoveResource = (index: number) => {
@@ -549,9 +507,13 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
                   
                   <div className="resource-config">
                     <DynamicResourceForm
-                      schema={resource.schema}
+                      resourceTypeId={resource.resourceTypeId}
+                      cloudProviderId={formData.cloudProviderId!}
                       values={resource.configuration}
                       onChange={(config) => handleResourceConfigChange(index, config)}
+                      context="stack"
+                      userEmail={user.email}
+                      isEditMode={!!stack}
                     />
                   </div>
                 </div>
@@ -567,7 +529,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
                       e.target.value = '';
                     }
                   }}
-                  disabled={loading || loadingSchema}
+                  disabled={loading}
                   className="add-resource-select"
                 >
                   <option value="">Select a resource type...</option>
@@ -577,7 +539,6 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
                     </option>
                   ))}
                 </select>
-                {loadingSchema && <small className="loading-text">Loading schema...</small>}
               </div>
             </div>
           )}

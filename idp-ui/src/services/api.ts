@@ -472,12 +472,25 @@ export const apiService = {
     }
   },
 
-  async getResourceSchemaForStack(resourceTypeId: string, cloudProviderId: string, userEmail?: string): Promise<Record<string, import('../types/admin').PropertySchema>> {
+  async getResourceSchemaForStack(resourceTypeId: string, cloudProviderId: string, userEmail?: string): Promise<import('../types/admin').PropertySchemaResponse> {
     try {
       const response = await apiCall(`/stacks/resource-schema/${resourceTypeId}/${cloudProviderId}`, {}, userEmail);
+      
       if (response.ok) {
         return await response.json();
       }
+      
+      // Handle 404 - no schema defined
+      if (response.status === 404) {
+        throw new Error('No property schema is defined for this resource type and cloud provider combination');
+      }
+      
+      // Handle 500 - server error
+      if (response.status === 500) {
+        throw new Error('Server error while fetching property schema. Please try again later');
+      }
+      
+      // Handle other errors
       throw new Error(`Failed to fetch resource schema: ${response.status}`);
     } catch (error) {
       console.error('Error fetching resource schema:', error);
@@ -512,12 +525,25 @@ export const apiService = {
     }
   },
 
-  async getResourceSchemaForBlueprint(resourceTypeId: string, cloudProviderId: string, userEmail?: string): Promise<Record<string, import('../types/admin').PropertySchema>> {
+  async getResourceSchemaForBlueprint(resourceTypeId: string, cloudProviderId: string, userEmail?: string): Promise<import('../types/admin').PropertySchemaResponse> {
     try {
       const response = await apiCall(`/blueprints/resource-schema/${resourceTypeId}/${cloudProviderId}`, {}, userEmail);
+      
       if (response.ok) {
         return await response.json();
       }
+      
+      // Handle 404 - no schema defined
+      if (response.status === 404) {
+        throw new Error('No property schema is defined for this resource type and cloud provider combination');
+      }
+      
+      // Handle 500 - server error
+      if (response.status === 500) {
+        throw new Error('Server error while fetching property schema. Please try again later');
+      }
+      
+      // Handle other errors
       throw new Error(`Failed to fetch resource schema for blueprint: ${response.status}`);
     } catch (error) {
       console.error('Error fetching resource schema for blueprint:', error);

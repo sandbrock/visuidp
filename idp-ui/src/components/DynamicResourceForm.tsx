@@ -1,288 +1,418 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import type { PropertySchema } from '../types/admin';
-import { AngryTextBox, AngryCheckBox, AngryComboBox } from './input';
+import { propertySchemaService } from '../services/PropertySchemaService';
+import { PropertyInput } from './PropertyInput';
 import './DynamicResourceForm.css';
 
+/**
+ * Props interface for DynamicResourceForm component
+ * 
+ * @property resourceTypeId - UUID of the resource type (e.g., Storage, Database)
+ * @property cloudProviderId - UUID of the cloud provider (e.g., AWS, Azure, GCP)
+ * @property values - Current property values as key-value pairs
+ * @property onChange - Callback function invoked when property values change
+ * @property disabled - If true, all inputs are disabled (default: false)
+ * @property showLabels - If true, property labels are displayed (default: true)
+ * @property context - Context for schema fetching: 'blueprint' or 'stack' (default: 'blueprint')
+ * @property userEmail - Optional user email for authentication
+ * @property isEditMode - If true, editing existing resource; if false, creating new (affects default value application)
+ */
 interface DynamicResourceFormProps {
-  schema: Record<string, PropertySchema>;
+  resourceTypeId: string;
+  cloudProviderId: string;
   values: Record<string, unknown>;
   onChange: (values: Record<string, unknown>) => void;
+  disabled?: boolean;
+  showLabels?: boolean;
+  context?: 'blueprint' | 'stack';
+  userEmail?: string;
+  isEditMode?: boolean;
 }
 
-interface ValidationError {
-  field: string;
-  message: string;
+/**
+ * Ref interface for DynamicResourceForm component
+ * Exposes validation methods to parent components via forwardRef
+ * 
+ * @property validateAll - Validates all properties and returns error map
+ * @property setValidationErrors - Manually sets validation errors for display
+ */
+export interface DynamicResourceFormRef {
+  validateAll: () => Record<string, string>;
+  setValidationErrors: (errors: Record<string, string>) => void;
 }
 
-export const DynamicResourceForm = ({ schema, values, onChange }: DynamicResourceFormProps) => {
-  const [errors, setErrors] = useState<ValidationError[]>([]);
-  const [localValues, setLocalValues] = useState<Record<string, unknown>>(values);
+/**
+ * DynamicResourceForm Component
+ * 
+ * A reusable form component that dynamically generates input controls based on property schemas
+ * fetched from the backend. This eliminates the need for hardcoded cloud-specific forms and
+ * enables administrators to configure new resource types without frontend code changes.
+ * 
+ * Features:
+ * - Automatic schema fetching and caching
+ * - Support for STRING, NUMBER, BOOLEAN, and LIST property types
+ * - Built-in validation (required fields, min/max, patterns, allowed values)
+ * - Loading, error, and empty states
+ * - Theme-aware styling (light/dark mode support)
+ * - Default value application for new resources
+ * 
+ * @example
+ * ```tsx
+ * <DynamicResourceForm
+ *   resourceTypeId="uuid-of-storage-type"
+ *   cloudProviderId="uuid-of-aws-provider"
+ *   values={properties}
+ *   onChange={setProperties}
+ *   context="blueprint"
+ * />
+ * ```
+ * 
+ * @see {@link https://github.com/angryss/idp-ui/docs/DYNAMIC_INFRASTRUCTURE_FORMS.md} for detailed documentation
+ */
+export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicResourceFormProps>(({
+  resourceTypeId,
+  cloudProviderId,
+  values,
+  onChange,
+  disabled = false,
+  showLabels = true,
+  context = 'blueprint',
+  userEmail,
+  isEditMode = false,
+}, ref) => {
+  // State management
+  const [schema, setSchema] = useState<PropertySchema[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  // Initialize with default values from schema
+  /**
+   * Expose validation methods to parent components via ref
+   */
+  useImperativeHandle(ref, () => ({
+    validateAll: () => {
+      const errors = validateAll();
+      setValidationErrors(errors);
+      return errors;
+    },
+    setValidationErrors: (errors: Record<string, string>) => {
+      setValidationErrors(errors);
+    },
+  }));
+
+  /**
+   * Fetch schema when props change
+   * useEffect hook monitors resourceTypeId, cloudProviderId, and context changes
+   */
   useEffect(() => {
-    const initialValues = { ...values };
-    Object.values(schema).forEach(prop => {
-      if (!(prop.propertyName in initialValues) && prop.defaultValue !== undefined) {
-        initialValues[prop.propertyName] = prop.defaultValue;
-      }
-    });
-    setLocalValues(initialValues);
-    onChange(initialValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema]);
-
-  // Validate a single field
-  const validateField = (_propertyName: string, value: unknown, prop: PropertySchema): string | null => {
-    // Check required
-    if (prop.required && (value === undefined || value === null || value === '')) {
-      return `${prop.displayName} is required`;
+    // Only fetch if we have both required IDs
+    if (!resourceTypeId || !cloudProviderId) {
+      setSchema(null);
+      setLoading(false);
+      setError(null);
+      return;
     }
 
-    // Skip validation if value is empty and not required
-    if (!prop.required && (value === undefined || value === null || value === '')) {
-      return null;
+    const fetchSchema = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const fetchedSchema = await propertySchemaService.getSchema(
+          resourceTypeId,
+          cloudProviderId,
+          context,
+          userEmail
+        );
+        
+        setSchema(fetchedSchema);
+      } catch (err) {
+        const errorMessage = err instanceof Error 
+          ? err.message 
+          : 'Failed to load property configuration';
+        setError(errorMessage);
+        setSchema(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchema();
+  }, [resourceTypeId, cloudProviderId, context, userEmail]);
+
+  /**
+   * Apply default values when creating new resources
+   * Only applies defaults if:
+   * 1. Not in edit mode (isEditMode = false)
+   * 2. Schema is loaded
+   * 3. Property has a default value defined
+   * 4. Property value is not already set
+   */
+  useEffect(() => {
+    // Skip if in edit mode or no schema loaded
+    if (isEditMode || !schema || schema.length === 0) {
+      return;
     }
 
-    // Type-specific validation
-    switch (prop.dataType) {
-      case 'STRING': {
-        const strValue = String(value);
-        const rules = prop.validationRules || {};
-        
-        if (rules.minLength && strValue.length < Number(rules.minLength)) {
-          return `${prop.displayName} must be at least ${rules.minLength} characters`;
-        }
-        if (rules.maxLength && strValue.length > Number(rules.maxLength)) {
-          return `${prop.displayName} must be at most ${rules.maxLength} characters`;
-        }
-        if (rules.pattern && !new RegExp(String(rules.pattern)).test(strValue)) {
-          return `${prop.displayName} format is invalid`;
-        }
-        break;
-      }
+    // Check if any defaults need to be applied
+    const defaultsToApply: Record<string, unknown> = {};
+    let hasDefaults = false;
 
-      case 'NUMBER': {
-        const numValue = Number(value);
-        if (isNaN(numValue)) {
-          return `${prop.displayName} must be a valid number`;
-        }
-        
-        const rules = prop.validationRules || {};
-        if (rules.min !== undefined && numValue < Number(rules.min)) {
-          return `${prop.displayName} must be at least ${rules.min}`;
-        }
-        if (rules.max !== undefined && numValue > Number(rules.max)) {
-          return `${prop.displayName} must be at most ${rules.max}`;
-        }
-        break;
-      }
-
-      case 'LIST': {
-        if (!Array.isArray(value)) {
-          return `${prop.displayName} must be a list`;
-        }
-        
-        const rules = prop.validationRules || {};
-        if (rules.minItems && value.length < Number(rules.minItems)) {
-          return `${prop.displayName} must have at least ${rules.minItems} items`;
-        }
-        if (rules.maxItems && value.length > Number(rules.maxItems)) {
-          return `${prop.displayName} must have at most ${rules.maxItems} items`;
-        }
-        break;
-      }
-
-      case 'BOOLEAN':
-        // Boolean values are always valid
-        break;
-    }
-
-    return null;
-  };
-
-  // Validate all fields
-  const validateAll = (valuesToValidate: Record<string, unknown>): ValidationError[] => {
-    const newErrors: ValidationError[] = [];
-    
-    Object.values(schema).forEach(prop => {
-      const value = valuesToValidate[prop.propertyName];
-      const error = validateField(prop.propertyName, value, prop);
-      if (error) {
-        newErrors.push({ field: prop.propertyName, message: error });
+    schema.forEach((property) => {
+      // Only apply default if:
+      // 1. Property has a default value defined
+      // 2. Current value is undefined or null (not set yet)
+      if (
+        property.defaultValue !== undefined &&
+        property.defaultValue !== null &&
+        (values[property.propertyName] === undefined || values[property.propertyName] === null)
+      ) {
+        defaultsToApply[property.propertyName] = property.defaultValue;
+        hasDefaults = true;
       }
     });
 
-    return newErrors;
-  };
+    // Apply defaults if any were found
+    if (hasDefaults) {
+      const updatedValues = {
+        ...values,
+        ...defaultsToApply,
+      };
+      onChange(updatedValues);
+    }
+  }, [schema, isEditMode, values, onChange]);
 
-  // Handle value change
-  const handleChange = (propertyName: string, value: unknown, prop: PropertySchema) => {
-    const newValues = { ...localValues, [propertyName]: value };
-    setLocalValues(newValues);
-    
-    // Validate the changed field
-    const error = validateField(propertyName, value, prop);
-    setErrors(prev => {
-      const filtered = prev.filter(e => e.field !== propertyName);
-      if (error) {
-        return [...filtered, { field: propertyName, message: error }];
-      }
-      return filtered;
-    });
-
-    // Validate all fields and notify parent
-    const allErrors = validateAll(newValues);
-    setErrors(allErrors);
-    onChange(newValues);
-  };
-
-  // Get error for a specific field
-  const getFieldError = (propertyName: string): string | undefined => {
-    return errors.find(e => e.field === propertyName)?.message;
-  };
-
-  // Sort properties by display order
-  const sortedProperties = Object.values(schema).sort((a, b) => {
-    const orderA = a.displayOrder ?? 999;
-    const orderB = b.displayOrder ?? 999;
-    return orderA - orderB;
-  });
-
-  if (sortedProperties.length === 0) {
+  /**
+   * Render loading state
+   */
+  if (loading) {
     return (
-      <div className="dynamic-resource-form-empty">
-        <p>No configuration properties defined for this resource.</p>
+      <div className="dynamic-form-loading">
+        <div className="loading-spinner" role="status" aria-live="polite">
+          <span className="loading-text">Loading properties...</span>
+        </div>
       </div>
     );
   }
 
+  /**
+   * Render error state
+   */
+  if (error) {
+    return (
+      <div className="dynamic-form-error" role="alert">
+        <div className="error-icon">⚠️</div>
+        <div className="error-content">
+          <p className="error-message">{error}</p>
+          <button 
+            className="retry-button"
+            onClick={() => {
+              // Trigger re-fetch by clearing and re-setting the error
+              setError(null);
+              setLoading(true);
+              propertySchemaService.getSchema(
+                resourceTypeId,
+                cloudProviderId,
+                context,
+                userEmail
+              ).then(setSchema)
+                .catch(err => setError(err instanceof Error ? err.message : 'Failed to load'))
+                .finally(() => setLoading(false));
+            }}
+            disabled={disabled}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Handle empty schema case (no properties defined)
+   */
+  if (schema && schema.length === 0) {
+    return (
+      <div className="dynamic-form-empty" role="status">
+        <div className="empty-icon">ℹ️</div>
+        <div className="empty-content">
+          <p className="empty-message">
+            No cloud-specific properties are configured for this resource type and cloud provider.
+          </p>
+          <p className="empty-help-text">
+            Contact your administrator if you need to configure additional properties.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Validate a single property
+   * Returns error message if validation fails, undefined if valid
+   */
+  const validateProperty = (property: PropertySchema, value: unknown): string | undefined => {
+    const { propertyName, displayName, dataType, required, validationRules } = property;
+
+    // Check required fields
+    if (required) {
+      if (value === undefined || value === null || value === '') {
+        return `${displayName} is required`;
+      }
+    }
+
+    // Skip further validation if value is empty and not required
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+
+    // Apply validation rules based on data type
+    if (validationRules) {
+      // STRING validation
+      if (dataType === 'STRING' && typeof value === 'string') {
+        // Pattern validation (regex)
+        if (validationRules.pattern) {
+          try {
+            const regex = new RegExp(validationRules.pattern);
+            if (!regex.test(value)) {
+              return `${displayName} format is invalid`;
+            }
+          } catch (err) {
+            console.error(`Invalid regex pattern for ${propertyName}:`, err);
+          }
+        }
+
+        // Min length validation
+        if (validationRules.minLength !== undefined && value.length < validationRules.minLength) {
+          return `${displayName} must be at least ${validationRules.minLength} characters`;
+        }
+
+        // Max length validation
+        if (validationRules.maxLength !== undefined && value.length > validationRules.maxLength) {
+          return `${displayName} must be at most ${validationRules.maxLength} characters`;
+        }
+      }
+
+      // NUMBER validation
+      if (dataType === 'NUMBER') {
+        const numValue = typeof value === 'number' ? value : parseFloat(String(value));
+        
+        if (isNaN(numValue)) {
+          return `${displayName} must be a valid number`;
+        }
+
+        // Min value validation
+        if (validationRules.min !== undefined && numValue < validationRules.min) {
+          if (validationRules.max !== undefined) {
+            return `${displayName} must be between ${validationRules.min} and ${validationRules.max}`;
+          }
+          return `${displayName} must be at least ${validationRules.min}`;
+        }
+
+        // Max value validation
+        if (validationRules.max !== undefined && numValue > validationRules.max) {
+          if (validationRules.min !== undefined) {
+            return `${displayName} must be between ${validationRules.min} and ${validationRules.max}`;
+          }
+          return `${displayName} must be at most ${validationRules.max}`;
+        }
+      }
+
+      // LIST validation (allowed values)
+      if (dataType === 'LIST' && validationRules.allowedValues && validationRules.allowedValues.length > 0) {
+        const stringValue = String(value);
+        const allowedValuesList = validationRules.allowedValues.map(av => av.value);
+        
+        if (!allowedValuesList.includes(stringValue)) {
+          const allowedValuesStr = allowedValuesList.join(', ');
+          return `${displayName} must be one of: ${allowedValuesStr}`;
+        }
+      }
+    }
+
+    return undefined;
+  };
+
+  /**
+   * Validate all properties
+   * Returns a Record of property names to error messages
+   */
+  const validateAll = (): Record<string, string> => {
+    if (!schema) {
+      return {};
+    }
+
+    const errors: Record<string, string> = {};
+
+    schema.forEach((property) => {
+      const value = values[property.propertyName];
+      const error = validateProperty(property, value);
+      
+      if (error) {
+        errors[property.propertyName] = error;
+      }
+    });
+
+    return errors;
+  };
+
+  /**
+   * Handle property change
+   * Updates the values object with the new property value and clears validation error
+   */
+  const handlePropertyChange = (propertyName: string, value: unknown) => {
+    // Update values object with new property value
+    const updatedValues = {
+      ...values,
+      [propertyName]: value,
+    };
+
+    // Clear validation error for changed property
+    if (validationErrors[propertyName]) {
+      const updatedErrors = { ...validationErrors };
+      delete updatedErrors[propertyName];
+      setValidationErrors(updatedErrors);
+    }
+
+    // Call onChange prop with updated values
+    onChange(updatedValues);
+  };
+
+  /**
+   * Sort properties by displayOrder field
+   * Properties without displayOrder are placed at the end
+   */
+  const sortedProperties = schema ? [...schema].sort((a, b) => {
+    const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+    const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+    return orderA - orderB;
+  }) : [];
+
+  /**
+   * Render form with properties
+   */
   return (
     <div className="dynamic-resource-form">
-      {sortedProperties.map(prop => {
-        const value = localValues[prop.propertyName];
-        const error = getFieldError(prop.propertyName);
-        const fieldId = `field-${prop.propertyName}`;
-
-        return (
-          <div key={prop.propertyName} className="dynamic-form-field">
-            {prop.dataType === 'STRING' && (() => {
-              const rules = prop.validationRules as { enum?: string[] } | undefined;
-              const hasEnum = rules?.enum && Array.isArray(rules.enum) && rules.enum.length > 0;
-              
-              if (hasEnum) {
-                // Render as combobox for enum values
-                return (
-                  <div className="field-wrapper">
-                    <label htmlFor={fieldId}>
-                      {prop.displayName}{prop.required ? ' *' : ''}
-                    </label>
-                    <AngryComboBox
-                      id={fieldId}
-                      value={String(value ?? '')}
-                      onChange={(v: string) => handleChange(prop.propertyName, v, prop)}
-                      items={rules.enum!.map(enumValue => ({ text: enumValue, value: enumValue }))}
-                      placeholder={`Select ${prop.displayName.toLowerCase()}`}
-                    />
-                    {prop.description && (
-                      <small className="field-help-text">{prop.description}</small>
-                    )}
-                    {error && (
-                      <small className="field-error-text">{error}</small>
-                    )}
-                  </div>
-                );
-              } else {
-                // Render as text box for free-form strings
-                return (
-                  <div className="field-wrapper">
-                    <label htmlFor={fieldId}>
-                      {prop.displayName}{prop.required ? ' *' : ''}
-                    </label>
-                    <AngryTextBox
-                      id={fieldId}
-                      value={String(value ?? '')}
-                      onChange={(v) => handleChange(prop.propertyName, v, prop)}
-                      placeholder={`Enter ${prop.displayName.toLowerCase()}`}
-                    />
-                    {prop.description && (
-                      <small className="field-help-text">{prop.description}</small>
-                    )}
-                    {error && (
-                      <small className="field-error-text">{error}</small>
-                    )}
-                  </div>
-                );
-              }
-            })()}
-
-            {prop.dataType === 'NUMBER' && (
-              <div className="field-wrapper">
-                <label htmlFor={fieldId}>
-                  {prop.displayName}{prop.required ? ' *' : ''}
-                </label>
-                <AngryTextBox
-                  id={fieldId}
-                  value={value !== undefined && value !== null ? String(value) : ''}
-                  onChange={(v) => {
-                    const numValue = v === '' ? undefined : Number(v);
-                    handleChange(prop.propertyName, numValue, prop);
-                  }}
-                  placeholder={`Enter ${prop.displayName.toLowerCase()}`}
-                  type="number"
-                />
-                {prop.description && (
-                  <small className="field-help-text">{prop.description}</small>
-                )}
-                {error && (
-                  <small className="field-error-text">{error}</small>
-                )}
-              </div>
-            )}
-
-            {prop.dataType === 'BOOLEAN' && (
-              <div className="field-wrapper">
-                <AngryCheckBox
-                  id={fieldId}
-                  checked={Boolean(value)}
-                  onChange={(checked) => handleChange(prop.propertyName, checked, prop)}
-                  label={`${prop.displayName}${prop.required ? ' *' : ''}`}
-                />
-                {prop.description && (
-                  <small className="field-help-text">{prop.description}</small>
-                )}
-                {error && (
-                  <small className="field-error-text">{error}</small>
-                )}
-              </div>
-            )}
-
-            {prop.dataType === 'LIST' && (
-              <div className="field-wrapper">
-                <label htmlFor={fieldId}>
-                  {prop.displayName}{prop.required ? ' *' : ''}
-                </label>
-                <textarea
-                  id={fieldId}
-                  value={Array.isArray(value) ? value.join('\n') : ''}
-                  onChange={(e) => {
-                    const lines = e.target.value.split('\n').filter(line => line.trim() !== '');
-                    handleChange(prop.propertyName, lines, prop);
-                  }}
-                  placeholder="Enter one item per line"
-                  rows={4}
-                  className="list-textarea"
-                />
-                {prop.description && (
-                  <small className="field-help-text">{prop.description}</small>
-                )}
-                {error && (
-                  <small className="field-error-text">{error}</small>
-                )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {showLabels && (
+        <div className="form-section-header">
+          <h3>Cloud-Specific Properties</h3>
+        </div>
+      )}
+      
+      <div className="form-properties">
+        {sortedProperties.map((property) => (
+          <PropertyInput
+            key={property.id}
+            property={property}
+            value={values[property.propertyName]}
+            onChange={(value) => handlePropertyChange(property.propertyName, value)}
+            error={validationErrors[property.propertyName]}
+            disabled={disabled}
+          />
+        ))}
+      </div>
     </div>
   );
-};
+});
+
+DynamicResourceForm.displayName = 'DynamicResourceForm';

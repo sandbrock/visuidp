@@ -12,6 +12,7 @@ import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBox } from './input
 import ContainerOrchestratorConfigFormWithoutCloudServiceName from './infrastructure/ContainerOrchestratorConfigFormWithoutCloudServiceName';
 import RelationalDatabaseServerConfigFormWithoutCloudServiceName from './infrastructure/RelationalDatabaseServerConfigFormWithoutCloudServiceName';
 import ServiceBusConfigFormWithoutCloudServiceName from './infrastructure/ServiceBusConfigFormWithoutCloudServiceName';
+import { DynamicResourceForm } from './DynamicResourceForm';
 
 interface InfrastructureProps {
   user: User;
@@ -320,285 +321,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
     }
   };
 
-  // Configuration form components
-
-  const renderCloudSpecificPropertiesForm = (cloudProviderId: string, resourceTypeId: string, properties: Record<string, unknown>, onChange: (properties: Record<string, unknown>) => void) => {
-    const resourceType = resourceTypes.find(rt => rt.id === resourceTypeId);
-    const cloudProvider = cloudProviders.find(cp => cp.id === cloudProviderId);
-    if (!resourceType || !cloudProvider) return null;
-
-    const renderAWSProperties = () => {
-      switch (resourceType.name.toLowerCase()) {
-        case 'storage':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>AWS Storage Properties</h5>
-              <div className="form-group">
-                <AngryTextBox
-                  id="aws-bucket-prefix"
-                  value={(properties.bucketPrefix as string) || ''}
-                  onChange={(v) => onChange({ ...properties, bucketPrefix: v })}
-                  placeholder="S3 Bucket Prefix (optional)"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="aws-storage-tier">Storage Tier</label>
-                <AngryComboBox
-                  id="aws-storage-tier"
-                  items={[
-                    { text: 'Standard', value: 'standard' },
-                    { text: 'Infrequent Access', value: 'infrequent_access' },
-                    { text: 'Archive', value: 'archive' }
-                  ]}
-                  value={(properties.storageTier as string) || 'standard'}
-                  onChange={(val) => onChange({ ...properties, storageTier: val })}
-                  placeholder="Select storage tier"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="aws-storage-class">Storage Class *</label>
-                <AngryComboBox
-                  id="aws-storage-class"
-                  items={[
-                    { text: 'Standard', value: 'STANDARD' },
-                    { text: 'Standard-IA', value: 'STANDARD_IA' },
-                    { text: 'One Zone-IA', value: 'ONEZONE_IA' },
-                    { text: 'Glacier', value: 'GLACIER' },
-                    { text: 'Glacier Deep Archive', value: 'DEEP_ARCHIVE' },
-                    { text: 'Intelligent-Tiering', value: 'INTELLIGENT_TIERING' }
-                  ]}
-                  value={(properties.storageClass as string) || 'STANDARD'}
-                  onChange={(val) => onChange({ ...properties, storageClass: val })}
-                  placeholder="Select storage class"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="aws-versioning">Versioning Status *</label>
-                <AngryComboBox
-                  id="aws-versioning"
-                  items={[
-                    { text: 'Enabled', value: 'Enabled' },
-                    { text: 'Suspended', value: 'Suspended' },
-                    { text: 'Disabled', value: 'Disabled' }
-                  ]}
-                  value={(properties.versioning as string) || 'Enabled'}
-                  onChange={(val) => onChange({ ...properties, versioning: val })}
-                  placeholder="Select versioning status"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="aws-encryption">Default Encryption *</label>
-                <AngryComboBox
-                  id="aws-encryption"
-                  items={[
-                    { text: 'AES-256', value: 'AES256' },
-                    { text: 'AWS-KMS', value: 'aws:kms' },
-                    { text: 'None', value: 'None' }
-                  ]}
-                  value={(properties.encryption as string) || 'AES256'}
-                  onChange={(val) => onChange({ ...properties, encryption: val })}
-                  placeholder="Select encryption type"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="aws-block-public-access">Block Public Access *</label>
-                <AngryComboBox
-                  id="aws-block-public-access"
-                  items={[
-                    { text: 'Enabled', value: 'Enabled' },
-                    { text: 'Disabled', value: 'Disabled' }
-                  ]}
-                  value={(properties.blockPublicAccess as string) || 'Enabled'}
-                  onChange={(val) => onChange({ ...properties, blockPublicAccess: val })}
-                  placeholder="Select public access setting"
-                />
-              </div>
-              <div className="form-group">
-                <AngryTextBox
-                  id="aws-lifecycle-days"
-                  value={(properties.lifecycleDays as string) || ''}
-                  onChange={(v) => onChange({ ...properties, lifecycleDays: v })}
-                  placeholder="Lifecycle Transition Days (optional)"
-                />
-              </div>
-            </div>
-          );
-        case 'relational database server':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>AWS RDS Properties</h5>
-              <div className="form-group">
-                <label htmlFor="aws-instance-class">Instance Class *</label>
-                <AngryComboBox
-                  id="aws-instance-class"
-                  items={[
-                    { text: 'db.t3.micro', value: 'db.t3.micro' },
-                    { text: 'db.t3.small', value: 'db.t3.small' },
-                    { text: 'db.t3.medium', value: 'db.t3.medium' },
-                    { text: 'db.r5.large', value: 'db.r5.large' },
-                    { text: 'db.r5.xlarge', value: 'db.r5.xlarge' }
-                  ]}
-                  value={(properties.instanceClass as string) || 'db.t3.micro'}
-                  onChange={(val) => onChange({ ...properties, instanceClass: val })}
-                  placeholder="Select instance class"
-                />
-              </div>
-              <div className="form-group">
-                <AngryTextBox
-                  id="aws-multi-az"
-                  value={(properties.multiAZ as string) || 'false'}
-                  onChange={(v) => onChange({ ...properties, multiAZ: v })}
-                  placeholder="Multi-AZ (true/false)"
-                />
-              </div>
-            </div>
-          );
-        default:
-          return null;
-      }
-    };
-
-    const renderAzureProperties = () => {
-      switch (resourceType.name.toLowerCase()) {
-        case 'storage':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Azure Storage Properties</h5>
-              <div className="form-group">
-                <AngryTextBox
-                  id="azure-account-name"
-                  value={(properties.accountName as string) || ''}
-                  onChange={(v) => onChange({ ...properties, accountName: v })}
-                  placeholder="Storage Account Name Prefix"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="azure-replication">Replication Type</label>
-                <AngryComboBox
-                  id="azure-replication"
-                  items={[
-                    { text: 'LRS (Locally-redundant)', value: 'LRS' },
-                    { text: 'GRS (Geo-redundant)', value: 'GRS' },
-                    { text: 'ZRS (Zone-redundant)', value: 'ZRS' },
-                    { text: 'GZRS (Geo-zone-redundant)', value: 'GZRS' }
-                  ]}
-                  value={(properties.replication as string) || 'LRS'}
-                  onChange={(val) => onChange({ ...properties, replication: val })}
-                  placeholder="Select replication type"
-                />
-              </div>
-            </div>
-          );
-        case 'relational database server':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Azure Database Properties</h5>
-              <div className="form-group">
-                <label htmlFor="azure-tier">Service Tier</label>
-                <AngryComboBox
-                  id="azure-tier"
-                  items={[
-                    { text: 'Basic', value: 'Basic' },
-                    { text: 'General Purpose', value: 'GeneralPurpose' },
-                    { text: 'Business Critical', value: 'BusinessCritical' }
-                  ]}
-                  value={(properties.tier as string) || 'Basic'}
-                  onChange={(val) => onChange({ ...properties, tier: val })}
-                  placeholder="Select service tier"
-                />
-              </div>
-              <div className="form-group">
-                <AngryTextBox
-                  id="azure-vcore"
-                  value={(properties.vCores as string) || '2'}
-                  onChange={(v) => onChange({ ...properties, vCores: v })}
-                  placeholder="vCores"
-                />
-              </div>
-            </div>
-          );
-        default:
-          return null;
-      }
-    };
-
-    const renderGCPProperties = () => {
-      switch (resourceType.name.toLowerCase()) {
-        case 'storage':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Google Cloud Storage Properties</h5>
-              <div className="form-group">
-                <AngryTextBox
-                  id="gcp-bucket-name"
-                  value={(properties.bucketName as string) || ''}
-                  onChange={(v) => onChange({ ...properties, bucketName: v })}
-                  placeholder="Bucket Name Prefix"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="gcp-storage-class">Storage Class</label>
-                <AngryComboBox
-                  id="gcp-storage-class"
-                  items={[
-                    { text: 'Standard', value: 'STANDARD' },
-                    { text: 'Nearline', value: 'NEARLINE' },
-                    { text: 'Coldline', value: 'COLDLINE' },
-                    { text: 'Archive', value: 'ARCHIVE' }
-                  ]}
-                  value={(properties.storageClass as string) || 'STANDARD'}
-                  onChange={(val) => onChange({ ...properties, storageClass: val })}
-                  placeholder="Select storage class"
-                />
-              </div>
-            </div>
-          );
-        case 'relational database server':
-          return (
-            <div className="config-form">
-              <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Google Cloud SQL Properties</h5>
-              <div className="form-group">
-                <label htmlFor="gcp-tier">Machine Tier</label>
-                <AngryComboBox
-                  id="gcp-tier"
-                  items={[
-                    { text: 'db-f1-micro', value: 'db-f1-micro' },
-                    { text: 'db-g1-small', value: 'db-g1-small' },
-                    { text: 'db-n1-standard-1', value: 'db-n1-standard-1' },
-                    { text: 'db-n1-standard-2', value: 'db-n1-standard-2' },
-                    { text: 'db-n1-highmem-2', value: 'db-n1-highmem-2' }
-                  ]}
-                  value={(properties.tier as string) || 'db-f1-micro'}
-                  onChange={(val) => onChange({ ...properties, tier: val })}
-                  placeholder="Select machine tier"
-                />
-              </div>
-              <div className="form-group">
-                <AngryTextBox
-                  id="gcp-availability"
-                  value={(properties.availabilityType as string) || 'ZONAL'}
-                  onChange={(v) => onChange({ ...properties, availabilityType: v })}
-                  placeholder="Availability Type (ZONAL/REGIONAL)"
-                />
-              </div>
-            </div>
-          );
-        default:
-          return null;
-      }
-    };
-
-    switch (cloudProvider.name.toLowerCase()) {
-      case 'aws':
-        return renderAWSProperties();
-      case 'azure':
-        return renderAzureProperties();
-      case 'gcp':
-        return renderGCPProperties();
-      default:
-        return null;
-    }
-  };
+  // Configuration form components (hardcoded cloud-specific forms removed - now using DynamicResourceForm)
 
   const renderConfigurationFormWithoutCloudServiceName = (resourceTypeId: string, config: Record<string, unknown>, onChange: (config: Record<string, unknown>) => void) => {
     const resourceType = resourceTypes.find(rt => rt.id === resourceTypeId);
@@ -1109,18 +832,16 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                         />
                       </div>
                       
-                      {/* Cloud-specific properties form - only show when cloud provider is selected */}
-                      {resourceFormData.cloudProviderId && (
+                      {/* Dynamic cloud-specific properties form - only show when cloud provider is selected */}
+                      {resourceFormData.cloudProviderId && resourceFormData.resourceTypeId && (
                         <div style={{ padding: '1rem' }}>
-                          <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 500 }}>
-                            Cloud-Specific Properties for {cloudProviders.find(cp => cp.id === resourceFormData.cloudProviderId)?.displayName || 'Selected Provider'}
-                          </h5>
-                          {renderCloudSpecificPropertiesForm(
-                            resourceFormData.cloudProviderId,
-                            resourceFormData.resourceTypeId,
-                            resourceFormData.cloudSpecificProperties as Record<string, unknown> || {},
-                            (newProps) => handleResourceFormChange('cloudSpecificProperties', newProps)
-                          )}
+                          <DynamicResourceForm
+                            resourceTypeId={resourceFormData.resourceTypeId}
+                            cloudProviderId={resourceFormData.cloudProviderId}
+                            values={resourceFormData.cloudSpecificProperties as Record<string, unknown> || {}}
+                            onChange={(newProps) => handleResourceFormChange('cloudSpecificProperties', newProps)}
+                            context="blueprint"
+                          />
                         </div>
                       )}
                     </div>

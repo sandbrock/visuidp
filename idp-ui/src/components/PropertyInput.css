@@ -1,0 +1,290 @@
+.property-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.property-input-wrapper.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Label styles */
+.property-input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.property-input-required {
+  color: var(--danger, #dc3545);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Input control container */
+.property-input-control {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Text and number input fields */
+.property-input-field {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.property-input-field:focus {
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.property-input-field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-primary);
+}
+
+.property-input-field::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Select dropdown specific styles */
+.property-input-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.property-input-select:disabled {
+  cursor: not-allowed;
+}
+
+/* Checkbox styles */
+.property-input-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.property-input-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-color, #007bff);
+}
+
+.property-input-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.property-input-checkbox-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Help text styles */
+.property-input-help-text {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Error display styles */
+.property-input-error {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--danger, #dc3545);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.property-input-wrapper.has-error .property-input-field {
+  border-color: var(--danger, #dc3545);
+}
+
+.property-input-wrapper.has-error .property-input-field:focus {
+  border-color: var(--danger, #dc3545);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Unsupported type message */
+.property-input-unsupported {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Frankenstein theme - Enhanced styling for PropertyInput */
+[data-theme="frankenstein"] .property-input-wrapper {
+  position: relative;
+}
+
+[data-theme="frankenstein"] .property-input-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 0 5px rgba(157, 78, 221, 0.1);
+}
+
+[data-theme="frankenstein"] .property-input-required {
+  color: var(--danger);
+  text-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
+}
+
+[data-theme="frankenstein"] .property-input-help-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+[data-theme="frankenstein"] .property-input-error {
+  color: var(--danger);
+  font-weight: 600;
+  text-shadow: 0 0 5px rgba(255, 0, 110, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-theme="frankenstein"] .property-input-error::before {
+  content: '⚠';
+  font-size: 1rem;
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .property-input-checkbox {
+  accent-color: var(--frankenstein-skin);
+}
+
+[data-theme="frankenstein"] .property-input-unsupported {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-style: italic;
+}
+
+/* Error state for AngryTextBox */
+.property-input-wrapper.has-error .angry-textbox {
+  border-color: var(--danger, #dc3545);
+}
+
+.property-input-wrapper.has-error .angry-textbox:focus {
+  border-color: var(--danger, #dc3545);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Error state for AngryComboBox */
+.property-input-wrapper.has-error .angry-combobox-input-group {
+  border-color: var(--danger, #dc3545);
+}
+
+.property-input-wrapper.has-error .angry-combobox-input-group:focus-within {
+  border-color: var(--danger, #dc3545);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Error state for AngryCheckBox */
+.property-input-wrapper.has-error .angry-checkbox .e-frame {
+  border-color: var(--danger, #dc3545);
+}
+
+/* Frankenstein theme - Error states */
+[data-theme="frankenstein"] .property-input-wrapper.has-error .angry-textbox {
+  border-color: var(--danger);
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1);
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .property-input-wrapper.has-error .angry-textbox:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.6),
+              0 0 30px rgba(255, 0, 110, 0.3),
+              inset 0 0 10px rgba(255, 0, 110, 0.2);
+}
+
+[data-theme="frankenstein"] .property-input-wrapper.has-error .angry-combobox-input-group {
+  border-color: var(--danger);
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+              inset 0 0 5px rgba(255, 0, 110, 0.1);
+  animation: frankenstein-error-pulse 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .property-input-wrapper.has-error .angry-combobox-input-group:focus-within {
+  border-color: var(--danger);
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.6),
+              0 0 30px rgba(255, 0, 110, 0.3),
+              inset 0 0 10px rgba(255, 0, 110, 0.2);
+}
+
+[data-theme="frankenstein"] .property-input-wrapper.has-error .angry-checkbox .e-frame {
+  border-color: var(--danger);
+  box-shadow: 0 0 8px rgba(255, 0, 110, 0.3);
+}
+
+/* Error pulse animation for Frankenstein theme */
+@keyframes frankenstein-error-pulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 0, 110, 0.4),
+                inset 0 0 5px rgba(255, 0, 110, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 0, 110, 0.6),
+                inset 0 0 8px rgba(255, 0, 110, 0.15);
+  }
+}
+
+/* Pulse danger animation for error indicators */
+@keyframes frankenstein-pulse-danger {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .property-input-field {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .property-input-label {
+    font-size: 14px;
+  }
+  
+  .property-input-help-text,
+  .property-input-error {
+    font-size: 12px;
+  }
+}

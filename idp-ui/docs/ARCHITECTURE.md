@@ -16,3 +16,15 @@ The application is stack-centric. When the user logs in, they are presented with
 Next to each stack will exist an action icon. If the user clicks the action icon, it will bring up a list of possible actions to perform on the stack. The "Provision" action should be at the top. If the user selects it, a dialog will appear prompting them which environment to provision the stack in. Once the click "Provision" in that dialog, it will run a GitHub Actions workflow that will handle the stack provisioning, which will create all the compute and infrastructure resources.
 
 The second action in for each stack will be the "Select Infrastructure" option. That will bring up a list of infrastructure items that the application needs. Available options are defined in the idp-api architecture documentation.
+
+# Dynamic Infrastructure Forms
+
+The application uses a schema-driven approach for rendering cloud-specific property forms. Instead of hardcoding forms for each cloud provider and resource type combination, the system fetches property schemas from the backend and dynamically generates appropriate UI controls.
+
+This feature is implemented through three main components:
+
+1. **DynamicResourceForm**: Main component that orchestrates schema fetching, property rendering, and validation
+2. **PropertyInput**: Specialized component that renders appropriate input controls based on property data type
+3. **PropertySchemaService**: Service class that manages fetching and caching of property schemas
+
+For detailed documentation, see [Dynamic Infrastructure Forms](./DYNAMIC_INFRASTRUCTURE_FORMS.md).
