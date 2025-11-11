@@ -10,13 +10,13 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.hasSize;
 
 /**
- * Test class for verifying that the API endpoint returns ECS properties
+ * Test class for verifying that the API endpoint returns ECS cluster properties
  * for AWS Managed Container Orchestrator.
  * 
  * This test validates Task 5 of the aws-ecs-container-orchestrator spec:
- * - Verify response contains 8 ECS properties in correct order
- * - Verify launchType is first property with display_order=10
- * - Verify all required properties have required=true
+ * - Verify response contains 5 ECS cluster properties in correct order
+ * - Verify capacityProvider is first property with display_order=10
+ * - Verify only capacityProvider has required=true
  * - Verify all default values are present
  * - Verify validation rules are correctly formatted
  */
@@ -31,7 +31,7 @@ public class EcsPropertiesEndpointTest {
     private static final UUID AWS_CLOUD_PROVIDER_ID = UUID.fromString("8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01");
 
     @Test
-    public void testGetEcsPropertiesSchema_ReturnsAllEightProperties() {
+    public void testGetEcsPropertiesSchema_ReturnsAllFiveClusterProperties() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
@@ -39,19 +39,16 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("size()", equalTo(8))
-            .body("launchType", notNullValue())
-            .body("taskCpu", notNullValue())
-            .body("taskMemory", notNullValue())
-            .body("desiredTaskCount", notNullValue())
-            .body("enableAutoScaling", notNullValue())
-            .body("minTaskCount", notNullValue())
-            .body("maxTaskCount", notNullValue())
-            .body("instanceType", notNullValue());
+            .body("size()", equalTo(5))
+            .body("capacityProvider", notNullValue())
+            .body("instanceType", notNullValue())
+            .body("minClusterSize", notNullValue())
+            .body("maxClusterSize", notNullValue())
+            .body("enableContainerInsights", notNullValue());
     }
 
     @Test
-    public void testGetEcsPropertiesSchema_LaunchTypeIsFirstProperty() {
+    public void testGetEcsPropertiesSchema_CapacityProviderIsFirstProperty() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
@@ -59,9 +56,9 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("launchType.displayOrder", equalTo(10))
-            .body("launchType.propertyName", equalTo("launchType"))
-            .body("launchType.displayName", equalTo("Launch Type"));
+            .body("capacityProvider.displayOrder", equalTo(10))
+            .body("capacityProvider.propertyName", equalTo("capacityProvider"))
+            .body("capacityProvider.displayName", equalTo("Capacity Provider"));
     }
 
     @Test
@@ -73,18 +70,15 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("launchType.displayOrder", equalTo(10))
-            .body("taskCpu.displayOrder", equalTo(20))
-            .body("taskMemory.displayOrder", equalTo(30))
-            .body("desiredTaskCount.displayOrder", equalTo(40))
-            .body("enableAutoScaling.displayOrder", equalTo(50))
-            .body("minTaskCount.displayOrder", equalTo(60))
-            .body("maxTaskCount.displayOrder", equalTo(70))
-            .body("instanceType.displayOrder", equalTo(80));
+            .body("capacityProvider.displayOrder", equalTo(10))
+            .body("instanceType.displayOrder", equalTo(20))
+            .body("minClusterSize.displayOrder", equalTo(30))
+            .body("maxClusterSize.displayOrder", equalTo(40))
+            .body("enableContainerInsights.displayOrder", equalTo(50));
     }
 
     @Test
-    public void testGetEcsPropertiesSchema_RequiredPropertiesMarkedCorrectly() {
+    public void testGetEcsPropertiesSchema_OnlyCapacityProviderIsRequired() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
@@ -92,16 +86,13 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            // Required properties
-            .body("launchType.required", equalTo(true))
-            .body("taskCpu.required", equalTo(true))
-            .body("taskMemory.required", equalTo(true))
-            .body("desiredTaskCount.required", equalTo(true))
-            // Optional properties
-            .body("enableAutoScaling.required", equalTo(false))
-            .body("minTaskCount.required", equalTo(false))
-            .body("maxTaskCount.required", equalTo(false))
-            .body("instanceType.required", equalTo(false));
+            // Only capacityProvider is required
+            .body("capacityProvider.required", equalTo(true))
+            // All other properties are optional
+            .body("instanceType.required", equalTo(false))
+            .body("minClusterSize.required", equalTo(false))
+            .body("maxClusterSize.required", equalTo(false))
+            .body("enableContainerInsights.required", equalTo(false));
     }
 
     @Test
@@ -113,18 +104,15 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("launchType.defaultValue", equalTo("\"FARGATE\""))
-            .body("taskCpu.defaultValue", equalTo("\"512\""))
-            .body("taskMemory.defaultValue", equalTo("\"1024\""))
-            .body("desiredTaskCount.defaultValue", equalTo("\"2\""))
-            .body("enableAutoScaling.defaultValue", equalTo("\"false\""))
-            .body("minTaskCount.defaultValue", equalTo("\"1\""))
-            .body("maxTaskCount.defaultValue", equalTo("\"10\""))
-            .body("instanceType.defaultValue", equalTo("\"t3.medium\""));
+            .body("capacityProvider.defaultValue", equalTo("\"FARGATE\""))
+            .body("instanceType.defaultValue", equalTo("\"t3.medium\""))
+            .body("minClusterSize.defaultValue", equalTo("\"1\""))
+            .body("maxClusterSize.defaultValue", equalTo("\"10\""))
+            .body("enableContainerInsights.defaultValue", equalTo("true"));
     }
 
     @Test
-    public void testGetEcsPropertiesSchema_LaunchTypeValidationRules() {
+    public void testGetEcsPropertiesSchema_CapacityProviderValidationRules() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
@@ -132,86 +120,12 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("launchType.dataType", equalTo("LIST"))
-            .body("launchType.validationRules.allowedValues", notNullValue())
-            .body("launchType.validationRules.allowedValues.size()", equalTo(2))
-            .body("launchType.validationRules.allowedValues[0].value", equalTo("FARGATE"))
-            .body("launchType.validationRules.allowedValues[1].value", equalTo("EC2"));
-    }
-
-    @Test
-    public void testGetEcsPropertiesSchema_TaskCpuValidationRules() {
-        given()
-            .header("X-Auth-Request-Email", TEST_USER)
-            .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when()
-            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
-            .then()
-            .statusCode(200)
-            .body("taskCpu.dataType", equalTo("LIST"))
-            .body("taskCpu.validationRules.allowedValues", notNullValue())
-            .body("taskCpu.validationRules.allowedValues.size()", equalTo(5))
-            .body("taskCpu.validationRules.allowedValues[0].value", equalTo("256"))
-            .body("taskCpu.validationRules.allowedValues[1].value", equalTo("512"))
-            .body("taskCpu.validationRules.allowedValues[2].value", equalTo("1024"))
-            .body("taskCpu.validationRules.allowedValues[3].value", equalTo("2048"))
-            .body("taskCpu.validationRules.allowedValues[4].value", equalTo("4096"));
-    }
-
-    @Test
-    public void testGetEcsPropertiesSchema_TaskMemoryValidationRules() {
-        given()
-            .header("X-Auth-Request-Email", TEST_USER)
-            .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when()
-            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
-            .then()
-            .statusCode(200)
-            .body("taskMemory.dataType", equalTo("LIST"))
-            .body("taskMemory.validationRules.allowedValues", notNullValue())
-            .body("taskMemory.validationRules.allowedValues.size()", equalTo(7));
-    }
-
-    @Test
-    public void testGetEcsPropertiesSchema_DesiredTaskCountValidationRules() {
-        given()
-            .header("X-Auth-Request-Email", TEST_USER)
-            .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when()
-            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
-            .then()
-            .statusCode(200)
-            .body("desiredTaskCount.dataType", equalTo("NUMBER"))
-            .body("desiredTaskCount.validationRules.min", equalTo(1))
-            .body("desiredTaskCount.validationRules.max", equalTo(100));
-    }
-
-    @Test
-    public void testGetEcsPropertiesSchema_MinTaskCountValidationRules() {
-        given()
-            .header("X-Auth-Request-Email", TEST_USER)
-            .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when()
-            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
-            .then()
-            .statusCode(200)
-            .body("minTaskCount.dataType", equalTo("NUMBER"))
-            .body("minTaskCount.validationRules.min", equalTo(1))
-            .body("minTaskCount.validationRules.max", equalTo(100));
-    }
-
-    @Test
-    public void testGetEcsPropertiesSchema_MaxTaskCountValidationRules() {
-        given()
-            .header("X-Auth-Request-Email", TEST_USER)
-            .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when()
-            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
-            .then()
-            .statusCode(200)
-            .body("maxTaskCount.dataType", equalTo("NUMBER"))
-            .body("maxTaskCount.validationRules.min", equalTo(1))
-            .body("maxTaskCount.validationRules.max", equalTo(100));
+            .body("capacityProvider.dataType", equalTo("LIST"))
+            .body("capacityProvider.validationRules.allowedValues", notNullValue())
+            .body("capacityProvider.validationRules.allowedValues.size()", equalTo(3))
+            .body("capacityProvider.validationRules.allowedValues[0].value", equalTo("FARGATE"))
+            .body("capacityProvider.validationRules.allowedValues[1].value", equalTo("FARGATE_SPOT"))
+            .body("capacityProvider.validationRules.allowedValues[2].value", equalTo("EC2"));
     }
 
     @Test
@@ -225,11 +139,14 @@ public class EcsPropertiesEndpointTest {
             .statusCode(200)
             .body("instanceType.dataType", equalTo("LIST"))
             .body("instanceType.validationRules.allowedValues", notNullValue())
-            .body("instanceType.validationRules.allowedValues.size()", equalTo(10));
+            .body("instanceType.validationRules.allowedValues.size()", equalTo(10))
+            .body("instanceType.validationRules.allowedValues[0].value", equalTo("t3.small"))
+            .body("instanceType.validationRules.allowedValues[1].value", equalTo("t3.medium"))
+            .body("instanceType.validationRules.allowedValues[2].value", equalTo("t3.large"));
     }
 
     @Test
-    public void testGetEcsPropertiesSchema_EnableAutoScalingIsBooleanType() {
+    public void testGetEcsPropertiesSchema_MinClusterSizeValidationRules() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
@@ -237,9 +154,37 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("enableAutoScaling.dataType", equalTo("BOOLEAN"))
-            .body("enableAutoScaling.required", equalTo(false))
-            .body("enableAutoScaling.defaultValue", equalTo("\"false\""));
+            .body("minClusterSize.dataType", equalTo("NUMBER"))
+            .body("minClusterSize.validationRules.min", equalTo(0))
+            .body("minClusterSize.validationRules.max", equalTo(100));
+    }
+
+    @Test
+    public void testGetEcsPropertiesSchema_MaxClusterSizeValidationRules() {
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .when()
+            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
+            .then()
+            .statusCode(200)
+            .body("maxClusterSize.dataType", equalTo("NUMBER"))
+            .body("maxClusterSize.validationRules.min", equalTo(1))
+            .body("maxClusterSize.validationRules.max", equalTo(100));
+    }
+
+    @Test
+    public void testGetEcsPropertiesSchema_EnableContainerInsightsIsBooleanType() {
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .when()
+            .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
+            .then()
+            .statusCode(200)
+            .body("enableContainerInsights.dataType", equalTo("BOOLEAN"))
+            .body("enableContainerInsights.required", equalTo(false))
+            .body("enableContainerInsights.defaultValue", equalTo("true"));
     }
 
     @Test
@@ -251,14 +196,11 @@ public class EcsPropertiesEndpointTest {
             .get("/v1/blueprints/resource-schema/" + MANAGED_CONTAINER_ORCHESTRATOR_ID + "/" + AWS_CLOUD_PROVIDER_ID)
             .then()
             .statusCode(200)
-            .body("launchType.description", notNullValue())
-            .body("taskCpu.description", notNullValue())
-            .body("taskMemory.description", notNullValue())
-            .body("desiredTaskCount.description", notNullValue())
-            .body("enableAutoScaling.description", notNullValue())
-            .body("minTaskCount.description", notNullValue())
-            .body("maxTaskCount.description", notNullValue())
-            .body("instanceType.description", notNullValue());
+            .body("capacityProvider.description", notNullValue())
+            .body("instanceType.description", notNullValue())
+            .body("minClusterSize.description", notNullValue())
+            .body("maxClusterSize.description", notNullValue())
+            .body("enableContainerInsights.description", notNullValue());
     }
 
     @Test
