@@ -84,14 +84,19 @@
   color: var(--text-secondary-dark, #999);
 }
 
-/* Label styling for LIST fields */
+/* Label styling for all fields */
 .field-wrapper label {
+  display: block;
   font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
   color: var(--text-primary, #333);
 }
 
 [data-theme="dark"] .field-wrapper label {
   color: var(--text-primary-dark, #ddd);
+}
+
+[data-theme="frankenstein"] .field-wrapper label {
+  color: var(--text-primary);
 }

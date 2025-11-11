@@ -1,6 +1,6 @@
-# IDP UI - React Frontend with OAuth2 Proxy Authentication
+# VisuIDP UI - React Frontend with OAuth2 Proxy Authentication
 
-This React application is configured to work with OAuth2 Proxy for AWS Identity Center authentication. It runs on port 8083 and integrates with the IDP API backend through OAuth2 Proxy.
+This React application is the frontend interface for VisuIDP, an Internal Developer Platform (IDP). It is configured to work with OAuth2 Proxy for AWS Identity Center authentication. It runs on port 8083 and integrates with the VisuIDP API backend through OAuth2 Proxy.
 
 ## Themes
 
@@ -17,8 +17,8 @@ For detailed information about the Frankenstein theme, see [FRANKENSTEIN_THEME_D
 ## Architecture
 
 - **OAuth2 Proxy**: Port 8080 (Authentication Gateway)
-- **Quarkus API**: Port 8082 (Backend API)
-- **React UI**: Port 8083 (Frontend Application)
+- **VisuIDP API**: Port 8082 (Backend API)
+- **VisuIDP UI**: Port 8083 (Frontend Application)
 - **PostgreSQL**: Port 5432 (Database)
 - **pgAdmin**: Port 8081 (Database Admin)
 
@@ -26,8 +26,8 @@ For detailed information about the Frankenstein theme, see [FRANKENSTEIN_THEME_D
 
 1. User accesses `http://localhost:8080` (OAuth2 Proxy)
 2. OAuth2 Proxy redirects to AWS Identity Center for authentication
-3. After successful authentication, OAuth2 Proxy forwards requests to the React app
-4. React app makes API calls through OAuth2 Proxy to the Quarkus backend
+3. After successful authentication, OAuth2 Proxy forwards requests to the VisuIDP UI
+4. VisuIDP UI makes API calls through OAuth2 Proxy to the backend
 5. All requests include authentication headers from OAuth2 Proxy
 
 ## Prerequisites
@@ -110,8 +110,8 @@ Authentication is handled entirely by Traefik with Azure Entra ID:
 1. **User accesses** `http://localhost:8080/ui`
 2. **Traefik checks authentication** - if not authenticated, redirects to Azure Entra ID
 3. **Azure Entra ID handles login** and redirects back to Traefik
-4. **Traefik forwards authenticated requests** to the React app with user headers
-5. **React app receives user info** from the API (which gets it from Traefik headers)
+4. **Traefik forwards authenticated requests** to the VisuIDP UI with user headers
+5. **VisuIDP UI receives user info** from the API (which gets it from Traefik headers)
 
 ### Application States
 
@@ -153,9 +153,9 @@ The Vite configuration (`vite.config.ts`) is set to:
 
 ### Traefik Integration
 
-The application expects Traefik to:
+The VisuIDP UI expects Traefik to:
 - Handle Azure Entra ID authentication
-- Forward authenticated requests to the React app
+- Forward authenticated requests to the application
 - Provide user information via HTTP headers to the API backend
 
 ## File Structure
@@ -175,7 +175,7 @@ src/
 
 ## Environment Variables
 
-The application uses these implicit configurations:
+VisuIDP UI uses these implicit configurations:
 
 - **Frontend Port**: 8083 (configured in Vite)
 - **OAuth2 Proxy**: Port 8080 (expected to be running)
@@ -191,12 +191,12 @@ The application uses these implicit configurations:
    - Verify AWS Identity Center configuration
 
 2. **API calls failing**
-   - Check that the Quarkus backend is running on port 8082
+   - Check that the VisuIDP API backend is running on port 8082
    - Verify OAuth2 Proxy is forwarding requests correctly
    - Check browser network tab for authentication headers
 
 3. **CORS errors**
-   - Ensure the Quarkus backend has proper CORS configuration
+   - Ensure the VisuIDP API backend has proper CORS configuration
    - Verify OAuth2 Proxy is configured as the allowed origin
 
 ### Debug Mode
@@ -216,7 +216,7 @@ docker-compose logs oauth2-proxy
 
 ## Production Deployment
 
-For production deployment:
+For production deployment of VisuIDP UI:
 
 1. Build the React application: `npm run build`
 2. Serve the built files through a web server

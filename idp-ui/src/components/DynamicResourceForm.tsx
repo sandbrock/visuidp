@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { PropertySchema } from '../types/admin';
-import { AngryTextBox, AngryCheckBox } from './input';
+import { AngryTextBox, AngryCheckBox, AngryComboBox } from './input';
 import './DynamicResourceForm.css';
 
 interface DynamicResourceFormProps {
@@ -165,25 +165,61 @@ export const DynamicResourceForm = ({ schema, values, onChange }: DynamicResourc
 
         return (
           <div key={prop.propertyName} className="dynamic-form-field">
-            {prop.dataType === 'STRING' && (
-              <div className="field-wrapper">
-                <AngryTextBox
-                  id={fieldId}
-                  value={String(value ?? '')}
-                  onChange={(v) => handleChange(prop.propertyName, v, prop)}
-                  placeholder={`${prop.displayName}${prop.required ? ' *' : ''}`}
-                />
-                {prop.description && (
-                  <small className="field-help-text">{prop.description}</small>
-                )}
-                {error && (
-                  <small className="field-error-text">{error}</small>
-                )}
-              </div>
-            )}
+            {prop.dataType === 'STRING' && (() => {
+              const rules = prop.validationRules as { enum?: string[] } | undefined;
+              const hasEnum = rules?.enum && Array.isArray(rules.enum) && rules.enum.length > 0;
+              
+              if (hasEnum) {
+                // Render as combobox for enum values
+                return (
+                  <div className="field-wrapper">
+                    <label htmlFor={fieldId}>
+                      {prop.displayName}{prop.required ? ' *' : ''}
+                    </label>
+                    <AngryComboBox
+                      id={fieldId}
+                      value={String(value ?? '')}
+                      onChange={(v: string) => handleChange(prop.propertyName, v, prop)}
+                      items={rules.enum!.map(enumValue => ({ text: enumValue, value: enumValue }))}
+                      placeholder={`Select ${prop.displayName.toLowerCase()}`}
+                    />
+                    {prop.description && (
+                      <small className="field-help-text">{prop.description}</small>
+                    )}
+                    {error && (
+                      <small className="field-error-text">{error}</small>
+                    )}
+                  </div>
+                );
+              } else {
+                // Render as text box for free-form strings
+                return (
+                  <div className="field-wrapper">
+                    <label htmlFor={fieldId}>
+                      {prop.displayName}{prop.required ? ' *' : ''}
+                    </label>
+                    <AngryTextBox
+                      id={fieldId}
+                      value={String(value ?? '')}
+                      onChange={(v) => handleChange(prop.propertyName, v, prop)}
+                      placeholder={`Enter ${prop.displayName.toLowerCase()}`}
+                    />
+                    {prop.description && (
+                      <small className="field-help-text">{prop.description}</small>
+                    )}
+                    {error && (
+                      <small className="field-error-text">{error}</small>
+                    )}
+                  </div>
+                );
+              }
+            })()}
 
             {prop.dataType === 'NUMBER' && (
               <div className="field-wrapper">
+                <label htmlFor={fieldId}>
+                  {prop.displayName}{prop.required ? ' *' : ''}
+                </label>
                 <AngryTextBox
                   id={fieldId}
                   value={value !== undefined && value !== null ? String(value) : ''}
@@ -191,7 +227,7 @@ export const DynamicResourceForm = ({ schema, values, onChange }: DynamicResourc
                     const numValue = v === '' ? undefined : Number(v);
                     handleChange(prop.propertyName, numValue, prop);
                   }}
-                  placeholder={`${prop.displayName}${prop.required ? ' *' : ''}`}
+                  placeholder={`Enter ${prop.displayName.toLowerCase()}`}
                   type="number"
                 />
                 {prop.description && (

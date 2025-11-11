@@ -11,15 +11,15 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.servers.Server;
 
 /**
- * OpenAPI configuration for the Internal Developer Platform API.
+ * OpenAPI configuration for the VisuIDP API.
  * Defines security schemes, API information, and global settings.
  */
 @OpenAPIDefinition(
     info = @Info(
-        title = "Internal Developer Platform API",
+        title = "VisuIDP API",
         version = "1.0.0",
         description = """
-            RESTful API for provisioning and managing developer projects across multiple environments.
+            VisuIDP is a RESTful API for provisioning and managing developer projects across multiple environments.
             
             ## Authentication
             
@@ -70,7 +70,7 @@ import org.eclipse.microprofile.openapi.annotations.servers.Server;
             Admin access is granted based on Azure Entra ID group membership configured in the OAuth2 Proxy.
             """,
         contact = @Contact(
-            name = "IDP Support",
+            name = "VisuIDP Support",
             email = "support@angryss.com"
         )
     ),
