@@ -85,13 +85,13 @@ VALUES (
 )
 ON CONFLICT (resource_type_id, cloud_provider_id) DO NOTHING;
 
--- Managed Container Orchestrator + AWS (EKS)
+-- Managed Container Orchestrator + AWS (ECS)
 INSERT INTO resource_type_cloud_mappings (id, resource_type_id, cloud_provider_id, terraform_module_location, module_location_type, enabled, created_at, updated_at)
 VALUES (
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',
     'a1f4e5c6-7d8b-4a2f-9c01-1234567890a1',  -- Managed Container Orchestrator resource type
     '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',  -- AWS cloud provider
-    'https://github.com/terraform-aws-modules/terraform-aws-eks',
+    'https://github.com/terraform-aws-modules/terraform-aws-ecs',
     'GIT',
     true,
     NOW(),
@@ -420,31 +420,29 @@ VALUES (
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
 -- ============================================================================
--- AWS Managed Container Orchestrator (EKS) Property Schemas
+-- AWS Managed Container Orchestrator (ECS) Property Schemas
 -- ============================================================================
--- This section defines property schemas for AWS EKS clusters.
--- Properties include Kubernetes version, node instance types, node counts,
--- autoscaling configuration, and node volume sizing.
+-- This section defines property schemas for AWS ECS services.
+-- Properties include launch type, task CPU/memory, task count, auto-scaling,
+-- and EC2 instance configuration.
 --
--- Mapping ID: 'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03' (EKS + AWS)
+-- Mapping ID: 'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03' (ECS + AWS)
 -- ============================================================================
 
--- kubernetesVersion property
+-- launchType property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000001',
+    '04010000-0000-0000-0000-000000000001',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'kubernetesVersion',
-    'Kubernetes Version',
-    'The Kubernetes version for the EKS cluster. AWS EKS supports multiple Kubernetes versions, and it is recommended to use the latest stable version when possible for the newest features and security updates. Each version receives support for approximately 14 months after release. Consider your application compatibility requirements when selecting a version. Upgrading to a newer version requires careful planning and testing.',
+    'launchType',
+    'Launch Type',
+    'The launch type determines how your containers run. FARGATE is serverless and AWS manages the infrastructure. EC2 gives you more control over the underlying instances but requires managing the cluster. FARGATE is recommended for most use cases.',
     'LIST',
     true,
-    '"1.30"',
+    '"FARGATE"',
     '{"allowedValues": [
-        {"value": "1.28", "label": "1.28"},
-        {"value": "1.29", "label": "1.29"},
-        {"value": "1.30", "label": "1.30"},
-        {"value": "1.31", "label": "1.31"}
+        {"value": "FARGATE", "label": "Fargate (Serverless)"},
+        {"value": "EC2", "label": "EC2 (Managed Instances)"}
     ]}',
     10,
     NOW(),
@@ -452,27 +450,23 @@ VALUES (
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- nodeInstanceType property
+-- taskCpu property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000002',
+    '04010000-0000-0000-0000-000000000002',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'nodeInstanceType',
-    'Node Instance Type',
-    'The EC2 instance type for worker nodes in the EKS cluster. T3 instances (t3.*) are burstable performance instances suitable for development and variable workloads. M5 instances (m5.*) are general-purpose instances balanced for compute, memory, and networking, ideal for most production workloads. C5 instances (c5.*) are compute-optimized for compute-intensive applications. Choose based on your workload requirements, considering CPU, memory, and network performance needs.',
+    'taskCpu',
+    'Task CPU (CPU Units)',
+    'The number of CPU units reserved for the task. 1024 CPU units = 1 vCPU. Valid values depend on task memory: 256 (.25 vCPU), 512 (.5 vCPU), 1024 (1 vCPU), 2048 (2 vCPU), 4096 (4 vCPU).',
     'LIST',
     true,
-    '"t3.medium"',
+    '"512"',
     '{"allowedValues": [
-        {"value": "t3.small", "label": "t3.small (2 vCPU, 2 GB RAM)"},
-        {"value": "t3.medium", "label": "t3.medium (2 vCPU, 4 GB RAM)"},
-        {"value": "t3.large", "label": "t3.large (2 vCPU, 8 GB RAM)"},
-        {"value": "t3.xlarge", "label": "t3.xlarge (4 vCPU, 16 GB RAM)"},
-        {"value": "m5.large", "label": "m5.large (2 vCPU, 8 GB RAM)"},
-        {"value": "m5.xlarge", "label": "m5.xlarge (4 vCPU, 16 GB RAM)"},
-        {"value": "m5.2xlarge", "label": "m5.2xlarge (8 vCPU, 32 GB RAM)"},
-        {"value": "c5.large", "label": "c5.large (2 vCPU, 4 GB RAM)"},
-        {"value": "c5.xlarge", "label": "c5.xlarge (4 vCPU, 8 GB RAM)"}
+        {"value": "256", "label": "256 (.25 vCPU)"},
+        {"value": "512", "label": "512 (.5 vCPU)"},
+        {"value": "1024", "label": "1024 (1 vCPU)"},
+        {"value": "2048", "label": "2048 (2 vCPU)"},
+        {"value": "4096", "label": "4096 (4 vCPU)"}
     ]}',
     20,
     NOW(),
@@ -480,35 +474,43 @@ VALUES (
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- desiredNodeCount property
+-- taskMemory property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000003',
+    '04010000-0000-0000-0000-000000000003',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'desiredNodeCount',
-    'Desired Node Count',
-    'The desired number of worker nodes in the node group. This is the target number of nodes that the node group should maintain under normal conditions. The actual number of nodes may temporarily differ during scaling operations or node replacements. Valid range is 1-100 nodes. For production workloads, a minimum of 2 nodes is recommended for high availability. Consider your workload requirements and cost constraints when setting this value.',
-    'NUMBER',
+    'taskMemory',
+    'Task Memory (MiB)',
+    'The amount of memory (in MiB) reserved for the task. Valid values depend on task CPU. For 512 CPU: 1024-4096 MiB. For 1024 CPU: 2048-8192 MiB. For 2048 CPU: 4096-16384 MiB. For 4096 CPU: 8192-30720 MiB.',
+    'LIST',
     true,
-    '2',
-    '{"min": 1, "max": 100}',
+    '"1024"',
+    '{"allowedValues": [
+        {"value": "512", "label": "512 MiB"},
+        {"value": "1024", "label": "1024 MiB"},
+        {"value": "2048", "label": "2048 MiB"},
+        {"value": "4096", "label": "4096 MiB"},
+        {"value": "8192", "label": "8192 MiB"},
+        {"value": "16384", "label": "16384 MiB"},
+        {"value": "30720", "label": "30720 MiB"}
+    ]}',
     30,
     NOW(),
     NOW()
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- minNodeCount property
+-- desiredTaskCount property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000004',
+    '04010000-0000-0000-0000-000000000004',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'minNodeCount',
-    'Minimum Node Count',
-    'The minimum number of worker nodes in the node group when autoscaling is enabled. The node group will not scale below this number even during periods of low demand. Valid range is 1-100 nodes. This value should be less than or equal to the desired node count and less than the maximum node count. Setting an appropriate minimum helps ensure your cluster maintains sufficient capacity to handle baseline workloads and provides a buffer for sudden traffic spikes.',
+    'desiredTaskCount',
+    'Desired Task Count',
+    'The number of task instances to run simultaneously. Minimum 2 is recommended for high availability. ECS will maintain this number of running tasks.',
     'NUMBER',
-    false,
-    '1',
+    true,
+    '"2"',
     '{"min": 1, "max": 100}',
     40,
     NOW(),
@@ -516,55 +518,84 @@ VALUES (
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- maxNodeCount property
+-- enableAutoScaling property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000005',
+    '04010000-0000-0000-0000-000000000005',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'maxNodeCount',
-    'Maximum Node Count',
-    'The maximum number of worker nodes in the node group when autoscaling is enabled. The node group will not scale above this number even during periods of high demand. Valid range is 1-100 nodes. This value should be greater than or equal to the desired node count and greater than the minimum node count. Setting an appropriate maximum helps control costs while ensuring your cluster can scale to handle peak workloads. Consider your budget constraints and maximum expected load when setting this value.',
-    'NUMBER',
+    'enableAutoScaling',
+    'Enable Auto Scaling',
+    'Enable auto scaling to automatically adjust the number of running tasks based on CloudWatch metrics (CPU utilization, memory utilization, or custom metrics). When enabled, ECS will scale between minimum and maximum task counts.',
+    'BOOLEAN',
     false,
-    '4',
-    '{"min": 1, "max": 100}',
+    '"false"',
+    '{}',
     50,
     NOW(),
     NOW()
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- enableClusterAutoscaler property
+-- minTaskCount property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000006',
+    '04010000-0000-0000-0000-000000000006',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'enableClusterAutoscaler',
-    'Enable Cluster Autoscaler',
-    'Automatically scale the number of worker nodes in the cluster based on pod resource requests and cluster utilization. When enabled, the Kubernetes Cluster Autoscaler will monitor pending pods that cannot be scheduled due to insufficient resources and automatically add nodes to the cluster. It will also remove underutilized nodes when they are no longer needed. This helps optimize costs by scaling down during low demand while ensuring sufficient capacity during peak loads. Requires minNodeCount and maxNodeCount to be configured to define the scaling boundaries.',
-    'BOOLEAN',
+    'minTaskCount',
+    'Minimum Task Count',
+    'The minimum number of tasks to maintain when auto scaling is enabled. ECS will not scale below this number even under low load. Only applies when auto scaling is enabled.',
+    'NUMBER',
     false,
-    'false',
-    '{}',
+    '"1"',
+    '{"min": 1, "max": 100}',
     60,
     NOW(),
     NOW()
 )
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
--- nodeVolumeSize property
+-- maxTaskCount property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '03010000-0000-0000-0000-000000000007',
+    '04010000-0000-0000-0000-000000000007',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'nodeVolumeSize',
-    'Node Volume Size (GB)',
-    'The size of the EBS volume attached to each worker node in gigabytes. This volume stores the operating system, container images, and ephemeral storage for running containers. Valid range is 20-1000 GB. The default of 20 GB is sufficient for most workloads, but you may need to increase this if you run many large container images or have applications that require significant local storage. Consider your container image sizes and local storage requirements when setting this value. Note that increasing volume size after cluster creation requires node replacement.',
+    'maxTaskCount',
+    'Maximum Task Count',
+    'The maximum number of tasks to run when auto scaling is enabled. ECS will not scale above this number even under high load. Only applies when auto scaling is enabled.',
     'NUMBER',
     false,
-    '20',
-    '{"min": 20, "max": 1000}',
+    '"10"',
+    '{"min": 1, "max": 100}',
     70,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (mapping_id, property_name) DO NOTHING;
+
+-- instanceType property
+INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
+VALUES (
+    '04010000-0000-0000-0000-000000000008',
+    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
+    'instanceType',
+    'EC2 Instance Type',
+    'The EC2 instance type for the ECS cluster nodes. Only applies when launch type is EC2. t3 instances are burstable and cost-effective, m5 are general purpose, c5 are compute-optimized. Ignored when using FARGATE launch type.',
+    'LIST',
+    false,
+    '"t3.medium"',
+    '{"allowedValues": [
+        {"value": "t3.small", "label": "t3.small"},
+        {"value": "t3.medium", "label": "t3.medium"},
+        {"value": "t3.large", "label": "t3.large"},
+        {"value": "t3.xlarge", "label": "t3.xlarge"},
+        {"value": "m5.large", "label": "m5.large"},
+        {"value": "m5.xlarge", "label": "m5.xlarge"},
+        {"value": "m5.2xlarge", "label": "m5.2xlarge"},
+        {"value": "c5.large", "label": "c5.large"},
+        {"value": "c5.xlarge", "label": "c5.xlarge"},
+        {"value": "c5.2xlarge", "label": "c5.2xlarge"}
+    ]}',
+    80,
     NOW(),
     NOW()
 )
@@ -583,7 +614,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- serviceType property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000001',
+    '05010000-0000-0000-0000-000000000001',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'serviceType',
     'Service Type',
@@ -605,7 +636,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- messageRetentionPeriod property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000002',
+    '05010000-0000-0000-0000-000000000002',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'messageRetentionPeriod',
     'Message Retention (Seconds)',
@@ -623,7 +654,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- visibilityTimeout property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000003',
+    '05010000-0000-0000-0000-000000000003',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'visibilityTimeout',
     'Visibility Timeout (Seconds)',
@@ -641,7 +672,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- fifoQueue property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000004',
+    '05010000-0000-0000-0000-000000000004',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'fifoQueue',
     'FIFO Queue',
@@ -659,7 +690,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- contentBasedDeduplication property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000005',
+    '05010000-0000-0000-0000-000000000005',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'contentBasedDeduplication',
     'Content-Based Deduplication',
@@ -677,7 +708,7 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- maxMessageSize property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000006',
+    '05010000-0000-0000-0000-000000000006',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f04',  -- Service Bus + AWS mapping
     'maxMessageSize',
     'Max Message Size (Bytes)',
