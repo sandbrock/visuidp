@@ -21,7 +21,8 @@ export default defineConfig(({ command }) => ({
           'X-Auth-Request-User': 'brandon.rock',
           'X-Auth-Request-Email': 'brandon.rock@angryss.com',
           'X-Auth-Request-Preferred-Username': 'brandon.rock',
-          'X-Auth-Request-Groups': 'user',
+          // Include the admin group UUID from .env to grant admin role in development
+          'X-Auth-Request-Groups': '42057c4f-09f2-4b9c-bbd2-53e838b3bccb',
         },
       },
     },

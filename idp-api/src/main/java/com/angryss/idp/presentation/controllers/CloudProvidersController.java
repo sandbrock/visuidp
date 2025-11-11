@@ -111,7 +111,7 @@ public class CloudProvidersController {
      * @param enabled The new enabled status
      * @return Response with no content
      */
-    @PATCH
+    @PUT
     @Path("/{id}/toggle")
     @Operation(summary = "Toggle cloud provider enabled status", description = "Enables or disables a cloud provider")
     @APIResponse(responseCode = "204", description = "Cloud provider status toggled successfully")
@@ -120,7 +120,19 @@ public class CloudProvidersController {
     @APIResponse(responseCode = "403", description = "Forbidden - Admin role required")
     public Response toggleEnabled(
             @Parameter(description = "Cloud provider ID") @PathParam("id") UUID id,
-            @Parameter(description = "Enabled status") @QueryParam("enabled") Boolean enabled) {
+            @Parameter(description = "Enabled status") @QueryParam("enabled") Boolean enabled,
+            @jakarta.ws.rs.core.Context jakarta.ws.rs.core.SecurityContext securityContext,
+            @HeaderParam("X-Auth-Request-Groups") String groups) {
+        // Debug logging
+        System.out.println("=== Toggle Cloud Provider Debug ===");
+        System.out.println("Provider ID: " + id);
+        System.out.println("Enabled: " + enabled);
+        System.out.println("X-Auth-Request-Groups header: " + groups);
+        System.out.println("User principal: " + (securityContext.getUserPrincipal() != null ? securityContext.getUserPrincipal().getName() : "null"));
+        System.out.println("Is admin: " + securityContext.isUserInRole("admin"));
+        System.out.println("Is user: " + securityContext.isUserInRole("user"));
+        System.out.println("===================================");
+        
         if (enabled == null) {
             throw new BadRequestException("Enabled parameter is required");
         }
