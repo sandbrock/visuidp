@@ -176,12 +176,13 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
   const filteredCloudProvidersForResource = useMemo(() => {
     const supportedProviderIds = selectedBlueprint?.supportedCloudProviderIds;
     
-    // If blueprint has supported cloud providers, filter to those
+    // Only show cloud providers that are in the blueprint's supportedCloudProviderIds
     if (supportedProviderIds && supportedProviderIds.length > 0) {
       return cloudProviders.filter(cp => supportedProviderIds.includes(cp.id));
     }
     
-    return cloudProviders;
+    // If blueprint has no supported cloud providers, return empty array
+    return [];
   }, [selectedBlueprint?.supportedCloudProviderIds, cloudProviders]);
 
   const handleResourceUpdate = async (resource: BlueprintResource) => {
@@ -294,7 +295,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
       case 'container orchestrator':
         return {
           type: 'container-orchestrator',
-          cloudServiceName: 'default-cluster'
+          cloudServiceName: ''
         };
       case 'relational database server':
         return {
@@ -316,7 +317,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
       default:
         return {
           type: 'container-orchestrator',
-          cloudServiceName: 'default-cluster'
+          cloudServiceName: ''
         };
     }
   };
@@ -741,6 +742,15 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                     
                     <div className="form-group">
                       <AngryTextBox
+                        id="cloud-service-name"
+                        value={(resourceFormData.configuration as Record<string, unknown>)?.cloudServiceName as string || ''}
+                        onChange={(v) => handleResourceFormChange('configuration', { ...(resourceFormData.configuration as Record<string, unknown> || {}), cloudServiceName: v })}
+                        placeholder="Cloud Service Name *"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <AngryTextBox
                         id="resource-description"
                         value={resourceFormData.description || ''}
                         onChange={(v) => handleResourceFormChange('description', v)}
@@ -760,15 +770,6 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                         onChange={(val) => handleResourceFormChange('resourceTypeId', val)}
                         placeholder="Resource Type *"
                         disabled={resourceTypes.length === 0 || resourceMode === 'edit'}
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <AngryTextBox
-                        id="cloud-service-name"
-                        value={(resourceFormData.configuration as Record<string, unknown>)?.cloudServiceName as string || ''}
-                        onChange={(v) => handleResourceFormChange('configuration', { ...(resourceFormData.configuration as Record<string, unknown> || {}), cloudServiceName: v })}
-                        placeholder="Cloud Service Name *"
                       />
                     </div>
                     

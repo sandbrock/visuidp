@@ -5,6 +5,7 @@ import type { User } from '../types/auth';
 import type { CloudProvider, ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBoxGroup } from './input';
+import { Modal } from './Modal';
 import './BlueprintForm.css';
 
 interface BlueprintFormProps {
@@ -29,12 +30,21 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
   // Cloud providers and resource types
   const [cloudProviders, setCloudProviders] = useState<CloudProvider[]>([]);
   const [availableResourceTypes, setAvailableResourceTypes] = useState<ResourceType[]>([]);
+  const [cloudProvidersLoaded, setCloudProvidersLoaded] = useState(false);
   const [selectedCloudProviderIds, setSelectedCloudProviderIds] = useState<string[]>([]);
   const [selectedResources, setSelectedResources] = useState<Array<{
     resourceTypeId: string;
     name: string;
     cloudProviderId: string;
     configuration: Record<string, unknown>;
+  }>>([]);
+  
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingCloudProviderChange, setPendingCloudProviderChange] = useState<string[] | null>(null);
+  const [affectedResources, setAffectedResources] = useState<Array<{
+    name: string;
+    cloudProviderName: string;
   }>>([]);
 
   // Focus the name input when the form mounts
@@ -112,6 +122,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
         ]);
         setCloudProviders(providers);
         setAvailableResourceTypes(resourceTypes);
+        setCloudProvidersLoaded(true);
       } catch (e) {
         console.error('Failed to load cloud providers or resource types', e);
       }
@@ -166,16 +177,51 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
   };
 
   const handleCloudProviderChange = (newSelection: string[]) => {
-    setSelectedCloudProviderIds(prev => {
-      // Remove resources that are not compatible with remaining cloud providers
-      if (newSelection.length < prev.length) {
-        setSelectedResources(current => 
-          current.filter(res => newSelection.includes(res.cloudProviderId))
-        );
-      }
+    // Check if we're removing providers
+    if (newSelection.length < selectedCloudProviderIds.length) {
+      const removedProviders = selectedCloudProviderIds.filter(id => !newSelection.includes(id));
+      const resourcesAffected = selectedResources.filter(res => 
+        removedProviders.includes(res.cloudProviderId)
+      );
       
-      return newSelection;
-    });
+      // If there are affected resources, show confirmation dialog
+      if (resourcesAffected.length > 0) {
+        const affectedResourcesList = resourcesAffected.map(res => ({
+          name: res.name,
+          cloudProviderName: cloudProviders.find(cp => cp.id === res.cloudProviderId)?.displayName || 'Unknown'
+        }));
+        
+        setAffectedResources(affectedResourcesList);
+        setPendingCloudProviderChange(newSelection);
+        setShowConfirmDialog(true);
+        return; // Don't apply the change yet
+      }
+    }
+    
+    // No affected resources or adding providers, apply change immediately
+    setSelectedCloudProviderIds(newSelection);
+  };
+  
+  const handleConfirmCloudProviderChange = () => {
+    if (pendingCloudProviderChange) {
+      // Apply the pending change and remove incompatible resources
+      setSelectedCloudProviderIds(pendingCloudProviderChange);
+      setSelectedResources(current => 
+        current.filter(res => pendingCloudProviderChange.includes(res.cloudProviderId))
+      );
+    }
+    
+    // Reset dialog state
+    setShowConfirmDialog(false);
+    setPendingCloudProviderChange(null);
+    setAffectedResources([]);
+  };
+  
+  const handleCancelCloudProviderChange = () => {
+    // Cancel the change, keep existing selection
+    setShowConfirmDialog(false);
+    setPendingCloudProviderChange(null);
+    setAffectedResources([]);
   };
 
   const handleAddResource = async (resourceTypeId: string, cloudProviderId: string) => {
@@ -275,11 +321,18 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
           </div>
 
           {/* Resources Section */}
-          {selectedCloudProviderIds.length > 0 && (
-            <div className="resources-section">
-              <h3>Shared Infrastructure Resources</h3>
-              
-              {selectedResources.map((resource, index) => {
+          <div className="resources-section">
+            <h3>Shared Infrastructure Resources</h3>
+            
+            {selectedCloudProviderIds.length === 0 ? (
+              <div className="info-message">
+                <p>Please select at least one cloud provider above before adding resources.</p>
+              </div>
+            ) : (
+              <>
+                {cloudProvidersLoaded && selectedCloudProviderIds.length > 0 && selectedResources.length > 0 && (
+                  <div className="resources-list">
+                    {selectedResources.map((resource, index) => {
                 const resourceType = availableResourceTypes.find(rt => rt.id === resource.resourceTypeId);
                 return (
                   <div key={index} className="resource-item">
@@ -303,9 +356,15 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                       <div className="resource-type-info">
                         <strong>Type:</strong> {resourceType?.displayName || 'Unknown'}
                       </div>
+                      <div className="resource-cloud-provider-badge">
+                        <span className="cloud-provider-badge">
+                          {cloudProviders.find(cp => cp.id === resource.cloudProviderId)?.displayName || 'Unknown Provider'}
+                        </span>
+                      </div>
                       <div className="form-group">
                         <label htmlFor={`resource-cloud-${index}`}>Cloud Provider *</label>
                         <AngryComboBox
+                          key={`resource-cloud-${index}-${selectedCloudProviderIds.join(',')}`}
                           id={`resource-cloud-${index}`}
                           value={resource.cloudProviderId}
                           onChange={(val: string) => handleResourceCloudProviderChange(index, val)}
@@ -329,40 +388,43 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                     </div>
                   </div>
                 );
-              })}
+                    })}
+                  </div>
+                )}
 
-              <div className="add-resource-section">
-                <label htmlFor="add-resource-type">Add Shared Resource</label>
-                <div className="add-resource-controls">
-                  <select
-                    id="add-resource-type"
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        const [resourceTypeId, cloudProviderId] = e.target.value.split('|');
-                        handleAddResource(resourceTypeId, cloudProviderId);
-                        e.target.value = '';
-                      }
-                    }}
-                    disabled={loading}
-                    className="add-resource-select"
-                  >
-                    <option value="">Select a resource type and cloud provider...</option>
-                    {availableResourceTypes.map(rt => (
-                      <optgroup key={rt.id} label={rt.displayName}>
-                        {cloudProviders
-                          .filter(cp => selectedCloudProviderIds.includes(cp.id))
-                          .map(cp => (
-                            <option key={`${rt.id}|${cp.id}`} value={`${rt.id}|${cp.id}`}>
-                              {cp.displayName}
-                            </option>
-                          ))}
-                      </optgroup>
-                    ))}
-                  </select>
+                <div className="add-resource-section">
+                  <label htmlFor="add-resource-type">Add Shared Resource</label>
+                  <div className="add-resource-controls">
+                    <select
+                      id="add-resource-type"
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          const [resourceTypeId, cloudProviderId] = e.target.value.split('|');
+                          handleAddResource(resourceTypeId, cloudProviderId);
+                          e.target.value = '';
+                        }
+                      }}
+                      disabled={loading}
+                      className="add-resource-select"
+                    >
+                      <option value="">Select a resource type and cloud provider...</option>
+                      {availableResourceTypes.map(rt => (
+                        <optgroup key={rt.id} label={rt.displayName}>
+                          {cloudProviders
+                            .filter(cp => selectedCloudProviderIds.includes(cp.id))
+                            .map(cp => (
+                              <option key={`${rt.id}|${cp.id}`} value={`${rt.id}|${cp.id}`}>
+                                {cp.displayName}
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           <div className="form-actions">
             <AngryButton
@@ -383,6 +445,42 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
           </div>
         </form>
       </div>
+      
+      {/* Confirmation Dialog for Cloud Provider Deselection */}
+      <Modal
+        isOpen={showConfirmDialog}
+        onClose={handleCancelCloudProviderChange}
+        title="Remove Cloud Provider?"
+        width="600px"
+        buttons={[
+          {
+            label: 'Cancel',
+            onClick: handleCancelCloudProviderChange,
+            variant: 'secondary'
+          },
+          {
+            label: 'Remove',
+            onClick: handleConfirmCloudProviderChange,
+            variant: 'danger'
+          }
+        ]}
+      >
+        <div className="confirmation-dialog-content">
+          <p>
+            Removing the selected cloud provider(s) will delete <strong>{affectedResources.length}</strong> resource(s):
+          </p>
+          <ul className="affected-resources-list">
+            {affectedResources.map((resource, index) => (
+              <li key={index}>
+                <strong>{resource.name}</strong> ({resource.cloudProviderName})
+              </li>
+            ))}
+          </ul>
+          <p>
+            This action cannot be undone. Do you want to continue?
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };

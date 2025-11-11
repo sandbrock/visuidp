@@ -185,6 +185,7 @@ export const apiService = {
           blueprintTypeName?: string; 
           configuration?: unknown; 
           supportedCloudTypes?: string[];
+          supportedCloudProviderIds?: string[];
           resources?: BlueprintResourceBackendDto[];
         }>).map((b) => ({
           id: b.id,
@@ -194,6 +195,7 @@ export const apiService = {
           blueprintTypeName: b.blueprintTypeName ?? null,
           configuration: b.configuration,
           supportedCloudTypes: b.supportedCloudTypes ?? [],
+          supportedCloudProviderIds: b.supportedCloudProviderIds ?? [],
           resources: b.resources?.map(transformBlueprintResourceFromBackend),
         }));
       }
