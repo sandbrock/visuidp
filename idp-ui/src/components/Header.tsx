@@ -19,7 +19,7 @@ export const Header = ({ user }: HeaderProps) => {
       <div className="header-content">
         <div className="header-left">
           <h1 className="app-title">
-            <Link to="/">IDP Portal</Link>
+            <Link to="/">VisuIDP</Link>
           </h1>
           <nav className="header-nav">
             <Link

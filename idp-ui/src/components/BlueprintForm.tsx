@@ -358,15 +358,18 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                       <div className="resource-type-info">
                         <strong>Type:</strong> {resourceType?.displayName || 'Unknown'}
                       </div>
-                      <AngryComboBox
-                        id={`resource-cloud-${index}`}
-                        value={resource.cloudProviderId}
-                        onChange={(val: string) => handleResourceCloudProviderChange(index, val)}
-                        items={cloudProviders
-                          .filter(cp => selectedCloudProviderIds.includes(cp.id))
-                          .map(cp => ({ text: cp.displayName, value: cp.id }))}
-                        placeholder="Cloud Provider *"
-                      />
+                      <div className="form-group">
+                        <label htmlFor={`resource-cloud-${index}`}>Cloud Provider *</label>
+                        <AngryComboBox
+                          id={`resource-cloud-${index}`}
+                          value={resource.cloudProviderId}
+                          onChange={(val: string) => handleResourceCloudProviderChange(index, val)}
+                          items={cloudProviders
+                            .filter(cp => selectedCloudProviderIds.includes(cp.id))
+                            .map(cp => ({ text: cp.displayName, value: cp.id }))}
+                          placeholder="Select cloud provider"
+                        />
+                      </div>
                     </div>
                     
                     <div className="resource-config">

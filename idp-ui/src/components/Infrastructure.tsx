@@ -342,6 +342,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="aws-storage-tier">Storage Tier</label>
                 <AngryComboBox
                   id="aws-storage-tier"
                   items={[
@@ -351,10 +352,11 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.storageTier as string) || 'standard'}
                   onChange={(val) => onChange({ ...properties, storageTier: val })}
-                  placeholder="Storage Tier"
+                  placeholder="Select storage tier"
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="aws-storage-class">Storage Class *</label>
                 <AngryComboBox
                   id="aws-storage-class"
                   items={[
@@ -367,10 +369,11 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.storageClass as string) || 'STANDARD'}
                   onChange={(val) => onChange({ ...properties, storageClass: val })}
-                  placeholder="Storage Class *"
+                  placeholder="Select storage class"
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="aws-versioning">Versioning Status *</label>
                 <AngryComboBox
                   id="aws-versioning"
                   items={[
@@ -380,10 +383,11 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.versioning as string) || 'Enabled'}
                   onChange={(val) => onChange({ ...properties, versioning: val })}
-                  placeholder="Versioning Status *"
+                  placeholder="Select versioning status"
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="aws-encryption">Default Encryption *</label>
                 <AngryComboBox
                   id="aws-encryption"
                   items={[
@@ -393,10 +397,11 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.encryption as string) || 'AES256'}
                   onChange={(val) => onChange({ ...properties, encryption: val })}
-                  placeholder="Default Encryption *"
+                  placeholder="Select encryption type"
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="aws-block-public-access">Block Public Access *</label>
                 <AngryComboBox
                   id="aws-block-public-access"
                   items={[
@@ -405,7 +410,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.blockPublicAccess as string) || 'Enabled'}
                   onChange={(val) => onChange({ ...properties, blockPublicAccess: val })}
-                  placeholder="Block Public Access *"
+                  placeholder="Select public access setting"
                 />
               </div>
               <div className="form-group">
@@ -423,6 +428,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             <div className="config-form">
               <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>AWS RDS Properties</h5>
               <div className="form-group">
+                <label htmlFor="aws-instance-class">Instance Class *</label>
                 <AngryComboBox
                   id="aws-instance-class"
                   items={[
@@ -434,7 +440,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.instanceClass as string) || 'db.t3.micro'}
                   onChange={(val) => onChange({ ...properties, instanceClass: val })}
-                  placeholder="Instance Class *"
+                  placeholder="Select instance class"
                 />
               </div>
               <div className="form-group">
@@ -467,6 +473,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="azure-replication">Replication Type</label>
                 <AngryComboBox
                   id="azure-replication"
                   items={[
@@ -477,7 +484,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.replication as string) || 'LRS'}
                   onChange={(val) => onChange({ ...properties, replication: val })}
-                  placeholder="Replication Type"
+                  placeholder="Select replication type"
                 />
               </div>
             </div>
@@ -487,6 +494,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             <div className="config-form">
               <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Azure Database Properties</h5>
               <div className="form-group">
+                <label htmlFor="azure-tier">Service Tier</label>
                 <AngryComboBox
                   id="azure-tier"
                   items={[
@@ -496,7 +504,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.tier as string) || 'Basic'}
                   onChange={(val) => onChange({ ...properties, tier: val })}
-                  placeholder="Service Tier"
+                  placeholder="Select service tier"
                 />
               </div>
               <div className="form-group">
@@ -529,6 +537,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                 />
               </div>
               <div className="form-group">
+                <label htmlFor="gcp-storage-class">Storage Class</label>
                 <AngryComboBox
                   id="gcp-storage-class"
                   items={[
@@ -539,7 +548,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.storageClass as string) || 'STANDARD'}
                   onChange={(val) => onChange({ ...properties, storageClass: val })}
-                  placeholder="Storage Class"
+                  placeholder="Select storage class"
                 />
               </div>
             </div>
@@ -549,6 +558,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             <div className="config-form">
               <h5 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 600 }}>Google Cloud SQL Properties</h5>
               <div className="form-group">
+                <label htmlFor="gcp-tier">Machine Tier</label>
                 <AngryComboBox
                   id="gcp-tier"
                   items={[
@@ -560,7 +570,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   ]}
                   value={(properties.tier as string) || 'db-f1-micro'}
                   onChange={(val) => onChange({ ...properties, tier: val })}
-                  placeholder="Machine Tier"
+                  placeholder="Select machine tier"
                 />
               </div>
               <div className="form-group">

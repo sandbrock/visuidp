@@ -14,10 +14,13 @@
 .angry-checkbox-group-items {
   display: flex;
   gap: 12px;
+  width: 100%;
 }
 
 .angry-checkbox-group-vertical {
   flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .angry-checkbox-group-horizontal {
@@ -27,11 +30,14 @@
 
 /* Checkbox styling */
 .angry-checkbox {
-  display: flex;
-  align-items: center;
+  display: grid !important;
+  grid-template-columns: 18px 1fr;
   gap: 8px;
+  align-items: start;
   cursor: pointer;
   user-select: none;
+  min-height: 24px;
+  width: 100%;
 }
 
 .angry-checkbox input[type="checkbox"] {
@@ -39,6 +45,9 @@
   height: 18px;
   cursor: pointer;
   accent-color: var(--border-primary);
+  margin: 0;
+  margin-top: 3px;
+  flex-shrink: 0;
 }
 
 .angry-checkbox input[type="checkbox"]:disabled {
@@ -54,4 +63,19 @@
 
 .angry-checkbox input[type="checkbox"]:disabled + span {
   opacity: 0.6;
+}
+
+/* Override form-group label styles */
+.form-group .angry-checkbox-group-label {
+  display: block !important;
+  margin-bottom: 0.5rem;
+}
+
+.form-group .angry-checkbox-group-vertical .angry-checkbox {
+  display: grid !important;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 0;
+  width: 100%;
 }

@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Determine repository root (prefers git, falls back to script parent)
+# Determine idp-api directory (script is in idp-api/scripts/)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if git -C "$SCRIPT_DIR" rev-parse --show-toplevel >/dev/null 2>&1; then
-  REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
-else
-  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-fi
+IDP_API_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-cd "$REPO_ROOT"
-echo "Running Flyway clean at start via Quarkus dev in: $REPO_ROOT"
+cd "$IDP_API_ROOT"
+echo "Running Flyway clean at start via Quarkus dev in: $IDP_API_ROOT"
 exec ./mvnw quarkus:dev -Dquarkus.flyway.clean-at-start=true -DskipTests
 

@@ -1,6 +1,6 @@
-# IDP REST API
+# VisuIDP REST API
 
-A Quarkus-based RESTful API for the Internal Developer Platform, implementing Clean Architecture principles for provisioning and managing developer projects across multiple environments.
+A Quarkus-based RESTful API for VisuIDP (Internal Developer Platform), implementing Clean Architecture principles for provisioning and managing developer projects across multiple environments.
 
 ## Prerequisites
 
@@ -166,7 +166,7 @@ For CLI tools, CI/CD pipelines, and scripts:
 - **Key Management**: Create, rotate, and revoke keys via UI or API endpoints
 
 **Managing Keys via UI** (Recommended):
-1. Log in to the IDP UI at `https://localhost:8443/ui/`
+1. Log in to the VisuIDP UI at `https://localhost:8443/ui/`
 2. Click "API Keys" in the navigation menu
 3. Create, rotate, or revoke your personal API keys
 

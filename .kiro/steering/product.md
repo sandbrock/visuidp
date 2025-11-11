@@ -1,6 +1,6 @@
 # Product Overview
 
-This is an Internal Developer Platform (IDP) that automates provisioning and management of developer projects across multiple environments.
+VisuIDP is an Internal Developer Platform (IDP) that automates provisioning and management of developer projects across multiple environments.
 
 ## Core Concept
 
