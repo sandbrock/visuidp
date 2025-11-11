@@ -441,6 +441,83 @@ public class BlueprintServiceTest {
         assertTrue(exception.getMessage().contains(disabledCloudName));
     }
 
+    @Test
+    @Transactional
+    public void testCreateBlueprintWithEcsProperties() {
+        // Given - Create blueprint with Managed Container Orchestrator resource and ECS properties
+        BlueprintCreateDto createDto = new BlueprintCreateDto();
+        createDto.setName("ECS Blueprint " + UUID.randomUUID());
+        createDto.setDescription("Blueprint with ECS Container Orchestrator");
+        createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
+
+        // Create resource with custom ECS properties
+        BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
+        resourceDto.setName("ECS Container Orchestrator");
+        resourceDto.setDescription("AWS ECS Container Orchestrator with custom configuration");
+        resourceDto.setBlueprintResourceTypeId(resourceTypeId);
+        resourceDto.setCloudType("AWS");
+        resourceDto.setConfiguration(new ContainerOrchestratorConfiguration());
+        
+        // Configure ECS-specific properties with custom values
+        Map<String, Object> ecsProperties = new HashMap<>();
+        ecsProperties.put("launchType", "EC2");  // Custom: EC2 instead of default FARGATE
+        ecsProperties.put("taskCpu", "1024");    // Custom: 1 vCPU instead of default 512
+        ecsProperties.put("taskMemory", "2048"); // Custom: 2048 MiB instead of default 1024
+        ecsProperties.put("desiredTaskCount", "3"); // Custom: 3 tasks instead of default 2
+        ecsProperties.put("enableAutoScaling", "true"); // Custom: enabled instead of default false
+        ecsProperties.put("minTaskCount", "2");  // Custom: min 2 tasks instead of default 1
+        ecsProperties.put("maxTaskCount", "5");  // Custom: max 5 tasks instead of default 10
+        ecsProperties.put("instanceType", "m5.large"); // Custom: m5.large instead of default t3.medium
+        
+        resourceDto.setCloudSpecificProperties(ecsProperties);
+        createDto.setResources(List.of(resourceDto));
+
+        // When - Create the blueprint
+        BlueprintResponseDto result = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(result.getId());
+
+        // Then - Verify blueprint was created successfully
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertTrue(result.getName().startsWith("ECS Blueprint"));
+        assertEquals("Blueprint with ECS Container Orchestrator", result.getDescription());
+        
+        // Verify resource was created
+        assertNotNull(result.getResources());
+        assertEquals(1, result.getResources().size());
+        assertEquals("ECS Container Orchestrator", result.getResources().get(0).getName());
+        assertEquals(resourceTypeId, result.getResources().get(0).getBlueprintResourceTypeId());
+
+        // Verify ECS properties are persisted correctly
+        Map<String, Object> savedProperties = result.getResources().get(0).getCloudSpecificProperties();
+        assertNotNull(savedProperties, "Cloud specific properties should not be null");
+        assertEquals("EC2", savedProperties.get("launchType"), "Launch type should be EC2");
+        assertEquals("1024", savedProperties.get("taskCpu"), "Task CPU should be 1024");
+        assertEquals("2048", savedProperties.get("taskMemory"), "Task memory should be 2048");
+        assertEquals("3", savedProperties.get("desiredTaskCount"), "Desired task count should be 3");
+        assertEquals("true", savedProperties.get("enableAutoScaling"), "Auto scaling should be enabled");
+        assertEquals("2", savedProperties.get("minTaskCount"), "Min task count should be 2");
+        assertEquals("5", savedProperties.get("maxTaskCount"), "Max task count should be 5");
+        assertEquals("m5.large", savedProperties.get("instanceType"), "Instance type should be m5.large");
+
+        // Verify persistence by retrieving the blueprint again
+        Blueprint savedBlueprint = Blueprint.findById(result.getId());
+        assertNotNull(savedBlueprint, "Blueprint should be persisted");
+        assertEquals(1, savedBlueprint.getResources().size(), "Blueprint should have 1 resource");
+        
+        BlueprintResource savedResource = savedBlueprint.getResources().iterator().next();
+        Map<String, Object> persistedProperties = savedResource.getCloudSpecificProperties();
+        assertNotNull(persistedProperties, "Persisted properties should not be null");
+        assertEquals("EC2", persistedProperties.get("launchType"), "Persisted launch type should be EC2");
+        assertEquals("1024", persistedProperties.get("taskCpu"), "Persisted task CPU should be 1024");
+        assertEquals("2048", persistedProperties.get("taskMemory"), "Persisted task memory should be 2048");
+        assertEquals("3", persistedProperties.get("desiredTaskCount"), "Persisted desired task count should be 3");
+        assertEquals("true", persistedProperties.get("enableAutoScaling"), "Persisted auto scaling should be enabled");
+        assertEquals("2", persistedProperties.get("minTaskCount"), "Persisted min task count should be 2");
+        assertEquals("5", persistedProperties.get("maxTaskCount"), "Persisted max task count should be 5");
+        assertEquals("m5.large", persistedProperties.get("instanceType"), "Persisted instance type should be m5.large");
+    }
+
     /**
      * Helper method to create a test blueprint without resources
      */
