@@ -11,3 +11,6 @@ const localStorageMock = {
 };
 
 global.localStorage = localStorageMock as Storage;
+
+// Mock scrollIntoView for jsdom
+Element.prototype.scrollIntoView = () => {};

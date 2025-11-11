@@ -85,28 +85,17 @@ export interface ResourceTypeCloudMappingUpdate {
 
 export type PropertyDataType = 'STRING' | 'NUMBER' | 'BOOLEAN' | 'LIST';
 
-// Validation rule types for different data types
-export interface StringValidationRules {
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  enum?: string[];
-}
-
-export interface NumberValidationRules {
+// Validation rules interface matching backend DTO structure
+export interface ValidationRules {
   min?: number;
   max?: number;
-  integer?: boolean;
+  pattern?: string;
+  allowedValues?: Array<{ value: string; label: string }>;
+  minLength?: number;
+  maxLength?: number;
 }
 
-export interface ListValidationRules {
-  minItems?: number;
-  maxItems?: number;
-  itemType?: 'string' | 'number' | 'boolean';
-}
-
-export type ValidationRules = StringValidationRules | NumberValidationRules | ListValidationRules | Record<string, unknown>;
-
+// Property schema interface matching backend DTO structure
 export interface PropertySchema {
   id: string;
   mappingId: string;
@@ -118,6 +107,15 @@ export interface PropertySchema {
   defaultValue?: unknown;
   validationRules?: ValidationRules;
   displayOrder?: number;
+}
+
+// API response interface for property schema endpoints
+export interface PropertySchemaResponse {
+  resourceTypeId: string;
+  resourceTypeName: string;
+  cloudProviderId: string;
+  cloudProviderName: string;
+  properties: PropertySchema[];
 }
 
 export interface PropertySchemaCreate {
@@ -198,18 +196,7 @@ export function getModuleLocationTypeDisplayName(locationType: ModuleLocationTyp
   return ModuleLocationTypeDisplayNames[locationType];
 }
 
-// Type guards for validation rules
-export function isStringValidationRules(rules: ValidationRules | undefined): rules is StringValidationRules {
-  if (!rules) return false;
-  return 'minLength' in rules || 'maxLength' in rules || 'pattern' in rules || 'enum' in rules;
-}
-
-export function isNumberValidationRules(rules: ValidationRules | undefined): rules is NumberValidationRules {
-  if (!rules) return false;
-  return 'min' in rules || 'max' in rules || 'integer' in rules;
-}
-
-export function isListValidationRules(rules: ValidationRules | undefined): rules is ListValidationRules {
-  if (!rules) return false;
-  return 'minItems' in rules || 'maxItems' in rules || 'itemType' in rules;
+// Helper function to check if validation rules contain allowed values (for LIST types)
+export function hasAllowedValues(rules: ValidationRules | undefined): boolean {
+  return !!(rules && rules.allowedValues && rules.allowedValues.length > 0);
 }

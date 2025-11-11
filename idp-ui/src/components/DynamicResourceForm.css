@@ -1,102 +1,429 @@
+/* DynamicResourceForm.css - Theme-aware styles for dynamic form components */
+
 .dynamic-resource-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 0.5rem 0;
-}
-
-.dynamic-resource-form-empty {
   padding: 1rem;
-  text-align: center;
-  color: var(--text-secondary, #666);
-  font-style: italic;
+  background-color: var(--bg-primary);
+  border-radius: 4px;
+  transition: background-color 400ms ease;
 }
 
-.dynamic-form-field {
+/* Loading State */
+.dynamic-form-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  min-height: 150px;
+  transition: background-color 400ms ease, border-color 400ms ease;
+}
+
+.loading-spinner {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
-.field-wrapper {
+.loading-spinner::before {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-primary);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Error State */
+.dynamic-form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  color: var(--danger);
+  transition: background-color 400ms ease, border-color 400ms ease;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  color: var(--danger);
+}
+
+.error-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
 }
 
-.field-help-text {
-  color: var(--text-secondary, #666);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+.error-message {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.retry-button {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.retry-button:hover:not(:disabled) {
+  background-color: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+.retry-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.dynamic-form-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  transition: background-color 400ms ease, border-color 400ms ease;
+}
+
+.empty-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.empty-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.empty-message {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.empty-help-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
   line-height: 1.4;
 }
 
-.field-error-text {
-  color: var(--error-color, #d32f2f);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+/* Form Section Header */
+.form-section-header {
+  margin-bottom: 0.5rem;
+}
+
+.form-section-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-primary);
+  padding-bottom: 0.5rem;
+  transition: color 400ms ease, border-color 400ms ease;
+}
+
+/* Form Properties Container */
+.form-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Frankenstein Theme - Enhanced styling for DynamicResourceForm */
+[data-theme="frankenstein"] .dynamic-resource-form {
+  background-color: var(--bg-primary);
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  position: relative;
+}
+
+/* Loading State - Frankenstein Theme */
+[data-theme="frankenstein"] .dynamic-form-loading {
+  background-color: var(--bg-secondary);
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .dynamic-form-loading::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .loading-spinner::before {
+  border-color: var(--border-primary);
+  border-top-color: var(--frankenstein-bolt);
+  animation: spin 1s linear infinite, frankenstein-electrical-glow 2s ease-in-out infinite;
+}
+
+[data-theme="frankenstein"] .loading-text {
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
-.list-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color, #ccc);
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 0.875rem;
-  resize: vertical;
-  min-height: 80px;
-  background-color: var(--input-bg, #fff);
-  color: var(--text-primary, #000);
+/* Error State - Frankenstein Theme */
+[data-theme="frankenstein"] .dynamic-form-error {
+  background-color: var(--bg-primary);
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 3px solid var(--danger);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6),
+              0 0 20px rgba(255, 0, 110, 0.4);
+  position: relative;
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
 }
 
-.list-textarea:focus {
-  outline: none;
-  border-color: var(--primary-color, #007bff);
-  box-shadow: 0 0 0 2px var(--primary-color-light, rgba(0, 123, 255, 0.1));
+[data-theme="frankenstein"] .dynamic-form-error::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 2px dashed var(--frankenstein-stitch);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.8;
 }
 
-.list-textarea::placeholder {
-  color: var(--text-secondary, #999);
+[data-theme="frankenstein"] .error-icon {
+  color: var(--danger);
+  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
 }
 
-/* Dark theme support */
-[data-theme="dark"] .list-textarea {
-  background-color: var(--input-bg-dark, #2a2a2a);
-  border-color: var(--border-color-dark, #444);
-  color: var(--text-primary-dark, #fff);
-}
-
-[data-theme="dark"] .list-textarea:focus {
-  border-color: var(--primary-color-dark, #4a9eff);
-  box-shadow: 0 0 0 2px var(--primary-color-light-dark, rgba(74, 158, 255, 0.2));
-}
-
-[data-theme="dark"] .field-help-text {
-  color: var(--text-secondary-dark, #aaa);
-}
-
-[data-theme="dark"] .field-error-text {
-  color: var(--error-color-dark, #f44336);
-}
-
-[data-theme="dark"] .dynamic-resource-form-empty {
-  color: var(--text-secondary-dark, #999);
-}
-
-/* Label styling for all fields */
-.field-wrapper label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary, #333);
-}
-
-[data-theme="dark"] .field-wrapper label {
-  color: var(--text-primary-dark, #ddd);
-}
-
-[data-theme="frankenstein"] .field-wrapper label {
+[data-theme="frankenstein"] .error-message {
   color: var(--text-primary);
+  font-weight: 500;
+}
+
+[data-theme="frankenstein"] .retry-button {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, #7b2cbf 100%);
+  border: 2px solid var(--accent-primary);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+[data-theme="frankenstein"] .retry-button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+[data-theme="frankenstein"] .retry-button:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+[data-theme="frankenstein"] .retry-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a1f8f 100%);
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.6),
+              inset 0 0 15px rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+[data-theme="frankenstein"] .retry-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Empty State - Frankenstein Theme */
+[data-theme="frankenstein"] .dynamic-form-empty {
+  background-color: var(--bg-secondary);
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .dynamic-form-empty::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px dashed var(--frankenstein-stitch);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+[data-theme="frankenstein"] .empty-icon {
+  color: var(--frankenstein-bolt);
+  text-shadow: 0 0 8px rgba(157, 78, 221, 0.2);
+}
+
+[data-theme="frankenstein"] .empty-message {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+[data-theme="frankenstein"] .empty-help-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Form Section Header - Frankenstein Theme */
+[data-theme="frankenstein"] .form-section-header h3 {
+  color: var(--frankenstein-bolt);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  border-bottom: 2px solid var(--frankenstein-stitch);
+  position: relative;
+}
+
+[data-theme="frankenstein"] .form-section-header h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frankenstein-stitch) 0px,
+    var(--frankenstein-stitch) 10px,
+    transparent 10px,
+    transparent 15px
+  );
+}
+
+/* Frankenstein Animations */
+@keyframes frankenstein-electrical-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.8),
+                0 0 40px rgba(157, 78, 221, 0.4);
+  }
+}
+
+@keyframes frankenstein-pulse-danger {
+  0%, 100% {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(255, 0, 110, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(255, 0, 110, 0.6);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dynamic-resource-form {
+    padding: 0.75rem;
+  }
+
+  .dynamic-form-loading {
+    padding: 1.5rem;
+    min-height: 120px;
+  }
+
+  .dynamic-form-error {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .error-icon {
+    font-size: 1.25rem;
+  }
+  
+  .form-section-header h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .dynamic-resource-form,
+  .dynamic-form-loading,
+  .dynamic-form-error,
+  .dynamic-form-empty,
+  .form-section-header h3,
+  .retry-button {
+    transition: none !important;
+  }
+  
+  .loading-spinner::before {
+    animation: spin 1s linear infinite !important;
+  }
+  
+  [data-theme="frankenstein"] .loading-spinner::before,
+  [data-theme="frankenstein"] .dynamic-form-error,
+  [data-theme="frankenstein"] .error-icon,
+  [data-theme="frankenstein"] .retry-button {
+    animation: none !important;
+  }
+  
+  [data-theme="frankenstein"] .retry-button:hover:not(:disabled) {
+    transform: none !important;
+  }
 }

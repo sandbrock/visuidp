@@ -254,6 +254,7 @@ Administrators have access to additional features:
 - **[Personal API Keys Guide](docs/PERSONAL_API_KEYS.md)** - Complete guide for managing your API keys
 - **[Admin Navigation Guide](docs/ADMIN_NAVIGATION.md)** - Admin dashboard navigation
 - **[Architecture Documentation](docs/ARCHITECTURE.md)** - Frontend architecture details
+- **[Dynamic Infrastructure Forms](docs/DYNAMIC_INFRASTRUCTURE_FORMS.md)** - Schema-driven form generation for cloud resources
 
 ### Theme Documentation
 

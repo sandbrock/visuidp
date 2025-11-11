@@ -17,9 +17,11 @@ export default defineConfig(({ command }) => ({
         // Keep the /api prefix as backend is rooted at /api
         rewrite: (path) => path,
         headers: {
-          // Dev-only headers to satisfy backend ForwardAuth in local runs
-          'X-Forwarded-User': 'brandon.rock',
-          'X-Forwarded-Email': 'brandon.rock@angryss.com',
+          // Dev-only headers to satisfy backend TraefikAuthenticationMechanism in local runs
+          'X-Auth-Request-User': 'brandon.rock',
+          'X-Auth-Request-Email': 'brandon.rock@angryss.com',
+          'X-Auth-Request-Preferred-Username': 'brandon.rock',
+          'X-Auth-Request-Groups': 'user',
         },
       },
     },
