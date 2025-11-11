@@ -41,6 +41,9 @@ public class BlueprintService {
             throw new IllegalArgumentException("Blueprint with name '" + createDto.getName() + "' already exists");
         }
 
+        // Validate cloud provider consistency before creating resources
+        validateBlueprintResourceCloudProviders(createDto);
+
         Blueprint blueprint = new Blueprint();
         blueprint.setName(createDto.getName());
         blueprint.setDescription(createDto.getDescription());
@@ -109,16 +112,26 @@ public class BlueprintService {
             }
         }
 
+        // Validate cloud provider consistency before updating resources
+        validateBlueprintResourceCloudProviders(updateDto);
+
         existingBlueprint.setName(updateDto.getName());
         existingBlueprint.setDescription(updateDto.getDescription());
         existingBlueprint.setIsActive(updateDto.getIsActive() != null ? updateDto.getIsActive() : true);
         
         // Update supported cloud providers
         if (updateDto.getSupportedCloudProviderIds() != null) {
-            existingBlueprint.getSupportedCloudProviders().clear();
+            // Get the existing collection reference
+            Set<CloudProvider> existingProviders = existingBlueprint.getSupportedCloudProviders();
+            
+            // Clear the existing collection
+            existingProviders.clear();
+            
+            // Add new providers if provided
             if (!updateDto.getSupportedCloudProviderIds().isEmpty()) {
                 Set<CloudProvider> cloudProviders = findCloudProvidersByIds(updateDto.getSupportedCloudProviderIds());
-                existingBlueprint.setSupportedCloudProviders(cloudProviders);
+                // Add to the existing collection instead of replacing it
+                existingProviders.addAll(cloudProviders);
                 // Validate that all cloud providers are enabled
                 existingBlueprint.validateCloudProvidersEnabled();
             }
@@ -184,6 +197,50 @@ public class BlueprintService {
         }
         if (createDto.getSupportedCloudProviderIds() == null || createDto.getSupportedCloudProviderIds().isEmpty()) {
             throw new IllegalArgumentException("At least one supported cloud provider is required");
+        }
+    }
+
+    /**
+     * Validates that all blueprint resources reference cloud providers that are in the blueprint's
+     * supportedCloudProviderIds list.
+     * 
+     * @param blueprintDto The blueprint DTO containing resources and supported cloud providers
+     * @throws IllegalArgumentException if any resource references a cloud provider not in the supported list
+     */
+    private void validateBlueprintResourceCloudProviders(BlueprintCreateDto blueprintDto) {
+        // Skip validation if no resources are provided
+        if (blueprintDto.getResources() == null || blueprintDto.getResources().isEmpty()) {
+            return;
+        }
+
+        // Skip validation if no supported cloud providers are specified
+        if (blueprintDto.getSupportedCloudProviderIds() == null || blueprintDto.getSupportedCloudProviderIds().isEmpty()) {
+            return;
+        }
+
+        // Build a map of cloud provider names to IDs for validation
+        Set<CloudProvider> supportedProviders = findCloudProvidersByIds(blueprintDto.getSupportedCloudProviderIds());
+        Set<String> supportedCloudTypes = supportedProviders.stream()
+            .map(cp -> cp.name)
+            .collect(Collectors.toSet());
+
+        // Validate each resource's cloud provider
+        List<String> invalidResources = new ArrayList<>();
+        for (BlueprintResourceCreateDto resource : blueprintDto.getResources()) {
+            if (resource.getCloudType() != null && !supportedCloudTypes.contains(resource.getCloudType())) {
+                invalidResources.add(String.format(
+                    "Resource '%s' references cloud provider '%s' which is not in the blueprint's supported cloud providers",
+                    resource.getName(),
+                    resource.getCloudType()
+                ));
+            }
+        }
+
+        // Throw exception if any invalid resources were found
+        if (!invalidResources.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Blueprint resource validation failed: " + String.join("; ", invalidResources)
+            );
         }
     }
     

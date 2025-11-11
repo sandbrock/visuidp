@@ -764,7 +764,107 @@ public class BlueprintsControllerTest {
             .body(containsString("not enabled"));
     }
 
+    @Test
+    public void testCreateBlueprintWithResourceUsingUnsupportedCloudProvider_Returns400() {
+        // Create a second cloud provider
+        UUID secondProviderId = createSecondCloudProvider();
+        String uniqueName = "Blueprint with Unsupported Cloud Provider " + UUID.randomUUID();
+
+        // Blueprint supports only TEST_AZURE, but resource uses TEST_GCP
+        String blueprintJson = """
+            {
+                "name": "%s",
+                "description": "Should fail - resource uses cloud provider not in supported list",
+                "isActive": true,
+                "supportedCloudProviderIds": ["%s"],
+                "resources": [
+                    {
+                        "name": "Resource with Unsupported Provider",
+                        "description": "Uses TEST_GCP which is not in supported list",
+                        "blueprintResourceTypeId": "%s",
+                        "cloudType": "TEST_GCP",
+                        "configuration": {
+                            "type": "container-orchestrator",
+                            "cloudServiceName": "test-cluster"
+                        },
+                        "cloudSpecificProperties": {}
+                    }
+                ]
+            }
+            """.formatted(uniqueName, testCloudProviderId, testResourceTypeId);
+
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(blueprintJson)
+        .when()
+            .post("/v1/blueprints")
+        .then()
+            .statusCode(400)
+            .body(containsString("Blueprint resource validation failed"))
+            .body(containsString("not in the blueprint's supported cloud providers"));
+    }
+
+    @Test
+    public void testUpdateBlueprintWithResourceUsingUnsupportedCloudProvider_Returns400() {
+        // Create a blueprint with resources
+        UUID blueprintId = createBlueprintWithResourcesInDb();
+        
+        // Create a second cloud provider
+        UUID secondProviderId = createSecondCloudProvider();
+        
+        // Get the current blueprint name to use in update
+        String currentName = getBlueprintName(blueprintId);
+
+        // Try to update with resource using unsupported cloud provider
+        String updateJson = """
+            {
+                "name": "%s",
+                "description": "Should fail - resource uses unsupported cloud provider",
+                "isActive": true,
+                "supportedCloudProviderIds": ["%s"],
+                "resources": [
+                    {
+                        "name": "Resource with Unsupported Provider",
+                        "description": "Uses TEST_GCP which is not in supported list",
+                        "blueprintResourceTypeId": "%s",
+                        "cloudType": "TEST_GCP",
+                        "configuration": {
+                            "type": "container-orchestrator",
+                            "cloudServiceName": "test-cluster"
+                        },
+                        "cloudSpecificProperties": {}
+                    }
+                ]
+            }
+            """.formatted(currentName, testCloudProviderId, testResourceTypeId);
+
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(updateJson)
+        .when()
+            .put("/v1/blueprints/" + blueprintId)
+        .then()
+            .statusCode(400)
+            .body(containsString("Blueprint resource validation failed"))
+            .body(containsString("not in the blueprint's supported cloud providers"));
+    }
+
     // Helper methods
+
+    @Transactional
+    UUID createSecondCloudProvider() {
+        CloudProvider provider = new CloudProvider();
+        provider.name = "TEST_GCP";
+        provider.displayName = "Test Google Cloud Platform";
+        provider.description = "Test GCP provider";
+        provider.enabled = true;
+        provider.persist();
+        return provider.id;
+    }
 
     @Transactional
     UUID createBlueprintWithResourcesInDb() {

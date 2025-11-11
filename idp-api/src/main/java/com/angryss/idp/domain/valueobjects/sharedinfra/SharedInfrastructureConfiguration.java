@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ContainerOrchestratorConfiguration.class, name = "container-orchestrator"),
         @JsonSubTypes.Type(value = RelationalDatabaseServerConfiguration.class, name = "relational-database-server"),
-        @JsonSubTypes.Type(value = ServiceBusConfiguration.class, name = "service-bus")
+        @JsonSubTypes.Type(value = ServiceBusConfiguration.class, name = "service-bus"),
+        @JsonSubTypes.Type(value = StorageConfiguration.class, name = "storage")
 })
 public abstract class SharedInfrastructureConfiguration {
 }

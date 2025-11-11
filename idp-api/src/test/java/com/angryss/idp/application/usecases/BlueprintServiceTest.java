@@ -404,7 +404,9 @@ public class BlueprintServiceTest {
             blueprintService.createBlueprint(createDto);
         });
 
-        assertTrue(exception.getMessage().contains("Cloud provider not found"));
+        // New validation catches this earlier - resource references cloud provider not in supported list
+        assertTrue(exception.getMessage().contains("Blueprint resource validation failed") || 
+                   exception.getMessage().contains("Cloud provider not found"));
         assertTrue(exception.getMessage().contains("INVALID_CLOUD"));
     }
 
@@ -437,7 +439,9 @@ public class BlueprintServiceTest {
             blueprintService.createBlueprint(createDto);
         });
 
-        assertTrue(exception.getMessage().contains("Cloud provider is not enabled"));
+        // New validation catches this earlier - resource references cloud provider not in supported list
+        assertTrue(exception.getMessage().contains("Blueprint resource validation failed") || 
+                   exception.getMessage().contains("Cloud provider is not enabled"));
         assertTrue(exception.getMessage().contains(disabledCloudName));
     }
 
@@ -564,5 +568,186 @@ public class BlueprintServiceTest {
         blueprint.flush();
         
         return blueprint;
+    }
+
+    // ========== Cloud Provider Validation Tests ==========
+
+    @Test
+    @Transactional
+    public void testCreateBlueprintWithValidCloudProviderReferences_Success() {
+        // Given - Blueprint with resources that reference supported cloud providers
+        BlueprintCreateDto createDto = new BlueprintCreateDto();
+        createDto.setName("Valid Blueprint " + UUID.randomUUID());
+        createDto.setDescription("Blueprint with valid cloud provider references");
+        createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
+
+        BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
+        resourceDto.setName("Valid Resource");
+        resourceDto.setDescription("Resource with valid cloud provider");
+        resourceDto.setBlueprintResourceTypeId(resourceTypeId);
+        resourceDto.setCloudType("AWS");  // Matches the supported cloud provider
+        resourceDto.setConfiguration(new ContainerOrchestratorConfiguration());
+        resourceDto.setCloudSpecificProperties(new HashMap<>());
+
+        createDto.setResources(List.of(resourceDto));
+
+        // When - Create the blueprint
+        BlueprintResponseDto result = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(result.getId());
+
+        // Then - Blueprint should be created successfully
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertEquals(1, result.getResources().size());
+        assertEquals("Valid Resource", result.getResources().get(0).getName());
+    }
+
+    @Test
+    @Transactional
+    public void testCreateBlueprintWithInvalidCloudProviderReference_ThrowsException() {
+        // Given - Create a second cloud provider that is NOT in the supported list
+        CloudProvider secondProvider = new CloudProvider();
+        secondProvider.name = "AZURE_" + UUID.randomUUID();
+        secondProvider.displayName = "Microsoft Azure";
+        secondProvider.enabled = true;
+        secondProvider.persist();
+        createdCloudProviderIds.add(secondProvider.id);
+
+        BlueprintCreateDto createDto = new BlueprintCreateDto();
+        createDto.setName("Invalid Blueprint " + UUID.randomUUID());
+        createDto.setDescription("Blueprint with invalid cloud provider reference");
+        createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));  // Only AWS supported
+
+        BlueprintResourceCreateDto resourceDto = new BlueprintResourceCreateDto();
+        resourceDto.setName("Invalid Resource");
+        resourceDto.setDescription("Resource with unsupported cloud provider");
+        resourceDto.setBlueprintResourceTypeId(resourceTypeId);
+        resourceDto.setCloudType(secondProvider.name);  // References Azure, which is NOT supported
+        resourceDto.setConfiguration(new ContainerOrchestratorConfiguration());
+        resourceDto.setCloudSpecificProperties(new HashMap<>());
+
+        createDto.setResources(List.of(resourceDto));
+
+        // When/Then - Should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            blueprintService.createBlueprint(createDto);
+        });
+
+        assertTrue(exception.getMessage().contains("Blueprint resource validation failed"));
+        assertTrue(exception.getMessage().contains("Invalid Resource"));
+        assertTrue(exception.getMessage().contains(secondProvider.name));
+        assertTrue(exception.getMessage().contains("not in the blueprint's supported cloud providers"));
+    }
+
+    @Test
+    @Transactional
+    public void testCreateBlueprintWithMultipleInvalidCloudProviderReferences_ThrowsException() {
+        // Given - Create two additional cloud providers that are NOT in the supported list
+        CloudProvider azureProvider = new CloudProvider();
+        azureProvider.name = "AZURE_" + UUID.randomUUID();
+        azureProvider.displayName = "Microsoft Azure";
+        azureProvider.enabled = true;
+        azureProvider.persist();
+        createdCloudProviderIds.add(azureProvider.id);
+
+        CloudProvider gcpProvider = new CloudProvider();
+        gcpProvider.name = "GCP_" + UUID.randomUUID();
+        gcpProvider.displayName = "Google Cloud Platform";
+        gcpProvider.enabled = true;
+        gcpProvider.persist();
+        createdCloudProviderIds.add(gcpProvider.id);
+
+        BlueprintCreateDto createDto = new BlueprintCreateDto();
+        createDto.setName("Invalid Blueprint " + UUID.randomUUID());
+        createDto.setDescription("Blueprint with multiple invalid cloud provider references");
+        createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));  // Only AWS supported
+
+        // Create two resources with unsupported cloud providers
+        BlueprintResourceCreateDto azureResource = new BlueprintResourceCreateDto();
+        azureResource.setName("Azure Resource");
+        azureResource.setDescription("Resource with Azure");
+        azureResource.setBlueprintResourceTypeId(resourceTypeId);
+        azureResource.setCloudType(azureProvider.name);
+        azureResource.setConfiguration(new ContainerOrchestratorConfiguration());
+        azureResource.setCloudSpecificProperties(new HashMap<>());
+
+        BlueprintResourceCreateDto gcpResource = new BlueprintResourceCreateDto();
+        gcpResource.setName("GCP Resource");
+        gcpResource.setDescription("Resource with GCP");
+        gcpResource.setBlueprintResourceTypeId(resourceTypeId);
+        gcpResource.setCloudType(gcpProvider.name);
+        gcpResource.setConfiguration(new ContainerOrchestratorConfiguration());
+        gcpResource.setCloudSpecificProperties(new HashMap<>());
+
+        createDto.setResources(List.of(azureResource, gcpResource));
+
+        // When/Then - Should throw IllegalArgumentException with both errors
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            blueprintService.createBlueprint(createDto);
+        });
+
+        assertTrue(exception.getMessage().contains("Blueprint resource validation failed"));
+        assertTrue(exception.getMessage().contains("Azure Resource"));
+        assertTrue(exception.getMessage().contains("GCP Resource"));
+        assertTrue(exception.getMessage().contains(azureProvider.name));
+        assertTrue(exception.getMessage().contains(gcpProvider.name));
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateBlueprintWithInvalidCloudProviderReference_ThrowsException() {
+        // Given - Create a blueprint with valid resources
+        BlueprintCreateDto createDto = new BlueprintCreateDto();
+        String blueprintName = "Blueprint to Update " + UUID.randomUUID();
+        createDto.setName(blueprintName);
+        createDto.setDescription("Original blueprint");
+        createDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));
+
+        BlueprintResourceCreateDto validResource = new BlueprintResourceCreateDto();
+        validResource.setName("Valid Resource");
+        validResource.setDescription("Valid resource");
+        validResource.setBlueprintResourceTypeId(resourceTypeId);
+        validResource.setCloudType("AWS");
+        validResource.setConfiguration(new ContainerOrchestratorConfiguration());
+        validResource.setCloudSpecificProperties(new HashMap<>());
+
+        createDto.setResources(List.of(validResource));
+
+        BlueprintResponseDto created = blueprintService.createBlueprint(createDto);
+        createdBlueprintIds.add(created.getId());
+
+        // Create a second cloud provider that is NOT in the supported list
+        CloudProvider secondProvider = new CloudProvider();
+        secondProvider.name = "AZURE_" + UUID.randomUUID();
+        secondProvider.displayName = "Microsoft Azure";
+        secondProvider.enabled = true;
+        secondProvider.persist();
+        createdCloudProviderIds.add(secondProvider.id);
+
+        // When - Try to update with resource using unsupported cloud provider
+        BlueprintCreateDto updateDto = new BlueprintCreateDto();
+        updateDto.setName(blueprintName);
+        updateDto.setDescription("Updated blueprint");
+        updateDto.setSupportedCloudProviderIds(Set.of(cloudProviderId));  // Still only AWS
+
+        BlueprintResourceCreateDto invalidResource = new BlueprintResourceCreateDto();
+        invalidResource.setName("Invalid Resource");
+        invalidResource.setDescription("Resource with unsupported cloud provider");
+        invalidResource.setBlueprintResourceTypeId(resourceTypeId);
+        invalidResource.setCloudType(secondProvider.name);  // References Azure, which is NOT supported
+        invalidResource.setConfiguration(new ContainerOrchestratorConfiguration());
+        invalidResource.setCloudSpecificProperties(new HashMap<>());
+
+        updateDto.setResources(List.of(invalidResource));
+
+        // Then - Should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            blueprintService.updateBlueprint(created.getId(), updateDto);
+        });
+
+        assertTrue(exception.getMessage().contains("Blueprint resource validation failed"));
+        assertTrue(exception.getMessage().contains("Invalid Resource"));
+        assertTrue(exception.getMessage().contains(secondProvider.name));
+        assertTrue(exception.getMessage().contains("not in the blueprint's supported cloud providers"));
     }
 }
