@@ -483,6 +483,37 @@ Response:
 - Only properties defined in the current schema are displayed and saved
 - Default values are applied for missing properties when creating new resources
 
+### Default Value Type Handling
+
+**Issue**: Default values must be stored with correct JSON types in the database to ensure proper display in form controls.
+
+**Type-Specific Storage**:
+- **STRING properties**: Store as JSON string: `'"value"'` or `'value'`
+- **NUMBER properties**: Store as JSON number: `1` or `10.5` (NOT `'"1"'` or `'"10.5"'`)
+- **BOOLEAN properties**: Store as JSON boolean: `true` or `false` (NOT `'"true"'` or `'"false"'`)
+- **LIST properties**: Store as JSON string: `'"STANDARD"'` (the value from allowedValues)
+
+**Example Database Values**:
+```sql
+-- CORRECT: NUMBER default value stored as JSON number
+default_value = '1'
+
+-- INCORRECT: NUMBER default value stored as JSON string
+default_value = '"1"'  -- This will display with quotation marks in the UI
+
+-- CORRECT: STRING default value stored as JSON string
+default_value = '"my-bucket"'
+
+-- CORRECT: BOOLEAN default value stored as JSON boolean
+default_value = 'true'
+```
+
+**Frontend Handling**:
+- The frontend receives default values from the backend API
+- For NUMBER properties, the value should be a JavaScript number type
+- The PropertyInput component converts the number to string for display in the text input
+- When the user doesn't modify the field, the numeric value is preserved without quotation marks
+
 ## Performance Considerations
 
 ### Schema Caching

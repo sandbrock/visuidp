@@ -178,3 +178,15 @@ The Dynamic Infrastructure Forms feature replaces hardcoded cloud-specific prope
 3. THE IDP System SHALL support passing property schemas as props to the dynamic form component
 4. THE IDP System SHALL support passing current property values and onChange handlers to the dynamic form component
 5. THE IDP System SHALL ensure the dynamic form component is self-contained and does not depend on parent component state beyond props
+
+### Requirement 15
+
+**User Story:** As a developer, I want NUMBER property default values to be stored and displayed as numeric values without quotation marks, so that numeric inputs show clean default values
+
+#### Acceptance Criteria
+
+1. THE IDP System SHALL store default values for NUMBER properties as JSON numeric values in the database
+2. THE IDP System SHALL not wrap numeric default values in string quotation marks in the database
+3. WHEN a NUMBER property has a default value, THE IDP System SHALL display the numeric value without quotation marks in the input control
+4. THE IDP System SHALL handle numeric default values correctly when applying them to new resources
+5. THE IDP System SHALL validate that default values for NUMBER properties are within the specified min and max range if validation rules are defined
