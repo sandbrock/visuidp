@@ -614,9 +614,8 @@ export const apiService = {
 
   async toggleCloudProvider(id: string, enabled: boolean, userEmail?: string): Promise<void> {
     try {
-      const response = await apiCall(`/admin/cloud-providers/${id}/toggle`, {
-        method: 'PATCH',
-        body: JSON.stringify({ enabled }),
+      const response = await apiCall(`/admin/cloud-providers/${id}/toggle?enabled=${enabled}`, {
+        method: 'PUT',
       }, userEmail);
       if (!response.ok) {
         throw new Error(`Failed to toggle cloud provider: ${response.status}`);

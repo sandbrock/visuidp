@@ -28,14 +28,28 @@ public class TraefikAuthenticationMechanism implements HttpAuthenticationMechani
 
     @Override
     public Uni<SecurityIdentity> authenticate(RoutingContext context, IdentityProviderManager identityProviderManager) {
+        // Try X-Auth-Request-* headers first (ForwardAuth mode), then X-Forwarded-* (Proxy mode)
         String user = context.request().getHeader("X-Auth-Request-User");
+        if (user == null) user = context.request().getHeader("X-Forwarded-User");
+        
         String email = context.request().getHeader("X-Auth-Request-Email");
+        if (email == null) email = context.request().getHeader("X-Forwarded-Email");
+        
         String groups = context.request().getHeader("X-Auth-Request-Groups");
+        if (groups == null) groups = context.request().getHeader("X-Forwarded-Groups");
+        
         String preferredUsername = context.request().getHeader("X-Auth-Request-Preferred-Username");
+        if (preferredUsername == null) preferredUsername = context.request().getHeader("X-Forwarded-Preferred-Username");
+        
         String accessToken = context.request().getHeader("X-Auth-Request-Access-Token");
+        if (accessToken == null) accessToken = context.request().getHeader("X-Forwarded-Access-Token");
+        
+        String method = context.request().method().name();
+        String path = context.request().path();
 
         // Debug logging
         System.out.println("=== Authentication Debug ===");
+        System.out.println("Method: " + method + " Path: " + path);
         System.out.println("X-Auth-Request-User: " + user);
         System.out.println("X-Auth-Request-Email: " + email);
         System.out.println("X-Auth-Request-Groups: " + groups);
@@ -45,8 +59,11 @@ public class TraefikAuthenticationMechanism implements HttpAuthenticationMechani
 
         if (user == null && email == null && preferredUsername == null) {
             // No authentication headers present
+            System.out.println("NO AUTH HEADERS - returning null identity");
             return Uni.createFrom().nullItem();
         }
+        
+        System.out.println("AUTH HEADERS PRESENT - building identity");
 
         // Use the most appropriate identifier as the principal
         String principal = preferredUsername != null ? preferredUsername : 

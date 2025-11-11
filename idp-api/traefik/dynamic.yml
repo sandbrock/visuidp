@@ -51,11 +51,13 @@ http:
           - "X-Auth-Request-Preferred-Username"
           - "X-Auth-Request-Access-Token"
           - "Authorization"
+        authResponseHeadersRegex: "^X-"
         authRequestHeaders:
           - "Cookie"
           - "X-Forwarded-For"
           - "X-Forwarded-Host"
           - "X-Forwarded-Proto"
+          - "X-Forwarded-Method"
     
     # Redirect root to /ui
     redirectToUI:
@@ -89,14 +91,13 @@ http:
       priority: 2000
       tls: {}
 
-    # API routes with authentication
+    # API routes - route through OAuth2-proxy for authentication
     api:
       rule: "PathPrefix(`/api`)"
-      service: api-service
+      service: oauth2-proxy-service
       middlewares:
         - cors-headers
         - forwarded-headers
-        - oauth2-auth
       entryPoints:
         - websecure
       priority: 100
