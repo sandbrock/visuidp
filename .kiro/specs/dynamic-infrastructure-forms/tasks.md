@@ -239,3 +239,11 @@
   - Add examples of property schema configuration
   - Update Infrastructure component documentation
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
+
+- [x] 15. Fix NUMBER property default values to remove quotation marks
+  - Update database migration V2__data.sql to store NUMBER default values as JSON numbers instead of JSON strings
+  - Change minClusterSize default_value from '"1"' to '1'
+  - Change maxClusterSize default_value from '"10"' to '10'
+  - Verify other NUMBER properties in the database have correct JSON numeric default values
+  - Test that numeric default values display without quotation marks in the UI
+  - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_
