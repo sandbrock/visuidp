@@ -85,7 +85,9 @@ VALUES (
 )
 ON CONFLICT (resource_type_id, cloud_provider_id) DO NOTHING;
 
--- Managed Container Orchestrator + AWS (ECS)
+-- Managed Container Orchestrator + AWS (ECS Cluster)
+-- This mapping provisions ECS cluster infrastructure only.
+-- Task definitions and services are configured at the stack level.
 INSERT INTO resource_type_cloud_mappings (id, resource_type_id, cloud_provider_id, terraform_module_location, module_location_type, enabled, created_at, updated_at)
 VALUES (
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',
@@ -420,153 +422,34 @@ VALUES (
 ON CONFLICT (mapping_id, property_name) DO NOTHING;
 
 -- ============================================================================
--- AWS Managed Container Orchestrator (ECS) Property Schemas
+-- AWS Managed Container Orchestrator (ECS Cluster) Property Schemas
 -- ============================================================================
--- This section defines property schemas for AWS ECS services.
--- Properties include launch type, task CPU/memory, task count, auto-scaling,
--- and EC2 instance configuration.
+-- This section defines property schemas for AWS ECS cluster configuration.
+-- Properties include capacity provider, instance type, cluster sizing,
+-- and monitoring configuration. These are cluster-level infrastructure
+-- properties only. Task definitions and services are configured at the
+-- stack level, not the blueprint level.
 --
--- Mapping ID: 'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03' (ECS + AWS)
+-- Mapping ID: 'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03' (ECS Cluster + AWS)
 -- ============================================================================
 
--- launchType property
+-- capacityProvider property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
     '04010000-0000-0000-0000-000000000001',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'launchType',
-    'Launch Type',
-    'The launch type determines how your containers run. FARGATE is serverless and AWS manages the infrastructure. EC2 gives you more control over the underlying instances but requires managing the cluster. FARGATE is recommended for most use cases.',
+    'capacityProvider',
+    'Capacity Provider',
+    'The capacity provider determines how the ECS cluster provisions compute resources. FARGATE is serverless and AWS manages all infrastructure. FARGATE_SPOT uses spare AWS capacity at reduced cost but tasks may be interrupted. EC2 gives you control over instance types and cluster scaling but requires managing the infrastructure. FARGATE is recommended for most use cases.',
     'LIST',
     true,
     '"FARGATE"',
     '{"allowedValues": [
-        {"value": "FARGATE", "label": "Fargate (Serverless)"},
-        {"value": "EC2", "label": "EC2 (Managed Instances)"}
+        {"value": "FARGATE", "label": "Fargate"},
+        {"value": "FARGATE_SPOT", "label": "Fargate Spot"},
+        {"value": "EC2", "label": "EC2"}
     ]}',
     10,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- taskCpu property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000002',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'taskCpu',
-    'Task CPU (CPU Units)',
-    'The number of CPU units reserved for the task. 1024 CPU units = 1 vCPU. Valid values depend on task memory: 256 (.25 vCPU), 512 (.5 vCPU), 1024 (1 vCPU), 2048 (2 vCPU), 4096 (4 vCPU).',
-    'LIST',
-    true,
-    '"512"',
-    '{"allowedValues": [
-        {"value": "256", "label": "256 (.25 vCPU)"},
-        {"value": "512", "label": "512 (.5 vCPU)"},
-        {"value": "1024", "label": "1024 (1 vCPU)"},
-        {"value": "2048", "label": "2048 (2 vCPU)"},
-        {"value": "4096", "label": "4096 (4 vCPU)"}
-    ]}',
-    20,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- taskMemory property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000003',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'taskMemory',
-    'Task Memory (MiB)',
-    'The amount of memory (in MiB) reserved for the task. Valid values depend on task CPU. For 512 CPU: 1024-4096 MiB. For 1024 CPU: 2048-8192 MiB. For 2048 CPU: 4096-16384 MiB. For 4096 CPU: 8192-30720 MiB.',
-    'LIST',
-    true,
-    '"1024"',
-    '{"allowedValues": [
-        {"value": "512", "label": "512 MiB"},
-        {"value": "1024", "label": "1024 MiB"},
-        {"value": "2048", "label": "2048 MiB"},
-        {"value": "4096", "label": "4096 MiB"},
-        {"value": "8192", "label": "8192 MiB"},
-        {"value": "16384", "label": "16384 MiB"},
-        {"value": "30720", "label": "30720 MiB"}
-    ]}',
-    30,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- desiredTaskCount property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000004',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'desiredTaskCount',
-    'Desired Task Count',
-    'The number of task instances to run simultaneously. Minimum 2 is recommended for high availability. ECS will maintain this number of running tasks.',
-    'NUMBER',
-    true,
-    '"2"',
-    '{"min": 1, "max": 100}',
-    40,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- enableAutoScaling property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000005',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'enableAutoScaling',
-    'Enable Auto Scaling',
-    'Enable auto scaling to automatically adjust the number of running tasks based on CloudWatch metrics (CPU utilization, memory utilization, or custom metrics). When enabled, ECS will scale between minimum and maximum task counts.',
-    'BOOLEAN',
-    false,
-    '"false"',
-    '{}',
-    50,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- minTaskCount property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000006',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'minTaskCount',
-    'Minimum Task Count',
-    'The minimum number of tasks to maintain when auto scaling is enabled. ECS will not scale below this number even under low load. Only applies when auto scaling is enabled.',
-    'NUMBER',
-    false,
-    '"1"',
-    '{"min": 1, "max": 100}',
-    60,
-    NOW(),
-    NOW()
-)
-ON CONFLICT (mapping_id, property_name) DO NOTHING;
-
--- maxTaskCount property
-INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
-VALUES (
-    '04010000-0000-0000-0000-000000000007',
-    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
-    'maxTaskCount',
-    'Maximum Task Count',
-    'The maximum number of tasks to run when auto scaling is enabled. ECS will not scale above this number even under high load. Only applies when auto scaling is enabled.',
-    'NUMBER',
-    false,
-    '"10"',
-    '{"min": 1, "max": 100}',
-    70,
     NOW(),
     NOW()
 )
@@ -575,11 +458,11 @@ ON CONFLICT (mapping_id, property_name) DO NOTHING;
 -- instanceType property
 INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
 VALUES (
-    '04010000-0000-0000-0000-000000000008',
+    '04010000-0000-0000-0000-000000000002',
     'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
     'instanceType',
     'EC2 Instance Type',
-    'The EC2 instance type for the ECS cluster nodes. Only applies when launch type is EC2. t3 instances are burstable and cost-effective, m5 are general purpose, c5 are compute-optimized. Ignored when using FARGATE launch type.',
+    'The EC2 instance type for the ECS cluster nodes. Only applies when capacity provider is EC2. t3 instances are burstable and cost-effective for variable workloads, m5 are general purpose for consistent workloads, c5 are compute-optimized for CPU-intensive applications. Ignored when using FARGATE or FARGATE_SPOT.',
     'LIST',
     false,
     '"t3.medium"',
@@ -595,7 +478,61 @@ VALUES (
         {"value": "c5.xlarge", "label": "c5.xlarge"},
         {"value": "c5.2xlarge", "label": "c5.2xlarge"}
     ]}',
-    80,
+    20,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (mapping_id, property_name) DO NOTHING;
+
+-- minClusterSize property
+INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
+VALUES (
+    '04010000-0000-0000-0000-000000000003',
+    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
+    'minClusterSize',
+    'Minimum Cluster Size',
+    'The minimum number of EC2 instances to maintain in the cluster. The cluster will not scale below this number even under low load. Setting this to 0 allows the cluster to scale down completely when idle, reducing costs. Only applies when capacity provider is EC2.',
+    'NUMBER',
+    false,
+    '"1"',
+    '{"min": 0, "max": 100}',
+    30,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (mapping_id, property_name) DO NOTHING;
+
+-- maxClusterSize property
+INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
+VALUES (
+    '04010000-0000-0000-0000-000000000004',
+    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
+    'maxClusterSize',
+    'Maximum Cluster Size',
+    'The maximum number of EC2 instances allowed in the cluster. The cluster will not scale above this number even under high load. This setting controls cost and resource limits. Must be greater than or equal to minimum cluster size. Only applies when capacity provider is EC2.',
+    'NUMBER',
+    false,
+    '"10"',
+    '{"min": 1, "max": 100}',
+    40,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (mapping_id, property_name) DO NOTHING;
+
+-- enableContainerInsights property
+INSERT INTO property_schemas (id, mapping_id, property_name, display_name, description, data_type, required, default_value, validation_rules, display_order, created_at, updated_at)
+VALUES (
+    '04010000-0000-0000-0000-000000000005',
+    'd1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f03',  -- Managed Container Orchestrator + AWS mapping
+    'enableContainerInsights',
+    'Enable Container Insights',
+    'Enable CloudWatch Container Insights to collect, aggregate, and summarize metrics and logs from your containerized applications. Provides cluster-level, task-level, and service-level metrics including CPU, memory, disk, and network utilization. Additional CloudWatch charges apply.',
+    'BOOLEAN',
+    false,
+    'true',
+    '{}',
+    50,
     NOW(),
     NOW()
 )

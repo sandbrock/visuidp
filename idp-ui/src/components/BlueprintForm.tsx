@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Blueprint, BlueprintCreate, BlueprintResource } from '../services/api';
 import { apiService } from '../services/api';
 import type { User } from '../types/auth';
-import type { CloudProvider, ResourceType, PropertySchema } from '../types/admin';
+import type { CloudProvider, ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBoxGroup } from './input';
 import './BlueprintForm.css';
@@ -35,9 +35,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
     name: string;
     cloudProviderId: string;
     configuration: Record<string, unknown>;
-    schema: Record<string, PropertySchema>;
   }>>([]);
-  const [loadingSchema, setLoadingSchema] = useState(false);
 
   // Focus the name input when the form mounts
   useEffect(() => {
@@ -95,34 +93,13 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
 
   // Load resource schemas for existing resources
   const loadResourceSchemas = async (resources: BlueprintResource[]) => {
-    const resourcesWithSchemas = await Promise.all(
-      resources.map(async (resource) => {
-        try {
-          const schema = await apiService.getResourceSchemaForBlueprint(
-            resource.resourceTypeId,
-            resource.cloudProviderId,
-            user.email
-          );
-          return {
-            resourceTypeId: resource.resourceTypeId,
-            name: resource.name,
-            cloudProviderId: resource.cloudProviderId,
-            configuration: resource.configuration,
-            schema,
-          };
-        } catch (err) {
-          console.error('Failed to load schema for resource:', err);
-          return {
-            resourceTypeId: resource.resourceTypeId,
-            name: resource.name,
-            cloudProviderId: resource.cloudProviderId,
-            configuration: resource.configuration,
-            schema: {},
-          };
-        }
-      })
-    );
-    setSelectedResources(resourcesWithSchemas);
+    const resourcesWithoutSchemas = resources.map((resource) => ({
+      resourceTypeId: resource.resourceTypeId,
+      name: resource.name,
+      cloudProviderId: resource.cloudProviderId,
+      configuration: resource.configuration,
+    }));
+    setSelectedResources(resourcesWithoutSchemas);
   };
 
   // Load cloud providers and resource types on mount
@@ -207,30 +184,15 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
       return;
     }
 
-    setLoadingSchema(true);
-    try {
-      const schema = await apiService.getResourceSchemaForBlueprint(
-        resourceTypeId,
-        cloudProviderId,
-        user.email
-      );
-      
-      const resourceType = availableResourceTypes.find(rt => rt.id === resourceTypeId);
-      const newResource = {
-        resourceTypeId,
-        name: resourceType?.displayName || 'New Resource',
-        cloudProviderId,
-        configuration: {},
-        schema,
-      };
-      
-      setSelectedResources(prev => [...prev, newResource]);
-    } catch (err) {
-      console.error('Failed to load resource schema:', err);
-      setError('Failed to load resource configuration schema');
-    } finally {
-      setLoadingSchema(false);
-    }
+    const resourceType = availableResourceTypes.find(rt => rt.id === resourceTypeId);
+    const newResource = {
+      resourceTypeId,
+      name: resourceType?.displayName || 'New Resource',
+      cloudProviderId,
+      configuration: {},
+    };
+    
+    setSelectedResources(prev => [...prev, newResource]);
   };
 
   const handleRemoveResource = (index: number) => {
@@ -254,32 +216,15 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
   };
 
   const handleResourceCloudProviderChange = async (index: number, cloudProviderId: string) => {
-    const resource = selectedResources[index];
-    
-    setLoadingSchema(true);
-    try {
-      const schema = await apiService.getResourceSchemaForBlueprint(
-        resource.resourceTypeId,
+    setSelectedResources(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
         cloudProviderId,
-        user.email
-      );
-      
-      setSelectedResources(prev => {
-        const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          cloudProviderId,
-          configuration: {}, // Reset configuration when cloud provider changes
-          schema,
-        };
-        return updated;
-      });
-    } catch (err) {
-      console.error('Failed to load resource schema:', err);
-      setError('Failed to load resource configuration schema');
-    } finally {
-      setLoadingSchema(false);
-    }
+        configuration: {}, // Reset configuration when cloud provider changes
+      };
+      return updated;
+    });
   };
 
   return (
@@ -374,9 +319,12 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                     
                     <div className="resource-config">
                       <DynamicResourceForm
-                        schema={resource.schema}
+                        resourceTypeId={resource.resourceTypeId}
+                        cloudProviderId={resource.cloudProviderId}
                         values={resource.configuration}
                         onChange={(config) => handleResourceConfigChange(index, config)}
+                        context="blueprint"
+                        userEmail={user.email}
                       />
                     </div>
                   </div>
@@ -395,7 +343,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                         e.target.value = '';
                       }
                     }}
-                    disabled={loading || loadingSchema}
+                    disabled={loading}
                     className="add-resource-select"
                   >
                     <option value="">Select a resource type and cloud provider...</option>
@@ -412,7 +360,6 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                     ))}
                   </select>
                 </div>
-                {loadingSchema && <small className="loading-text">Loading schema...</small>}
               </div>
             </div>
           )}
