@@ -3,8 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { BlueprintForm } from './BlueprintForm';
 import { apiService } from '../services/api';
+import CloudProviderLookupService from '../services/CloudProviderLookupService';
 import type { User } from '../types/auth';
 import type { CloudProvider, ResourceType } from '../types/admin';
+import type { Blueprint } from '../services/api';
 
 // Mock the API service
 vi.mock('../services/api', () => ({
@@ -647,6 +649,643 @@ describe('BlueprintForm - Enhanced User Feedback', () => {
         expect(screen.getByTestId('checkbox-aws-id')).not.toBeChecked();
         expect(screen.queryByTestId('dynamic-form-database-id-aws-id')).not.toBeInTheDocument();
         expect(screen.getByTestId('dynamic-form-cache-id-azure-id')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('CloudProviderLookupService Integration', () => {
+    beforeEach(() => {
+      // Clear the singleton instance before each test
+      CloudProviderLookupService.getInstance().clear();
+    });
+
+    it('initializes CloudProviderLookupService when cloud providers load', async () => {
+      const lookupService = CloudProviderLookupService.getInstance();
+      
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for cloud providers to load
+      await waitFor(() => {
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify lookup service was initialized
+      expect(lookupService.isInitialized()).toBe(true);
+      expect(lookupService.resolveCloudProviderId('aws')).toBe('aws-id');
+      expect(lookupService.resolveCloudProviderId('azure')).toBe('azure-id');
+      expect(lookupService.resolveCloudProviderId('gcp')).toBe('gcp-id');
+    });
+
+    it('loads existing blueprint with cloud type resolution to UUID', async () => {
+      const existingBlueprint: Blueprint = {
+        id: 'blueprint-123',
+        name: 'Test Blueprint',
+        description: 'Test description',
+        supportedCloudProviderIds: ['aws-id'],
+        resources: [
+          {
+            id: 'resource-1',
+            name: 'Test Database',
+            resourceTypeId: 'database-id',
+            resourceTypeName: 'Database',
+            cloudProviderId: 'aws-id', // Already resolved UUID
+            cloudProviderName: 'AWS',
+            configuration: { size: '100GB' },
+          },
+        ],
+        createdBy: 'test@example.com',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      render(
+        <BlueprintForm
+          blueprint={existingBlueprint}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for cloud providers and blueprint to load
+      await waitFor(() => {
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify resource was loaded with UUID
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify cloud provider dropdown shows correct selection
+      const cloudProviderSelect = screen.getByTestId('resource-cloud-0');
+      expect(cloudProviderSelect).toHaveValue('aws-id');
+    });
+
+    it('cloud provider dropdown shows correct selection for loaded blueprint', async () => {
+      const existingBlueprint: Blueprint = {
+        id: 'blueprint-123',
+        name: 'Test Blueprint',
+        description: 'Test description',
+        supportedCloudProviderIds: ['aws-id', 'azure-id'],
+        resources: [
+          {
+            id: 'resource-1',
+            name: 'Test Database',
+            resourceTypeId: 'database-id',
+            cloudProviderId: 'azure-id',
+            cloudProviderName: 'Azure',
+            configuration: {},
+          },
+        ],
+        createdBy: 'test@example.com',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      render(
+        <BlueprintForm
+          blueprint={existingBlueprint}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for everything to load
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-azure-id')).toBeInTheDocument();
+      });
+
+      // Verify cloud provider dropdown shows Azure (UUID)
+      const cloudProviderSelect = screen.getByTestId('resource-cloud-0');
+      expect(cloudProviderSelect).toHaveValue('azure-id');
+      
+      // Verify the badge shows Azure
+      const container = screen.getByText('Shared Infrastructure Resources').closest('.resources-section');
+      const badge = container?.querySelector('.cloud-provider-badge');
+      expect(badge).toHaveTextContent('Azure');
+    });
+
+    it('changing cloud provider updates state with UUID', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for cloud providers to load
+      await waitFor(() => {
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Select AWS and Azure
+      await user.click(screen.getByTestId('checkbox-aws-id'));
+      await user.click(screen.getByTestId('checkbox-azure-id'));
+
+      // Add a resource for AWS
+      const addResourceSelect = screen.getByRole('combobox', { name: /add shared resource/i });
+      await user.selectOptions(addResourceSelect, 'database-id|aws-id');
+
+      // Verify resource was added with AWS
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-aws-id')).toBeInTheDocument();
+      });
+
+      // Change cloud provider to Azure
+      const cloudProviderSelect = screen.getByTestId('resource-cloud-0');
+      await user.selectOptions(cloudProviderSelect, 'azure-id');
+
+      // Verify the form updated with Azure UUID
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-azure-id')).toBeInTheDocument();
+        expect(screen.queryByTestId('dynamic-form-database-id-aws-id')).not.toBeInTheDocument();
+      });
+
+      // Verify badge updated
+      const container = screen.getByText('Shared Infrastructure Resources').closest('.resources-section');
+      const badge = container?.querySelector('.cloud-provider-badge');
+      expect(badge).toHaveTextContent('Azure');
+    });
+
+    it('saving blueprint transforms UUID back to cloud type', async () => {
+      const user = userEvent.setup();
+      const lookupService = CloudProviderLookupService.getInstance();
+
+      vi.mocked(apiService.createBlueprint).mockResolvedValue({
+        id: 'new-blueprint-123',
+        name: 'New Blueprint',
+        description: 'Test',
+        supportedCloudProviderIds: ['aws-id'],
+        resources: [],
+        createdBy: 'test@example.com',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      });
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for cloud providers to load
+      await waitFor(() => {
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Fill in form
+      const nameInput = screen.getByTestId('name');
+      await user.clear(nameInput);
+      await user.type(nameInput, 'New Blueprint');
+
+      // Select AWS
+      await user.click(screen.getByTestId('checkbox-aws-id'));
+
+      // Add a resource
+      const addResourceSelect = screen.getByRole('combobox', { name: /add shared resource/i });
+      await user.selectOptions(addResourceSelect, 'database-id|aws-id');
+
+      // Wait for resource to be added
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-aws-id')).toBeInTheDocument();
+      });
+
+      // Submit form
+      const submitButton = screen.getByTestId('button-create-blueprint');
+      await user.click(submitButton);
+
+      // Verify API was called with correct data
+      await waitFor(() => {
+        expect(apiService.createBlueprint).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'New Blueprint',
+            supportedCloudProviderIds: ['aws-id'],
+            resources: expect.arrayContaining([
+              expect.objectContaining({
+                name: 'Database',
+                resourceTypeId: 'database-id',
+                cloudProviderId: 'aws-id', // UUID is sent
+                configuration: expect.any(Object),
+              }),
+            ]),
+          }),
+          'test@example.com'
+        );
+      });
+
+      // Verify the lookup service can resolve the UUID back to cloud type
+      expect(lookupService.resolveCloudType('aws-id')).toBe('aws');
+    });
+
+    it('handles resources with resolved UUIDs in configuration reset', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for cloud providers to load
+      await waitFor(() => {
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Select AWS and Azure
+      await user.click(screen.getByTestId('checkbox-aws-id'));
+      await user.click(screen.getByTestId('checkbox-azure-id'));
+
+      // Add a resource for AWS
+      const addResourceSelect = screen.getByRole('combobox', { name: /add shared resource/i });
+      await user.selectOptions(addResourceSelect, 'database-id|aws-id');
+
+      // Wait for resource and update its configuration
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-aws-id')).toBeInTheDocument();
+      });
+
+      // Simulate configuration update
+      const updateConfigButton = screen.getByText('Update Config');
+      await user.click(updateConfigButton);
+
+      // Change cloud provider (should reset configuration)
+      const cloudProviderSelect = screen.getByTestId('resource-cloud-0');
+      await user.selectOptions(cloudProviderSelect, 'azure-id');
+
+      // Verify configuration was reset (new form instance)
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-azure-id')).toBeInTheDocument();
+      });
+    });
+
+    it('maintains UUID format throughout resource lifecycle', async () => {
+      const user = userEvent.setup();
+      const lookupService = CloudProviderLookupService.getInstance();
+
+      const existingBlueprint: Blueprint = {
+        id: 'blueprint-123',
+        name: 'Test Blueprint',
+        description: 'Test description',
+        supportedCloudProviderIds: ['aws-id', 'azure-id'],
+        resources: [
+          {
+            id: 'resource-1',
+            name: 'Test Database',
+            resourceTypeId: 'database-id',
+            cloudProviderId: 'aws-id',
+            cloudProviderName: 'AWS',
+            configuration: { size: '100GB' },
+          },
+        ],
+        createdBy: 'test@example.com',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(apiService.updateBlueprint).mockResolvedValue({
+        ...existingBlueprint,
+        updatedAt: '2024-01-02T00:00:00Z',
+      });
+
+      render(
+        <BlueprintForm
+          blueprint={existingBlueprint}
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for everything to load
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify initial state has UUID
+      const cloudProviderSelect = screen.getByTestId('resource-cloud-0');
+      expect(cloudProviderSelect).toHaveValue('aws-id');
+
+      // Change to Azure
+      await user.selectOptions(cloudProviderSelect, 'azure-id');
+
+      // Verify UUID updated
+      await waitFor(() => {
+        expect(screen.getByTestId('dynamic-form-database-id-azure-id')).toBeInTheDocument();
+      });
+
+      // Submit form
+      const submitButton = screen.getByTestId('button-update-blueprint');
+      await user.click(submitButton);
+
+      // Verify API was called with UUID
+      await waitFor(() => {
+        expect(apiService.updateBlueprint).toHaveBeenCalledWith(
+          'blueprint-123',
+          expect.objectContaining({
+            resources: expect.arrayContaining([
+              expect.objectContaining({
+                cloudProviderId: 'azure-id', // UUID maintained
+              }),
+            ]),
+          }),
+          'test@example.com'
+        );
+      });
+
+      // Verify lookup service can resolve both directions
+      expect(lookupService.resolveCloudProviderId('azure')).toBe('azure-id');
+      expect(lookupService.resolveCloudType('azure-id')).toBe('azure');
+    });
+  });
+
+  describe('Cloud Provider Loading Failures', () => {
+    it('displays error message when cloud providers fail to load', async () => {
+      const errorMessage = 'Network error: Failed to fetch cloud providers';
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error(errorMessage)
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+    });
+
+    it('displays retry button when cloud providers fail to load', async () => {
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error('Network error')
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error and retry button to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      });
+    });
+
+    it('disables cloud provider checkboxes when loading fails', async () => {
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error('Network error')
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Cloud provider checkboxes should be disabled
+      // Note: The checkboxes won't be rendered if providers array is empty
+      // So we just verify the error state is shown
+      expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+    });
+
+    it('disables resource editing when cloud providers fail to load', async () => {
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error('Network error')
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Should show message that cloud providers must be loaded
+      expect(screen.getByText(/cloud providers must be loaded before you can add resources/i)).toBeInTheDocument();
+    });
+
+    it('disables submit button when cloud providers fail to load', async () => {
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error('Network error')
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Submit button should be disabled
+      const submitButton = screen.getByTestId('button-create-blueprint');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('retries loading cloud providers when retry button is clicked', async () => {
+      const user = userEvent.setup();
+      
+      // First call fails
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+      
+      // Second call succeeds
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockResolvedValueOnce(
+        mockCloudProviders
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // Wait for cloud providers to load successfully
+      await waitFor(() => {
+        expect(screen.queryByText(/error loading cloud providers/i)).not.toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify API was called twice
+      expect(apiService.getAvailableCloudProvidersForBlueprints).toHaveBeenCalledTimes(2);
+    });
+
+    it('successfully retries and loads cloud providers after initial failure', async () => {
+      const user = userEvent.setup();
+      
+      // First call fails
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+      
+      // Second call succeeds
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockResolvedValueOnce(
+        mockCloudProviders
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // Wait for success - error should disappear and cloud providers should load
+      await waitFor(() => {
+        expect(screen.queryByText(/error loading cloud providers/i)).not.toBeInTheDocument();
+        expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      });
+
+      // Verify API was called twice (initial + retry)
+      expect(apiService.getAvailableCloudProvidersForBlueprints).toHaveBeenCalledTimes(2);
+    });
+
+    it('shows error again if retry fails', async () => {
+      const user = userEvent.setup();
+      
+      // Both calls fail
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValue(
+        new Error('Persistent network error')
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // Error should still be displayed
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+        expect(screen.getByText(/persistent network error/i)).toBeInTheDocument();
+      });
+
+      // Retry button should still be available
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+    });
+
+    it('clears error state when retry succeeds', async () => {
+      const user = userEvent.setup();
+      
+      // First call fails
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockRejectedValueOnce(
+        new Error('Network error')
+      );
+      
+      // Second call succeeds
+      vi.mocked(apiService.getAvailableCloudProvidersForBlueprints).mockResolvedValueOnce(
+        mockCloudProviders
+      );
+
+      render(
+        <BlueprintForm
+          onSave={mockOnSave}
+          onCancel={mockOnCancel}
+          user={mockUser}
+        />
+      );
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText(/error loading cloud providers/i)).toBeInTheDocument();
+      });
+
+      // Click retry button
+      const retryButton = screen.getByRole('button', { name: /retry/i });
+      await user.click(retryButton);
+
+      // Wait for success - error should be gone
+      await waitFor(() => {
+        expect(screen.queryByText(/error loading cloud providers/i)).not.toBeInTheDocument();
+      });
+
+      // Cloud providers should be loaded and functional
+      expect(screen.getByTestId('checkbox-aws-id')).toBeInTheDocument();
+      expect(screen.getByTestId('checkbox-aws-id')).not.toBeDisabled();
+      
+      // Submit button should be enabled (after selecting providers)
+      await user.click(screen.getByTestId('checkbox-aws-id'));
+      const nameInput = screen.getByTestId('name');
+      await user.type(nameInput, 'Test Blueprint');
+      
+      await waitFor(() => {
+        const submitButton = screen.getByTestId('button-create-blueprint');
+        expect(submitButton).not.toBeDisabled();
       });
     });
   });

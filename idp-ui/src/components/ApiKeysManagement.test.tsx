@@ -10,10 +10,11 @@ import type { ApiKeyResponse } from '../types/apiKey';
 vi.mock('../services/api', () => ({
   apiService: {
     getUserApiKeys: vi.fn(),
-    getAllApiKeys: vi.fn(),
+    getSystemApiKeys: vi.fn(),
     createUserApiKey: vi.fn(),
     rotateApiKey: vi.fn(),
     revokeApiKey: vi.fn(),
+    updateApiKeyName: vi.fn(),
   },
 }));
 
@@ -59,6 +60,18 @@ vi.mock('./ApiKeyRevokeModal', () => ({
     isOpen ? (
       <div data-testid="revoke-modal">
         <button onClick={() => onSuccess()}>Revoke</button>
+      </div>
+    ) : null
+  ),
+}));
+
+vi.mock('./ApiKeyEditNameModal', () => ({
+  ApiKeyEditNameModal: ({ isOpen, onSuccess, apiKey }: any) => (
+    isOpen ? (
+      <div data-testid="edit-name-modal">
+        <button onClick={() => onSuccess({ ...apiKey, keyName: 'Updated Name' })}>
+          Update Name
+        </button>
       </div>
     ) : null
   ),
@@ -155,7 +168,7 @@ describe('ApiKeysManagement', () => {
 
         await waitFor(() => {
           expect(apiService.getUserApiKeys).toHaveBeenCalledWith(mockUser.email);
-          expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+          expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
         });
       });
 
@@ -182,7 +195,7 @@ describe('ApiKeysManagement', () => {
 
     describe('Admin Mode', () => {
       it('renders correctly in admin mode with correct title', async () => {
-        vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+        vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
         render(<ApiKeysManagement user={mockAdminUser} mode="admin" />);
 
         await waitFor(() => {
@@ -191,7 +204,7 @@ describe('ApiKeysManagement', () => {
       });
 
       it('renders correctly in admin mode with correct breadcrumb', async () => {
-        vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+        vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
         render(<ApiKeysManagement user={mockAdminUser} mode="admin" />);
 
         await waitFor(() => {
@@ -200,18 +213,18 @@ describe('ApiKeysManagement', () => {
         });
       });
 
-      it('calls getAllApiKeys in admin mode', async () => {
-        vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      it('calls getSystemApiKeys in admin mode', async () => {
+        vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
         render(<ApiKeysManagement user={mockAdminUser} mode="admin" />);
 
         await waitFor(() => {
-          expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+          expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
           expect(apiService.getUserApiKeys).not.toHaveBeenCalled();
         });
       });
 
       it('displays admin mode description', async () => {
-        vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+        vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
         render(<ApiKeysManagement user={mockAdminUser} mode="admin" />);
 
         await waitFor(() => {
@@ -220,7 +233,7 @@ describe('ApiKeysManagement', () => {
       });
 
       it('shows admin empty state message when no keys exist', async () => {
-        vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+        vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
         render(<ApiKeysManagement user={mockAdminUser} mode="admin" />);
 
         await waitFor(() => {
@@ -238,7 +251,7 @@ describe('ApiKeysManagement', () => {
         await waitFor(() => {
           expect(screen.getByRole('heading', { name: 'My API Keys' })).toBeInTheDocument();
           expect(apiService.getUserApiKeys).toHaveBeenCalledWith(mockUser.email);
-          expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+          expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
         });
       });
     });
@@ -295,6 +308,49 @@ describe('ApiKeysManagement', () => {
         const revokeButtons = screen.getAllByRole('button', { name: /revoke/i });
         expect(rotateButtons.length).toBeGreaterThan(0);
         expect(revokeButtons.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('opens edit name modal when edit name button is clicked', async () => {
+      vi.mocked(apiService.getUserApiKeys).mockResolvedValue(mockUserApiKeys);
+      const user = userEvent.setup();
+      render(<ApiKeysManagement user={mockUser} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Key 1')).toBeInTheDocument();
+      });
+
+      const editButtons = screen.getAllByRole('button', { name: /edit name/i });
+      await user.click(editButtons[0]);
+
+      expect(screen.getByTestId('edit-name-modal')).toBeInTheDocument();
+    });
+
+    it('reloads API keys after successful name update', async () => {
+      vi.mocked(apiService.getUserApiKeys).mockResolvedValue(mockUserApiKeys);
+      const user = userEvent.setup();
+      render(<ApiKeysManagement user={mockUser} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Key 1')).toBeInTheDocument();
+      });
+
+      // Clear the mock to track subsequent calls
+      vi.mocked(apiService.getUserApiKeys).mockClear();
+      vi.mocked(apiService.getUserApiKeys).mockResolvedValue([
+        { ...mockUserApiKeys[0], keyName: 'Updated Name' },
+        mockUserApiKeys[1],
+      ]);
+
+      const editButtons = screen.getAllByRole('button', { name: /edit name/i });
+      await user.click(editButtons[0]);
+
+      const updateButton = screen.getByRole('button', { name: /update name/i });
+      await user.click(updateButton);
+
+      // Verify that getUserApiKeys was called again to reload the list
+      await waitFor(() => {
+        expect(apiService.getUserApiKeys).toHaveBeenCalledWith(mockUser.email);
       });
     });
   });

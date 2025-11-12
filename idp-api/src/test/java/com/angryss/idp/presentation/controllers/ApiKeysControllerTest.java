@@ -29,7 +29,7 @@ public class ApiKeysControllerTest {
     private static final String TEST_USER = "testuser@example.com";
     private static final String TEST_ADMIN = "admin@example.com";
     private static final String TEST_GROUPS = "Users";
-    private static final String ADMIN_GROUPS = "Admins";
+    private static final String ADMIN_GROUPS = "IDP-Admins";
 
     @BeforeEach
     @Transactional
@@ -233,31 +233,33 @@ public class ApiKeysControllerTest {
                 .statusCode(401);
     }
 
-    // ========== List All API Keys Tests ==========
+    // ========== List System API Keys Tests ==========
 
     @Test
-    public void testListAllApiKeys_Success() {
+    public void testListSystemApiKeys_Success() {
         // Create keys for different users and system
         createTestUserKey(TEST_USER, "User Key 1");
         createTestUserKey("otheruser@example.com", "User Key 2");
         createTestSystemKey("System Key 1");
+        createTestSystemKey("System Key 2");
 
         given()
             .header("X-Auth-Request-Email", TEST_ADMIN)
             .header("X-Auth-Request-Groups", ADMIN_GROUPS)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(200)
-                .body("$", hasSize(3))
-                .body("keyName", hasItems("User Key 1", "User Key 2", "System Key 1"));
+                .body("$", hasSize(2))
+                .body("keyName", hasItems("System Key 1", "System Key 2"))
+                .body("keyType", everyItem(equalTo("SYSTEM")));
     }
 
     @Test
-    public void testListAllApiKeys_NonAdmin_Forbidden() {
+    public void testListSystemApiKeys_NonAdmin_Forbidden() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(403);
     }

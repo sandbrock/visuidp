@@ -6,6 +6,7 @@ import type { CloudProvider, ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBoxGroup } from './input';
 import { Modal } from './Modal';
+import CloudProviderLookupService from '../services/CloudProviderLookupService';
 import './BlueprintForm.css';
 
 interface BlueprintFormProps {
@@ -18,6 +19,27 @@ interface BlueprintFormProps {
 export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFormProps) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nameInputRef = useRef<any>(null);
+  
+  /**
+   * CloudProviderLookupService Reference
+   * 
+   * Purpose: Provides bidirectional mapping between cloud type strings and cloud provider UUIDs
+   * 
+   * Usage Pattern:
+   * 1. Service is initialized when cloud providers are loaded from the API
+   * 2. Used by API service to transform backend DTOs (cloudType string → UUID)
+   * 3. Used when saving to transform UUIDs back to cloud type strings for backend
+   * 
+   * Key Methods:
+   * - initialize(providers): Loads cloud provider data and builds internal mappings
+   * - resolveCloudProviderId(cloudType): Converts "AWS" → "uuid-123"
+   * - resolveCloudType(uuid): Converts "uuid-123" → "AWS"
+   * - getCloudProviderById(uuid): Retrieves full cloud provider object
+   * 
+   * Singleton Pattern: getInstance() ensures single instance across the application
+   */
+  const cloudProviderLookupRef = useRef<CloudProviderLookupService>(CloudProviderLookupService.getInstance());
+  
   const [formData, setFormData] = useState<BlueprintCreate>({
     name: '',
     description: '',
@@ -31,11 +53,32 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
   const [cloudProviders, setCloudProviders] = useState<CloudProvider[]>([]);
   const [availableResourceTypes, setAvailableResourceTypes] = useState<ResourceType[]>([]);
   const [cloudProvidersLoaded, setCloudProvidersLoaded] = useState(false);
+  const [cloudProvidersLoadError, setCloudProvidersLoadError] = useState<string | null>(null);
   const [selectedCloudProviderIds, setSelectedCloudProviderIds] = useState<string[]>([]);
+  
+  /**
+   * State for selected resources in the blueprint
+   * 
+   * Interface:
+   * - resourceTypeId: UUID of the resource type
+   * - name: Display name of the resource
+   * - cloudProviderId: UUID of the cloud provider (resolved from cloud type string)
+   * - configuration: Cloud-specific configuration object
+   * 
+   * Data Flow:
+   * 1. Backend returns resources with cloudType string (e.g., "AWS")
+   * 2. API service transforms using CloudProviderLookupService to resolve UUID
+   * 3. This state stores the resolved UUID in cloudProviderId field
+   * 4. DynamicResourceForm receives the UUID and uses it to fetch property schemas
+   * 5. Property schema API endpoint expects UUID: /blueprints/resource-schema/{typeId}/{UUID}
+   * 
+   * Note: cloudProviderId stores the UUID, not the cloud type string. This ensures
+   * the correct cloud provider is used when fetching property schemas.
+   */
   const [selectedResources, setSelectedResources] = useState<Array<{
     resourceTypeId: string;
     name: string;
-    cloudProviderId: string;
+    cloudProviderId: string; // UUID of cloud provider (resolved from backend cloudType)
     configuration: Record<string, unknown>;
   }>>([]);
   
@@ -101,34 +144,123 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
     }
   }, [blueprint]);
 
-  // Load resource schemas for existing resources
+  /**
+   * Load resource schemas for existing resources
+   * 
+   * Note: Resources received here have already been transformed by the API service's
+   * getBlueprints() method, which uses CloudProviderLookupService to resolve cloud type
+   * strings to UUIDs. Therefore, resource.cloudProviderId contains the resolved UUID.
+   * 
+   * @param resources - Array of BlueprintResource objects with resolved cloudProviderId (UUID)
+   */
   const loadResourceSchemas = async (resources: BlueprintResource[]) => {
-    const resourcesWithoutSchemas = resources.map((resource) => ({
+    // Map resources to the state format, preserving the resolved UUID in cloudProviderId
+    const resourcesWithResolvedIds = resources.map((resource) => ({
       resourceTypeId: resource.resourceTypeId,
       name: resource.name,
-      cloudProviderId: resource.cloudProviderId,
+      cloudProviderId: resource.cloudProviderId, // Already contains UUID from transformation
       configuration: resource.configuration,
     }));
-    setSelectedResources(resourcesWithoutSchemas);
+    setSelectedResources(resourcesWithResolvedIds);
   };
 
-  // Load cloud providers and resource types on mount
+  /**
+   * Load cloud providers and resource types on component mount
+   * 
+   * Critical Initialization Step:
+   * This effect initializes the CloudProviderLookupService with cloud provider data,
+   * which is essential for the cloud type → UUID resolution process.
+   * 
+   * Initialization Flow:
+   * 1. Fetch cloud providers and resource types from API
+   * 2. Store providers in component state for UI rendering
+   * 3. Initialize CloudProviderLookupService with provider data
+   * 4. Service builds internal mapping: { "aws" → "uuid-123", "azure" → "uuid-456", ... }
+   * 5. Set cloudProvidersLoaded flag to enable resource editing
+   * 
+   * Error Handling:
+   * - If loading fails, cloudProvidersLoadError is set
+   * - Resource editing is disabled until providers are successfully loaded
+   * - User can retry loading via the retry button
+   * 
+   * Dependencies:
+   * - user.email: Required for API authentication
+   */
   useEffect(() => {
     (async () => {
       try {
+        setCloudProvidersLoadError(null);
         const [providers, resourceTypes] = await Promise.all([
           apiService.getAvailableCloudProvidersForBlueprints(user.email),
           apiService.getAvailableResourceTypesForBlueprints(user.email),
         ]);
         setCloudProviders(providers);
         setAvailableResourceTypes(resourceTypes);
+        
+        // Initialize CloudProviderLookupService with loaded providers
+        // This builds the internal mapping used for cloud type ↔ UUID resolution
+        cloudProviderLookupRef.current.initialize(providers);
+        
         setCloudProvidersLoaded(true);
       } catch (e) {
         console.error('Failed to load cloud providers or resource types', e);
+        const errorMessage = e instanceof Error ? e.message : 'Failed to load cloud providers';
+        setCloudProvidersLoadError(errorMessage);
+        setCloudProvidersLoaded(false);
       }
     })();
   }, [user.email]);
 
+  /**
+   * Retry loading cloud providers after a failure
+   * 
+   * This handler allows users to retry loading cloud providers if the initial
+   * load fails. It performs the same initialization as the useEffect, including
+   * reinitializing the CloudProviderLookupService.
+   */
+  const handleRetryLoadCloudProviders = async () => {
+    try {
+      setCloudProvidersLoadError(null);
+      setLoading(true);
+      const [providers, resourceTypes] = await Promise.all([
+        apiService.getAvailableCloudProvidersForBlueprints(user.email),
+        apiService.getAvailableResourceTypesForBlueprints(user.email),
+      ]);
+      setCloudProviders(providers);
+      setAvailableResourceTypes(resourceTypes);
+      
+      // Reinitialize CloudProviderLookupService with loaded providers
+      cloudProviderLookupRef.current.initialize(providers);
+      
+      setCloudProvidersLoaded(true);
+    } catch (e) {
+      console.error('Failed to load cloud providers or resource types', e);
+      const errorMessage = e instanceof Error ? e.message : 'Failed to load cloud providers';
+      setCloudProvidersLoadError(errorMessage);
+      setCloudProvidersLoaded(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Handle form submission - save blueprint to backend
+   * 
+   * Transformation Logic:
+   * The API service handles the transformation of cloud provider UUIDs back to cloud type
+   * strings when sending data to the backend. This maintains backward compatibility with
+   * the backend API contract.
+   * 
+   * Data Flow:
+   * 1. selectedResources contains cloudProviderId as UUID (e.g., "uuid-123")
+   * 2. Resources are mapped to BlueprintResource format with UUID preserved
+   * 3. API service's createBlueprint/updateBlueprint methods handle transformation
+   * 4. transformBlueprintResourceToBackend() converts UUID → cloud type string
+   * 5. Backend receives cloudType string (e.g., "AWS") as expected
+   * 
+   * Note: The transformation happens in the API service layer, not here. This component
+   * works exclusively with UUIDs for cloud provider identification.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -145,10 +277,11 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
       let savedBlueprint: Blueprint;
       
       // Convert selected resources to the format expected by the API
+      // Note: cloudProviderId contains UUID, API service will transform to cloud type string
       const resources: Omit<BlueprintResource, 'id'>[] = selectedResources.map(res => ({
         name: res.name,
         resourceTypeId: res.resourceTypeId,
-        cloudProviderId: res.cloudProviderId,
+        cloudProviderId: res.cloudProviderId, // UUID - will be transformed by API service
         configuration: res.configuration,
       }));
       
@@ -261,12 +394,31 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
     });
   };
 
+  /**
+   * Handle cloud provider change for a specific resource
+   * 
+   * State Management:
+   * When a user changes the cloud provider for a resource, we need to:
+   * 1. Update the cloudProviderId field with the new UUID
+   * 2. Reset the configuration object (cloud-specific properties are different)
+   * 3. Trigger DynamicResourceForm to fetch new property schema
+   * 
+   * Data Flow:
+   * 1. User selects new cloud provider from dropdown
+   * 2. cloudProviderId is updated with the new UUID
+   * 3. Configuration is reset to empty object
+   * 4. DynamicResourceForm receives new cloudProviderId via props
+   * 5. DynamicResourceForm fetches property schema using the UUID
+   * 6. Property schema API: /blueprints/resource-schema/{resourceTypeId}/{UUID}
+   * 
+   * Note: The UUID is used directly for the API call, no transformation needed here.
+   */
   const handleResourceCloudProviderChange = async (index: number, cloudProviderId: string) => {
     setSelectedResources(prev => {
       const updated = [...prev];
       updated[index] = {
         ...updated[index],
-        cloudProviderId,
+        cloudProviderId, // Store UUID for property schema fetching
         configuration: {}, // Reset configuration when cloud provider changes
       };
       return updated;
@@ -281,6 +433,21 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+
+        {cloudProvidersLoadError && (
+          <div className="error-message">
+            <strong>Error loading cloud providers:</strong> {cloudProvidersLoadError}
+            <div style={{ marginTop: '10px' }}>
+              <AngryButton
+                onClick={handleRetryLoadCloudProviders}
+                disabled={loading}
+                cssClass="e-outline"
+              >
+                {loading ? 'Retrying...' : 'Retry'}
+              </AngryButton>
+            </div>
           </div>
         )}
 
@@ -314,8 +481,9 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
               selectedValues={selectedCloudProviderIds}
               onChange={handleCloudProviderChange}
               layout="vertical"
+              disabled={!cloudProvidersLoaded || !!cloudProvidersLoadError}
             />
-            {selectedCloudProviderIds.length === 0 && (
+            {selectedCloudProviderIds.length === 0 && !cloudProvidersLoadError && (
               <small className="form-help-text">Select at least one cloud provider</small>
             )}
           </div>
@@ -324,7 +492,11 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
           <div className="resources-section">
             <h3>Shared Infrastructure Resources</h3>
             
-            {selectedCloudProviderIds.length === 0 ? (
+            {cloudProvidersLoadError ? (
+              <div className="info-message">
+                <p>Cloud providers must be loaded before you can add resources. Please retry loading cloud providers above.</p>
+              </div>
+            ) : selectedCloudProviderIds.length === 0 ? (
               <div className="info-message">
                 <p>Please select at least one cloud provider above before adding resources.</p>
               </div>
@@ -342,7 +514,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                           id={`resource-name-${index}`}
                           value={resource.name}
                           onChange={(v) => handleResourceNameChange(index, v)}
-                          placeholder="Resource Name *"
+                          placeholder="Display Name *"
                         />
                         <button
                           type="button"
@@ -436,7 +608,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
             </AngryButton>
             <AngryButton
               type="submit"
-              disabled={loading}
+              disabled={loading || !cloudProvidersLoaded || !!cloudProvidersLoadError}
               cssClass="e-primary"
               isPrimary={true}
             >

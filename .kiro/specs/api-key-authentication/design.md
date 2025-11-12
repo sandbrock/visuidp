@@ -191,7 +191,7 @@ public class ApiKeyService {
     public List<ApiKeyResponseDto> listUserApiKeys();
     
     @RolesAllowed("admin")
-    public List<ApiKeyResponseDto> listAllApiKeys();
+    public List<ApiKeyResponseDto> listSystemApiKeys();
     
     @RolesAllowed("admin")
     public List<ApiKeyAuditLogDto> getApiKeyAuditLogs(String userEmail, LocalDateTime startDate, LocalDateTime endDate);
@@ -307,7 +307,7 @@ public class ApiKeysController {
     @POST
     @Path("/user")
     public Response createUserApiKey(ApiKeyCreateDto dto) {
-        // Create user API key
+        // Create user API key (personal keys only)
         // Return 201 with ApiKeyCreatedDto
     }
     
@@ -315,22 +315,22 @@ public class ApiKeysController {
     @Path("/system")
     @RolesAllowed("admin")
     public Response createSystemApiKey(ApiKeyCreateDto dto) {
-        // Create system API key
+        // Create system API key (admin only, system keys only)
         // Return 201 with ApiKeyCreatedDto
     }
     
     @GET
     @Path("/user")
     public Response listUserApiKeys() {
-        // List current user's API keys
+        // List current user's personal API keys only
         // Return 200 with List<ApiKeyResponseDto>
     }
     
     @GET
-    @Path("/all")
+    @Path("/system")
     @RolesAllowed("admin")
-    public Response listAllApiKeys() {
-        // List all API keys (admin only)
+    public Response listSystemApiKeys() {
+        // List all system-level API keys (admin only)
         // Return 200 with List<ApiKeyResponseDto>
     }
     
@@ -607,31 +607,47 @@ Create Flyway migration `V3__api_keys.sql`:
 
 ### UI Components
 
-1. **API Keys Management Page** (`/admin/api-keys`)
-   - List user's API keys
-   - Create new API key button
+1. **Personal API Keys Management Page** (`/api-keys`)
+   - List user's personal API keys only
+   - Create new user API key button
    - Revoke key button
    - Rotate key button
    - Edit key name
    - Display key metadata (creation date, expiration, last used)
    - Warning indicator for expiring keys
 
-2. **API Key Creation Modal**
+2. **Admin System API Keys Management Page** (`/admin/api-keys`)
+   - List all system-level API keys across the organization
+   - Create new system API key button (admin only)
+   - Revoke key button
+   - Display key metadata (creation date, expiration, last used, created by)
+   - Warning indicator for expiring keys
+   - No option to create user-level API keys
+
+3. **Personal API Key Creation Modal**
    - Key name input
    - Expiration period dropdown (30, 60, 90, 180, 365 days)
-   - Key type selection (admin only)
    - Display generated key with copy button
    - Warning: "Save this key now, you won't see it again"
 
-3. **API Key Display Component**
-   - Show key prefix only (e.g., "idp_user_abc...")
+4. **System API Key Creation Modal** (admin only)
+   - Key name input
+   - Expiration period dropdown (30, 60, 90, 180, 365 days)
+   - No key type selector (always creates SYSTEM type keys)
+   - Display generated key with copy button
+   - Warning: "Save this key now, you won't see it again"
+   - Note: "This is a system-level key not tied to any individual user"
+
+5. **API Key Display Component**
+   - Show key prefix only (e.g., "idp_user_abc..." or "idp_system_abc...")
    - Status badge (Active, Expiring Soon, Expired, Revoked)
    - Metadata display
    - Action buttons (Rotate, Revoke, Edit Name)
+   - Key type indicator (User or System)
 
-4. **Admin Audit Log Viewer** (admin only)
+6. **Admin Audit Log Viewer** (admin only)
    - Filterable table of API key events
-   - Filter by user email, date range, event type
+   - Filter by user email, date range, event type, key type
    - Export to CSV
 
 ### API Client Updates

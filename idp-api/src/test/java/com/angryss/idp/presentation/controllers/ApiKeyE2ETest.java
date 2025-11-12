@@ -23,7 +23,7 @@ public class ApiKeyE2ETest {
     private static final String TEST_USER = "e2euser@example.com";
     private static final String TEST_ADMIN = "e2eadmin@example.com";
     private static final String TEST_GROUPS = "Users";
-    private static final String ADMIN_GROUPS = "Admins";
+    private static final String ADMIN_GROUPS = "IDP-Admins";
 
     @BeforeEach
     @Transactional
@@ -138,15 +138,15 @@ public class ApiKeyE2ETest {
         // Step 2: System key can access admin endpoints
         given()
             .header("Authorization", "Bearer " + apiKey)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(200);
 
-        // Step 3: Admin can view all keys including system keys
+        // Step 3: Admin can view all system keys
         given()
             .header("X-Auth-Request-Email", TEST_ADMIN)
             .header("X-Auth-Request-Groups", ADMIN_GROUPS)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(200)
                 .body("$", hasItem(hasEntry("id", keyId)));
@@ -162,7 +162,7 @@ public class ApiKeyE2ETest {
         // Step 5: Revoked system key no longer works
         given()
             .header("Authorization", "Bearer " + apiKey)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(401);
     }

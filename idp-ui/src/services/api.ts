@@ -1,6 +1,7 @@
 import { apiCall } from '../auth';
 import type { Stack, StackCreate } from '../types/stack';
 import type { CloudProvider, CloudProviderCreate, CloudProviderUpdate, ResourceType, ResourceTypeCreate, ResourceTypeUpdate } from '../types/admin';
+import CloudProviderLookupService from './CloudProviderLookupService';
 
 // Cloud types supported by the system
 export const CLOUD_TYPES = [
@@ -50,27 +51,161 @@ interface BlueprintResourceBackendDto {
 }
 
 // Transformation functions for BlueprintResource
-function transformBlueprintResourceFromBackend(backendResource: BlueprintResourceBackendDto): BlueprintResource {
+/**
+ * Transforms a blueprint resource from backend DTO format to frontend format.
+ * 
+ * Cloud Provider ID Resolution:
+ * - Backend sends cloud type as a string (e.g., "AWS", "azure", "gcp")
+ * - Frontend needs cloud provider UUID to fetch property schemas
+ * - This function resolves the cloud type string to the corresponding UUID
+ * 
+ * Resolution Process:
+ * 1. Check if backend resource has a cloudType field
+ * 2. Use CloudProviderLookupService to resolve cloud type string to UUID
+ * 3. Resolution is case-insensitive (e.g., "AWS", "aws", "Aws" all resolve to same UUID)
+ * 4. If resolution succeeds, set cloudProviderId to the UUID
+ * 5. If resolution fails, log warning and set cloudProviderId to empty string
+ * 
+ * Backward Compatibility:
+ * - If cloudProviderLookup service is not provided, cloudProviderId defaults to empty string
+ * - cloudProviderName field preserves the original cloud type string for display purposes
+ * - This allows the form to continue functioning even if resolution fails
+ * 
+ * Error Handling:
+ * - Unknown cloud types: Logs warning, sets empty cloudProviderId, form shows "no schema" message
+ * - Missing cloudType: Sets empty cloudProviderId, no warning (valid for resources without cloud provider)
+ * - Missing lookup service: Sets empty cloudProviderId, no warning (backward compatibility mode)
+ * 
+ * @param backendResource - The blueprint resource DTO from the backend API
+ * @param cloudProviderLookup - Optional lookup service for cloud type to UUID resolution
+ * @returns Frontend blueprint resource with resolved cloud provider UUID
+ */
+export function transformBlueprintResourceFromBackend(
+  backendResource: BlueprintResourceBackendDto,
+  cloudProviderLookup?: CloudProviderLookupService
+): BlueprintResource {
+  // Initialize cloudProviderId to empty string (safe default for all error cases)
+  let cloudProviderId = '';
+  
+  // Attempt cloud type to UUID resolution if both cloudType and lookup service are available
+  if (backendResource.cloudType && cloudProviderLookup) {
+    // Resolve cloud type string (e.g., "AWS") to cloud provider UUID
+    // Resolution is case-insensitive and uses in-memory cache for performance
+    const resolvedId = cloudProviderLookup.resolveCloudProviderId(backendResource.cloudType);
+    
+    if (resolvedId) {
+      // Resolution successful - use the UUID for property schema fetching
+      cloudProviderId = resolvedId;
+    } else {
+      // Resolution failed - cloud type doesn't match any loaded cloud provider
+      // This can happen if:
+      // 1. Cloud provider was deleted but blueprint still references it
+      // 2. Cloud type string has a typo or invalid format
+      // 3. Cloud providers haven't been loaded yet (race condition)
+      console.warn(
+        `[CloudProviderResolution] Could not resolve cloud type "${backendResource.cloudType}" to a cloud provider UUID. ` +
+        `Resource "${backendResource.name}" will have an empty cloudProviderId. ` +
+        `This may cause issues when loading cloud-specific properties.`
+      );
+      // cloudProviderId remains empty string - DynamicResourceForm will show "no schema" message
+    }
+  }
+  // If cloudType is missing or lookup service not provided, cloudProviderId stays empty (backward compatibility)
+  
   return {
     id: backendResource.id,
     name: backendResource.name,
     description: backendResource.description,
     resourceTypeId: backendResource.blueprintResourceTypeId,
     resourceTypeName: backendResource.blueprintResourceTypeName,
-    cloudProviderId: backendResource.cloudType || '',
+    // cloudProviderId: Resolved UUID for property schema API calls
+    cloudProviderId: cloudProviderId,
+    // cloudProviderName: Original cloud type string preserved for display and backward compatibility
     cloudProviderName: backendResource.cloudType,
     configuration: backendResource.configuration,
     cloudSpecificProperties: backendResource.cloudSpecificProperties,
   };
 }
 
-function transformBlueprintResourceToBackend(frontendResource: Omit<BlueprintResource, 'id'>): Omit<BlueprintResourceBackendDto, 'id'> {
+/**
+ * Transforms a blueprint resource from frontend format to backend DTO format.
+ * 
+ * Cloud Provider UUID to Cloud Type Resolution:
+ * - Frontend uses cloud provider UUID for property schema fetching
+ * - Backend expects cloud type as a string (e.g., "AWS", "azure", "gcp")
+ * - This function performs reverse resolution from UUID back to cloud type string
+ * 
+ * Resolution Process:
+ * 1. First, try to use cloudProviderName if available (most efficient, no lookup needed)
+ * 2. If cloudProviderName is missing, resolve cloudProviderId UUID to cloud type string
+ * 3. Use CloudProviderLookupService for reverse lookup (UUID → cloud type)
+ * 4. If resolution fails, fallback to using UUID directly (backward compatibility)
+ * 
+ * Backward Compatibility:
+ * - Prioritizes cloudProviderName field to avoid unnecessary lookups
+ * - Falls back to UUID if resolution fails (backend may accept UUIDs in some cases)
+ * - Handles missing lookup service gracefully by using UUID as fallback
+ * - Maintains backend API contract by always sending cloudType field
+ * 
+ * Error Handling:
+ * - Missing cloudProviderName and cloudProviderId: Sets empty string (valid for resources without cloud provider)
+ * - UUID resolution fails: Logs warning, uses UUID as fallback to maintain data integrity
+ * - Missing lookup service: Uses UUID as fallback, no warning (backward compatibility mode)
+ * 
+ * @param frontendResource - The blueprint resource from frontend state
+ * @param cloudProviderLookup - Optional lookup service for UUID to cloud type resolution
+ * @returns Backend blueprint resource DTO with cloud type string
+ */
+export function transformBlueprintResourceToBackend(
+  frontendResource: Omit<BlueprintResource, 'id'>,
+  cloudProviderLookup?: CloudProviderLookupService
+): Omit<BlueprintResourceBackendDto, 'id'> {
+  // Initialize cloudType to empty string (safe default)
+  let cloudType = '';
+  
+  // Strategy 1: Use cloudProviderName if available (most efficient, no lookup needed)
+  // cloudProviderName contains the original cloud type string from backend
+  if (frontendResource.cloudProviderName) {
+    cloudType = frontendResource.cloudProviderName;
+  }
+  // Strategy 2: Resolve UUID to cloud type string if cloudProviderName is missing
+  else if (frontendResource.cloudProviderId) {
+    if (cloudProviderLookup) {
+      // Attempt reverse resolution: UUID → cloud type string
+      // This uses the same in-memory cache as forward resolution
+      const resolvedCloudType = cloudProviderLookup.resolveCloudType(frontendResource.cloudProviderId);
+      
+      if (resolvedCloudType) {
+        // Resolution successful - use the cloud type string
+        cloudType = resolvedCloudType;
+      } else {
+        // Resolution failed - UUID doesn't match any loaded cloud provider
+        // This can happen if:
+        // 1. Cloud provider was deleted after resource was loaded
+        // 2. UUID is invalid or corrupted
+        // 3. Cloud providers cache was cleared
+        console.warn(
+          `[CloudProviderResolution] Could not resolve cloud provider UUID "${frontendResource.cloudProviderId}" to cloud type. ` +
+          `Resource "${frontendResource.name}" will use UUID as fallback for backward compatibility.`
+        );
+        // Fallback: Use UUID directly - backend may accept it or validation will catch it
+        cloudType = frontendResource.cloudProviderId;
+      }
+    } else {
+      // No lookup service available - use UUID as fallback
+      // This maintains backward compatibility when lookup service is not initialized
+      cloudType = frontendResource.cloudProviderId;
+    }
+  }
+  // If both cloudProviderName and cloudProviderId are missing, cloudType stays empty (valid state)
+  
   return {
     name: frontendResource.name,
     description: frontendResource.description,
     blueprintResourceTypeId: frontendResource.resourceTypeId,
     blueprintResourceTypeName: frontendResource.resourceTypeName,
-    cloudType: frontendResource.cloudProviderName || frontendResource.cloudProviderId,
+    // cloudType: Cloud type string expected by backend API (e.g., "AWS", "azure", "gcp")
+    cloudType: cloudType,
     configuration: frontendResource.configuration,
     cloudSpecificProperties: frontendResource.cloudSpecificProperties,
   };
@@ -172,8 +307,37 @@ export const apiService = {
   },
 
   // Get all blueprints
+  /**
+   * Fetches all blueprints and transforms their resources to use cloud provider UUIDs.
+   * 
+   * Cloud Provider Resolution Strategy:
+   * 1. Load cloud providers first to build the lookup cache
+   * 2. Initialize CloudProviderLookupService with loaded providers
+   * 3. Fetch blueprints from backend (resources contain cloud type strings)
+   * 4. Transform each resource to resolve cloud type strings to UUIDs
+   * 
+   * This ensures that when blueprints are loaded, all resources have resolved
+   * cloud provider UUIDs ready for property schema fetching.
+   * 
+   * Error Handling:
+   * - If cloud providers fail to load, the error propagates and blueprints are not fetched
+   * - If blueprint fetch fails, the error is logged and re-thrown
+   * - If individual resource transformation fails, it logs a warning but continues
+   */
   async getBlueprints(userEmail?: string): Promise<Blueprint[]> {
     try {
+      // Step 1: Load cloud providers before fetching blueprints
+      // This ensures the lookup service has all necessary data for resolution
+      // If this fails, we cannot properly resolve cloud provider IDs
+      const cloudProviders = await this.getAvailableCloudProvidersForBlueprints(userEmail);
+      
+      // Step 2: Initialize CloudProviderLookupService with loaded cloud providers
+      // This builds the in-memory cache for cloud type ↔ UUID resolution
+      // The singleton pattern ensures this cache is shared across all transformations
+      const lookupService = CloudProviderLookupService.getInstance();
+      lookupService.initialize(cloudProviders);
+      
+      // Step 3: Fetch blueprints from backend
       const response = await apiCall('/blueprints', {}, userEmail);
       if (response.ok) {
         const raw = await response.json();
@@ -196,7 +360,11 @@ export const apiService = {
           configuration: b.configuration,
           supportedCloudTypes: b.supportedCloudTypes ?? [],
           supportedCloudProviderIds: b.supportedCloudProviderIds ?? [],
-          resources: b.resources?.map(transformBlueprintResourceFromBackend),
+          // Step 4: Transform all blueprint resources with resolved cloud provider IDs
+          // Each resource's cloudType string (e.g., "AWS") is resolved to a UUID
+          // The UUID is stored in cloudProviderId for property schema fetching
+          // The original cloud type string is preserved in cloudProviderName for display
+          resources: b.resources?.map(r => transformBlueprintResourceFromBackend(r, lookupService)),
         }));
       }
       throw new Error(`Failed to fetch blueprints: ${response.status}`);
@@ -206,19 +374,48 @@ export const apiService = {
     }
   },
 
+  /**
+   * Creates a new blueprint with resources.
+   * 
+   * Transformation Flow:
+   * 1. Frontend state contains resources with cloud provider UUIDs
+   * 2. Transform resources to backend format (UUID → cloud type string)
+   * 3. Send to backend API with cloud type strings
+   * 4. Transform response back to frontend format (cloud type string → UUID)
+   * 
+   * This bidirectional transformation maintains:
+   * - Frontend: Uses UUIDs for property schema fetching
+   * - Backend: Uses cloud type strings for storage and validation
+   * 
+   * Backward Compatibility:
+   * - Backend API contract unchanged (still expects cloud type strings)
+   * - Transformation handles missing lookup service gracefully
+   */
   async createBlueprint(payload: BlueprintCreate, userEmail?: string): Promise<Blueprint> {
     try {
-      // Transform resources to backend format
+      // Get CloudProviderLookupService instance for UUID to cloud type transformation
+      // This is the same singleton instance used for loading blueprints
+      const cloudProviderLookup = CloudProviderLookupService.getInstance();
+      
+      // Transform resources to backend format, converting UUIDs back to cloud type strings
+      // Frontend resources have cloudProviderId (UUID) for property schema fetching
+      // Backend expects cloudType (string) for storage and validation
       const backendPayload = {
         ...payload,
-        resources: payload.resources?.map(transformBlueprintResourceToBackend),
+        resources: payload.resources?.map((res: Omit<BlueprintResource, 'id'>) => 
+          transformBlueprintResourceToBackend(res, cloudProviderLookup)
+        ),
       };
       const response = await apiCall('/blueprints', { method: 'POST', body: JSON.stringify(backendPayload) }, userEmail);
       if (response.ok) {
         const result = await response.json();
         // Transform response resources back to frontend format
+        // Backend returns resources with cloud type strings
+        // Transform them to have UUIDs for consistent frontend state
         if (result.resources) {
-          result.resources = result.resources.map(transformBlueprintResourceFromBackend);
+          result.resources = result.resources.map((res: BlueprintResourceBackendDto) => 
+            transformBlueprintResourceFromBackend(res, cloudProviderLookup)
+          );
         }
         return result;
       }
@@ -229,24 +426,57 @@ export const apiService = {
     }
   },
 
+  /**
+   * Updates an existing blueprint with resources.
+   * 
+   * Transformation Flow:
+   * 1. Frontend state contains resources with cloud provider UUIDs
+   * 2. Transform resources to backend format (UUID → cloud type string)
+   * 3. Send to backend API with cloud type strings
+   * 4. Transform response back to frontend format (cloud type string → UUID)
+   * 
+   * Error Handling:
+   * - Logs the payload being sent for debugging purposes
+   * - Attempts to extract error details from response body
+   * - Provides detailed error messages for troubleshooting
+   * 
+   * Backward Compatibility:
+   * - Backend API contract unchanged (still expects cloud type strings)
+   * - Transformation handles missing lookup service gracefully
+   */
   async updateBlueprint(id: string, payload: BlueprintCreate, userEmail?: string): Promise<Blueprint> {
     try {
-      // Transform resources to backend format
+      // Get CloudProviderLookupService instance for UUID to cloud type transformation
+      // This is the same singleton instance used for loading blueprints
+      const cloudProviderLookup = CloudProviderLookupService.getInstance();
+      
+      // Transform resources to backend format, converting UUIDs back to cloud type strings
+      // Frontend resources have cloudProviderId (UUID) for property schema fetching
+      // Backend expects cloudType (string) for storage and validation
       const backendPayload = {
         ...payload,
-        resources: payload.resources?.map(transformBlueprintResourceToBackend),
+        resources: payload.resources?.map((res: Omit<BlueprintResource, 'id'>) => 
+          transformBlueprintResourceToBackend(res, cloudProviderLookup)
+        ),
       };
+      // Log payload for debugging - helps troubleshoot transformation issues
       console.log('Sending to backend:', JSON.stringify(backendPayload, null, 2));
+      
       const response = await apiCall(`/blueprints/${id}`, { method: 'PUT', body: JSON.stringify(backendPayload) }, userEmail);
       if (response.ok) {
         const result = await response.json();
         // Transform response resources back to frontend format
+        // Backend returns resources with cloud type strings
+        // Transform them to have UUIDs for consistent frontend state
         if (result.resources) {
-          result.resources = result.resources.map(transformBlueprintResourceFromBackend);
+          result.resources = result.resources.map((res: BlueprintResourceBackendDto) => 
+            transformBlueprintResourceFromBackend(res, cloudProviderLookup)
+          );
         }
         return result;
       }
-      // Try to get error details from response
+      
+      // Error handling: Try to extract detailed error information from response
       let errorMessage = `Failed to update blueprint: ${response.status}`;
       try {
         const errorBody = await response.text();
@@ -255,7 +485,7 @@ export const apiService = {
           errorMessage += ` - ${errorBody}`;
         }
       } catch (e) {
-        // Ignore if we can't read the error body
+        // Ignore if we can't read the error body - use basic error message
       }
       throw new Error(errorMessage);
     } catch (error) {
@@ -970,15 +1200,15 @@ export const apiService = {
     }
   },
 
-  async getAllApiKeys(userEmail?: string): Promise<import('../types/apiKey').ApiKeyResponse[]> {
+  async getSystemApiKeys(userEmail?: string): Promise<import('../types/apiKey').ApiKeyResponse[]> {
     try {
-      const response = await apiCall('/api-keys/all', {}, userEmail);
+      const response = await apiCall('/api-keys/system', {}, userEmail);
       if (response.ok) {
         return await response.json();
       }
-      throw new Error(`Failed to fetch all API keys: ${response.status}`);
+      throw new Error(`Failed to fetch system API keys: ${response.status}`);
     } catch (error) {
-      console.error('Error fetching all API keys:', error);
+      console.error('Error fetching system API keys:', error);
       throw error;
     }
   },

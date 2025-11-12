@@ -14,7 +14,7 @@ import type { ApiKeyResponse } from '../types/apiKey';
 vi.mock('../services/api', () => ({
   apiService: {
     getUserApiKeys: vi.fn(),
-    getAllApiKeys: vi.fn(),
+    getSystemApiKeys: vi.fn(),
     createUserApiKey: vi.fn(),
     rotateApiKey: vi.fn(),
     revokeApiKey: vi.fn(),
@@ -349,7 +349,7 @@ describe('Navigation and Routing Behavior Tests', () => {
     });
 
     it('should allow admins to access /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -368,13 +368,13 @@ describe('Navigation and Routing Behavior Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: 'API Keys Management' })).toBeInTheDocument();
-        expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
       });
     });
 
     it('should allow admins to navigate between personal and admin API keys pages', async () => {
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue(mockUserApiKeys);
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
       const user = userEvent.setup();
 
       render(
@@ -413,7 +413,7 @@ describe('Navigation and Routing Behavior Tests', () => {
 
     it('should show different content for admin on personal vs admin routes', async () => {
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue([mockUserApiKeys[0]]);
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([
         mockUserApiKeys[0],
         {
           id: 'key-2',
@@ -465,7 +465,7 @@ describe('Navigation and Routing Behavior Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: 'API Keys Management' })).toBeInTheDocument();
-        expect(apiService.getAllApiKeys).toHaveBeenCalled();
+        expect(apiService.getSystemApiKeys).toHaveBeenCalled();
       });
     });
   });
@@ -490,7 +490,7 @@ describe('Navigation and Routing Behavior Tests', () => {
     });
 
     it('should show admin breadcrumb on /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -516,7 +516,7 @@ describe('Navigation and Routing Behavior Tests', () => {
 
     it('should have different breadcrumb structure for personal vs admin contexts', async () => {
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue(mockUserApiKeys);
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       // Render personal route
       const { unmount } = render(
@@ -580,7 +580,7 @@ describe('Navigation and Routing Behavior Tests', () => {
     });
 
     it('should maintain breadcrumb consistency when navigating within admin context', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>

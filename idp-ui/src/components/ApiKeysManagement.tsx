@@ -7,6 +7,7 @@ import { Breadcrumb } from './Breadcrumb';
 import { ApiKeyCreateModal } from './ApiKeyCreateModal';
 import { ApiKeyRotateModal } from './ApiKeyRotateModal';
 import { ApiKeyRevokeModal } from './ApiKeyRevokeModal';
+import { ApiKeyEditNameModal } from './ApiKeyEditNameModal';
 import './ApiKeysManagement.css';
 
 interface ApiKeysManagementProps {
@@ -30,6 +31,7 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isRotateModalOpen, setIsRotateModalOpen] = useState(false);
   const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
+  const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKeyResponse | null>(null);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
       setLoading(true);
       setError(null);
       const data = isAdminMode 
-        ? await apiService.getAllApiKeys(user.email)
+        ? await apiService.getSystemApiKeys(user.email)
         : await apiService.getUserApiKeys(user.email);
       setApiKeys(data);
     } catch (err) {
@@ -82,8 +84,11 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
   };
 
   const handleEditName = (keyId: string) => {
-    // TODO: Will be implemented in a future task
-    console.log('Edit API key name:', keyId);
+    const key = apiKeys.find(k => k.id === keyId);
+    if (key) {
+      setSelectedApiKey(key);
+      setIsEditNameModalOpen(true);
+    }
   };
 
   const handleRotateSuccess = (_rotatedKey: ApiKeyCreated) => {
@@ -103,6 +108,16 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
 
   const handleCloseRevokeModal = () => {
     setIsRevokeModalOpen(false);
+    setSelectedApiKey(null);
+  };
+
+  const handleEditNameSuccess = (_updatedKey: ApiKeyResponse) => {
+    // Reload the API keys list to show the updated name
+    loadApiKeys();
+  };
+
+  const handleCloseEditNameModal = () => {
+    setIsEditNameModalOpen(false);
     setSelectedApiKey(null);
   };
 
@@ -315,6 +330,14 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
         apiKey={selectedApiKey}
         user={user}
         mode={mode}
+      />
+
+      <ApiKeyEditNameModal
+        isOpen={isEditNameModalOpen}
+        onClose={handleCloseEditNameModal}
+        onSuccess={handleEditNameSuccess}
+        apiKey={selectedApiKey}
+        user={user}
       />
     </div>
   );

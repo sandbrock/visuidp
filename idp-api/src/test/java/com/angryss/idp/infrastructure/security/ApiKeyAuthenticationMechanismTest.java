@@ -262,7 +262,7 @@ public class ApiKeyAuthenticationMechanismTest {
         // When - Make request with system API key to admin endpoint
         given()
             .header("Authorization", "Bearer " + apiKey)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(200);
     }
@@ -290,7 +290,7 @@ public class ApiKeyAuthenticationMechanismTest {
         // When - Make request with user API key to admin endpoint
         given()
             .header("Authorization", "Bearer " + apiKey)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(403); // Forbidden
     }

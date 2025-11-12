@@ -655,7 +655,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                     fontWeight: 600,
                     borderBottom: '1px solid var(--border-color)'
                   }}>
-                    <div>Name</div>
+                    <div>Display Name</div>
                     <div>Type</div>
                     <div>Cloud Type</div>
                     <div>Actions</div>
@@ -736,7 +736,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                         id="resource-name"
                         value={resourceFormData.name}
                         onChange={(v) => handleResourceFormChange('name', v)}
-                        placeholder="Resource Name *"
+                        placeholder="Display Name *"
                       />
                     </div>
                     

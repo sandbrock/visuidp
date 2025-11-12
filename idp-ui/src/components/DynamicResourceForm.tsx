@@ -127,9 +127,29 @@ export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicRes
         
         setSchema(fetchedSchema);
       } catch (err) {
-        const errorMessage = err instanceof Error 
-          ? err.message 
-          : 'Failed to load property configuration';
+        // Provide helpful error messages based on error type
+        let errorMessage = 'Failed to load property configuration';
+        
+        if (err instanceof Error) {
+          // Check for 404 errors (no schema configured)
+          if (err.message.includes('404')) {
+            errorMessage = 'No property schema is configured for this resource type and cloud provider combination. Contact your administrator to configure the required properties.';
+          } else if (err.message.includes('401') || err.message.includes('403')) {
+            errorMessage = 'You do not have permission to access this property schema. Please contact your administrator.';
+          } else if (err.message.includes('500')) {
+            errorMessage = 'Server error occurred while loading property schema. Please try again later or contact your administrator.';
+          } else {
+            errorMessage = err.message;
+          }
+        }
+        
+        console.error('Error loading property schema:', {
+          resourceTypeId,
+          cloudProviderId,
+          context,
+          error: err
+        });
+        
         setError(errorMessage);
         setSchema(null);
       } finally {
@@ -199,30 +219,45 @@ export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicRes
    * Render error state
    */
   if (error) {
+    // Check if this is a 404 error (no schema configured)
+    const is404Error = error.includes('No property schema is configured');
+    
     return (
       <div className="dynamic-form-error" role="alert">
-        <div className="error-icon">⚠️</div>
+        <div className="error-icon">{is404Error ? 'ℹ️' : '⚠️'}</div>
         <div className="error-content">
           <p className="error-message">{error}</p>
-          <button 
-            className="retry-button"
-            onClick={() => {
-              // Trigger re-fetch by clearing and re-setting the error
-              setError(null);
-              setLoading(true);
-              propertySchemaService.getSchema(
-                resourceTypeId,
-                cloudProviderId,
-                context,
-                userEmail
-              ).then(setSchema)
-                .catch(err => setError(err instanceof Error ? err.message : 'Failed to load'))
-                .finally(() => setLoading(false));
-            }}
-            disabled={disabled}
-          >
-            Retry
-          </button>
+          {!is404Error && (
+            <button 
+              className="retry-button"
+              onClick={() => {
+                // Trigger re-fetch by clearing and re-setting the error
+                setError(null);
+                setLoading(true);
+                propertySchemaService.getSchema(
+                  resourceTypeId,
+                  cloudProviderId,
+                  context,
+                  userEmail
+                ).then(setSchema)
+                  .catch(err => {
+                    let errorMessage = 'Failed to load property configuration';
+                    if (err instanceof Error) {
+                      if (err.message.includes('404')) {
+                        errorMessage = 'No property schema is configured for this resource type and cloud provider combination. Contact your administrator to configure the required properties.';
+                      } else {
+                        errorMessage = err.message;
+                      }
+                    }
+                    setError(errorMessage);
+                  })
+                  .finally(() => setLoading(false));
+              }}
+              disabled={disabled}
+            >
+              Retry
+            </button>
+          )}
         </div>
       </div>
     );

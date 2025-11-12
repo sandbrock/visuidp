@@ -12,7 +12,7 @@ import type { ApiKeyResponse } from '../types/apiKey';
 vi.mock('../services/api', () => ({
   apiService: {
     getUserApiKeys: vi.fn(),
-    getAllApiKeys: vi.fn(),
+    getSystemApiKeys: vi.fn(),
     createUserApiKey: vi.fn(),
     createSystemApiKey: vi.fn(),
     rotateApiKey: vi.fn(),
@@ -188,7 +188,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
         roles: ['user'],
       };
 
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -211,11 +211,11 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
         expect(screen.queryByRole('heading', { name: 'API Keys Management' })).not.toBeInTheDocument();
       });
 
-      expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+      expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
     });
 
     it('should continue to allow admin users to access /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -236,13 +236,13 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
         expect(screen.getByRole('heading', { name: 'API Keys Management' })).toBeInTheDocument();
       });
 
-      expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+      expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
     });
   });
 
   describe('2. Admin Page Rendering - Unchanged', () => {
     it('should continue to display "API Keys Management" title on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -265,7 +265,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to display admin breadcrumb with "Admin Dashboard"', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -289,7 +289,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to display admin description text', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -314,7 +314,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('3. All Keys Display - Unchanged', () => {
     it('should continue to display all user keys on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -340,7 +340,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to display all system keys on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -365,8 +365,8 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
       });
     });
 
-    it('should continue to call getAllApiKeys API endpoint', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+    it('should continue to call getSystemApiKeys API endpoint', async () => {
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -384,14 +384,14 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
       );
 
       await waitFor(() => {
-        expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
-        expect(apiService.getAllApiKeys).toHaveBeenCalledTimes(1);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledTimes(1);
         expect(apiService.getUserApiKeys).not.toHaveBeenCalled();
       });
     });
 
     it('should continue to display both USER and SYSTEM type badges', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -420,7 +420,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('4. System Key Creation - Unchanged', () => {
     it('should continue to show create button on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -444,7 +444,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to open create modal with admin mode', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       const user = userEvent.setup();
 
       render(
@@ -477,7 +477,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to allow system key creation in admin mode', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       const user = userEvent.setup();
 
       render(
@@ -511,7 +511,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('5. Key Operations - Unchanged', () => {
     it('should continue to support rotating keys', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       const user = userEvent.setup();
 
       render(
@@ -542,7 +542,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to support revoking keys', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       const user = userEvent.setup();
 
       render(
@@ -573,7 +573,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to display key metadata (status, dates, etc.)', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -604,7 +604,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('6. Empty State - Unchanged', () => {
     it('should continue to show admin empty state when no keys exist', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -631,7 +631,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('7. Error Handling - Unchanged', () => {
     it('should continue to handle API errors gracefully', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockRejectedValue(new Error('API Error'));
+      vi.mocked(apiService.getSystemApiKeys).mockRejectedValue(new Error('API Error'));
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -655,7 +655,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
     });
 
     it('should continue to display error message and allow retry', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockRejectedValue(new Error('Failed to fetch'));
+      vi.mocked(apiService.getSystemApiKeys).mockRejectedValue(new Error('Failed to fetch'));
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -683,7 +683,7 @@ describe('Admin API Keys Backward Compatibility Tests', () => {
 
   describe('8. Integration with Admin Dashboard', () => {
     it('should continue to be accessible from admin dashboard navigation', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       // Simulate navigation from admin dashboard
       render(
