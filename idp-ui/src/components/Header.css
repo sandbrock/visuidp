@@ -64,31 +64,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.user-name {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.user-email {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.logout-button {
-  background: var(--danger);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.logout-button:hover {
-  background: var(--danger-hover);
+  height: 40px; /* Match ProfileIcon height for consistent alignment */
 }
 
 /* Frankenstein Theme Styles */
@@ -165,37 +141,40 @@
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-[data-theme="frankenstein"] .user-name {
-  color: var(--text-primary);
-}
-
-[data-theme="frankenstein"] .user-email {
-  color: var(--text-secondary);
-}
-
-[data-theme="frankenstein"] .logout-button {
-  background: var(--danger);
-  border: 2px solid var(--danger);
-  box-shadow: 0 0 10px rgba(255, 0, 110, 0.3);
-  transition: all 0.3s ease;
-}
-
-[data-theme="frankenstein"] .logout-button:hover {
-  background: var(--danger-hover);
-  box-shadow: 0 0 15px rgba(255, 0, 110, 0.5),
-              inset 0 0 10px rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-}
-
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
     gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .header-left {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .app-title {
+    font-size: 1.25rem;
+  }
+  
+  .header-nav {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .nav-link {
+    flex: 1;
+    min-width: fit-content;
     text-align: center;
   }
   
   .user-info {
-    flex-direction: column;
-    gap: 0.5rem;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 1rem;
+    height: 44px; /* Larger touch targets on mobile */
   }
 }
