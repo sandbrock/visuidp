@@ -241,24 +241,55 @@ public class ApiKeysController {
     }
 
     /**
-     * Lists all API keys in the system.
+     * Lists all system-level API keys.
      * Only administrators can access this endpoint.
-     * Returns key metadata for all users and system keys.
+     * Returns key metadata for system keys only (not user keys).
      *
-     * @return Response with HTTP 200 and list of all API keys
+     * @return Response with HTTP 200 and list of system API keys
      */
     @GET
-    @Path("/all")
+    @Path("/system")
     @RolesAllowed("admin")
     @Operation(
-        summary = "List all API keys",
-        description = "Retrieves all API keys in the system including user and system keys. Admin role required."
+        summary = "List system API keys",
+        description = """
+            Retrieves all system-level API keys. Admin role required.
+            
+            System keys are not tied to individual users and persist beyond user tenure.
+            This endpoint only returns SYSTEM type keys, not user-level keys.
+            
+            **Example Response**:
+            ```json
+            [
+              {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "keyName": "Production Deployment Service",
+                "keyPrefix": "idp_system_xyz",
+                "keyType": "SYSTEM",
+                "userEmail": null,
+                "createdByEmail": "admin@example.com",
+                "createdAt": "2024-01-15T10:30:00",
+                "expiresAt": "2024-07-13T10:30:00",
+                "lastUsedAt": "2024-02-20T14:45:00",
+                "isActive": true,
+                "isExpiringSoon": false,
+                "status": "ACTIVE"
+              }
+            ]
+            """
     )
-    @APIResponse(responseCode = "200", description = "API keys retrieved successfully")
-    @APIResponse(responseCode = "401", description = "Unauthorized")
+    @APIResponse(
+        responseCode = "200",
+        description = "System API keys retrieved successfully",
+        content = @org.eclipse.microprofile.openapi.annotations.media.Content(
+            mediaType = MediaType.APPLICATION_JSON,
+            schema = @org.eclipse.microprofile.openapi.annotations.media.Schema(implementation = ApiKeyResponseDto.class, type = org.eclipse.microprofile.openapi.annotations.enums.SchemaType.ARRAY)
+        )
+    )
+    @APIResponse(responseCode = "401", description = "Unauthorized - Authentication required")
     @APIResponse(responseCode = "403", description = "Forbidden - Admin role required")
-    public Response listAllApiKeys() {
-        List<ApiKeyResponseDto> apiKeys = apiKeyService.listAllApiKeys();
+    public Response listSystemApiKeys() {
+        List<ApiKeyResponseDto> apiKeys = apiKeyService.listSystemApiKeys();
         return Response.ok(apiKeys).build();
     }
 

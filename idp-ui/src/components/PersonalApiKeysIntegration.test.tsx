@@ -16,7 +16,7 @@ import type { ApiKeyResponse } from '../types/apiKey';
 vi.mock('../services/api', () => ({
   apiService: {
     getUserApiKeys: vi.fn(),
-    getAllApiKeys: vi.fn(),
+    getSystemApiKeys: vi.fn(),
     createUserApiKey: vi.fn(),
     rotateApiKey: vi.fn(),
     revokeApiKey: vi.fn(),
@@ -203,7 +203,7 @@ describe('Personal API Keys Route Integration Tests', () => {
       await waitFor(() => {
         expect(apiService.getUserApiKeys).toHaveBeenCalledWith(mockRegularUser.email);
         expect(apiService.getUserApiKeys).toHaveBeenCalledTimes(1);
-        expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+        expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
       });
     });
   });
@@ -384,7 +384,7 @@ describe('Personal API Keys Route Integration Tests', () => {
 
     it('should allow admin users to access both /api-keys and /admin/api-keys routes', async () => {
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue([]);
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       // Test personal route
       const { unmount } = render(

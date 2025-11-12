@@ -269,6 +269,99 @@ describe('DynamicResourceForm - Empty State and Error State UI (Task 5.8)', () =
       // Verify generic error message is displayed
       expect(screen.getByText(/Failed to load property configuration/i)).toBeInTheDocument();
     });
+
+    it('should display helpful message for 404 errors (no schema configured)', async () => {
+      const { propertySchemaService } = await import('../services/PropertySchemaService');
+      vi.mocked(propertySchemaService.getSchema).mockRejectedValue(
+        new Error('404: Not Found')
+      );
+
+      const onChange = vi.fn();
+      render(
+        <DynamicResourceForm
+          resourceTypeId="resource-1"
+          cloudProviderId="cloud-1"
+          values={{}}
+          onChange={onChange}
+        />
+      );
+
+      // Wait for error state to appear
+      await screen.findByText(/No property schema is configured/i);
+
+      // Verify helpful 404 error message is displayed
+      expect(screen.getByText(/No property schema is configured for this resource type and cloud provider combination/i)).toBeInTheDocument();
+      expect(screen.getByText(/Contact your administrator to configure the required properties/i)).toBeInTheDocument();
+    });
+
+    it('should not show retry button for 404 errors', async () => {
+      const { propertySchemaService } = await import('../services/PropertySchemaService');
+      vi.mocked(propertySchemaService.getSchema).mockRejectedValue(
+        new Error('404: Not Found')
+      );
+
+      const onChange = vi.fn();
+      render(
+        <DynamicResourceForm
+          resourceTypeId="resource-1"
+          cloudProviderId="cloud-1"
+          values={{}}
+          onChange={onChange}
+        />
+      );
+
+      // Wait for error state to appear
+      await screen.findByText(/No property schema is configured/i);
+
+      // Verify retry button is NOT shown for 404 errors
+      expect(screen.queryByText('Retry')).not.toBeInTheDocument();
+    });
+
+    it('should display helpful message for 401/403 errors', async () => {
+      const { propertySchemaService } = await import('../services/PropertySchemaService');
+      vi.mocked(propertySchemaService.getSchema).mockRejectedValue(
+        new Error('403: Forbidden')
+      );
+
+      const onChange = vi.fn();
+      render(
+        <DynamicResourceForm
+          resourceTypeId="resource-1"
+          cloudProviderId="cloud-1"
+          values={{}}
+          onChange={onChange}
+        />
+      );
+
+      // Wait for error state to appear
+      await screen.findByText(/You do not have permission/i);
+
+      // Verify helpful permission error message is displayed
+      expect(screen.getByText(/You do not have permission to access this property schema/i)).toBeInTheDocument();
+    });
+
+    it('should display helpful message for 500 errors', async () => {
+      const { propertySchemaService } = await import('../services/PropertySchemaService');
+      vi.mocked(propertySchemaService.getSchema).mockRejectedValue(
+        new Error('500: Internal Server Error')
+      );
+
+      const onChange = vi.fn();
+      render(
+        <DynamicResourceForm
+          resourceTypeId="resource-1"
+          cloudProviderId="cloud-1"
+          values={{}}
+          onChange={onChange}
+        />
+      );
+
+      // Wait for error state to appear
+      await screen.findByText(/Server error occurred/i);
+
+      // Verify helpful server error message is displayed
+      expect(screen.getByText(/Server error occurred while loading property schema/i)).toBeInTheDocument();
+    });
   });
 
   describe('Loading State (Requirement 10.2)', () => {

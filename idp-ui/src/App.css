@@ -13,6 +13,38 @@
   --accent-secondary: #e3f2fd;
   --danger: #dc3545;
   --danger-hover: #c82333;
+  
+  /* Button-specific variables for better contrast */
+  --button-primary-bg: #0056b3;
+  --button-primary-text: #ffffff;
+  --button-primary-hover: #004085;
+  
+  --button-secondary-bg: #6c757d;
+  --button-secondary-text: #ffffff;
+  --button-secondary-hover: #545b62;
+  
+  --button-outline-border: #495057;
+  --button-outline-text: #212529;
+  --button-outline-hover-bg: #e9ecef;
+  
+  --button-danger-bg: #c82333;
+  --button-danger-text: #ffffff;
+  --button-danger-hover: #a71d2a;
+  
+  --button-disabled-bg: #e9ecef;
+  --button-disabled-text: #6c757d;
+  
+  --button-success-bg: #218838;
+  --button-success-text: #ffffff;
+  --button-success-hover: #1e7e34;
+  
+  --button-warning-bg: #e0a800;
+  --button-warning-text: #212529;
+  --button-warning-hover: #c69500;
+  
+  --button-info-bg: #138496;
+  --button-info-text: #ffffff;
+  --button-info-hover: #117a8b;
 }
 
 :root[data-theme="dark"] {
@@ -29,6 +61,38 @@
   --accent-secondary: #1e3a8a;
   --danger: #f03e3e;
   --danger-hover: #e03131;
+  
+  /* Button-specific variables for better contrast */
+  --button-primary-bg: #5dade2;
+  --button-primary-text: #1a1a1a;
+  --button-primary-hover: #85c1e9;
+  
+  --button-secondary-bg: #566573;
+  --button-secondary-text: #ffffff;
+  --button-secondary-hover: #717d8a;
+  
+  --button-outline-border: #aab7b8;
+  --button-outline-text: #ecf0f1;
+  --button-outline-hover-bg: #34495e;
+  
+  --button-danger-bg: #ff6b6b;
+  --button-danger-text: #1a1a1a;
+  --button-danger-hover: #ff8787;
+  
+  --button-disabled-bg: #34495e;
+  --button-disabled-text: #95a5a6;
+  
+  --button-success-bg: #52c41a;
+  --button-success-text: #1a1a1a;
+  --button-success-hover: #73d13d;
+  
+  --button-warning-bg: #faad14;
+  --button-warning-text: #1a1a1a;
+  --button-warning-hover: #ffc53d;
+  
+  --button-info-bg: #40a9ff;
+  --button-info-text: #1a1a1a;
+  --button-info-hover: #69c0ff;
 }
 
 :root[data-theme="frankenstein"] {
@@ -70,6 +134,38 @@
   
   /* Greenish skin texture - rough, patched appearance */
   --frankenstein-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='5' seed='42' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.3 0.5 0.3 0 0 0.3 0.5 0.3 0 0 0.2 0.4 0.2 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='%238ba888' filter='url(%23noise)' opacity='0.10'/%3E%3C/svg%3E");
+  
+  /* Button-specific variables with improved contrast */
+  --button-primary-bg: #9db89d;
+  --button-primary-text: #1a1d1a;
+  --button-primary-hover: #b8d4b8;
+  
+  --button-secondary-bg: #4a5a4a;
+  --button-secondary-text: #d4e4d4;
+  --button-secondary-hover: #5f7d5f;
+  
+  --button-outline-border: #7a9b7a;
+  --button-outline-text: #d4e4d4;
+  --button-outline-hover-bg: #2f362f;
+  
+  --button-danger-bg: #c82333;
+  --button-danger-text: #ffffff;
+  --button-danger-hover: #e03e3e;
+  
+  --button-disabled-bg: #2f362f;
+  --button-disabled-text: #7a9b7a;
+  
+  --button-success-bg: #7a9b23;
+  --button-success-text: #1a1d1a;
+  --button-success-hover: #8fb82f;
+  
+  --button-warning-bg: #b8a888;
+  --button-warning-text: #1a1d1a;
+  --button-warning-hover: #d4c4a8;
+  
+  --button-info-bg: #5f7d7a;
+  --button-info-text: #d4e4d4;
+  --button-info-hover: #7a9b97;
   
   /* Smooth transitions for theme changes */
   transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
@@ -375,26 +471,76 @@ body {
   color: var(--text-primary) !important;
 }
 
+/* Light theme Syncfusion button overrides */
+[data-theme="light"] .e-btn {
+  font-weight: 600;
+}
+
+[data-theme="light"] .e-btn.e-primary {
+  background: var(--button-primary-bg) !important;
+  border-color: var(--button-primary-bg) !important;
+  color: var(--button-primary-text) !important;
+}
+
+[data-theme="light"] .e-btn.e-primary:hover:not(:disabled) {
+  background: var(--button-primary-hover) !important;
+  border-color: var(--button-primary-hover) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="light"] .e-btn.e-danger {
+  background: var(--button-danger-bg) !important;
+  border-color: var(--button-danger-bg) !important;
+  color: var(--button-danger-text) !important;
+}
+
+[data-theme="light"] .e-btn.e-danger:hover:not(:disabled) {
+  background: var(--button-danger-hover) !important;
+  border-color: var(--button-danger-hover) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="light"] .e-btn:disabled {
+  background: var(--button-disabled-bg) !important;
+  color: var(--button-disabled-text) !important;
+  border-color: transparent !important;
+  opacity: 1 !important;
+}
+
+/* Dark theme Syncfusion button overrides */
 [data-theme="dark"] .e-btn {
-  color: var(--text-primary) !important;
+  font-weight: 600;
 }
 
 [data-theme="dark"] .e-btn.e-primary {
-  background: var(--accent-primary) !important;
-  border-color: var(--accent-primary) !important;
-  color: white !important;
+  background: var(--button-primary-bg) !important;
+  border-color: var(--button-primary-bg) !important;
+  color: var(--button-primary-text) !important;
 }
 
-[data-theme="dark"] .e-btn.e-outline {
-  background: transparent !important;
-  border-color: var(--border-primary) !important;
-  color: var(--text-primary) !important;
+[data-theme="dark"] .e-btn.e-primary:hover:not(:disabled) {
+  background: var(--button-primary-hover) !important;
+  border-color: var(--button-primary-hover) !important;
+  opacity: 1 !important;
 }
 
 [data-theme="dark"] .e-btn.e-danger {
-  background: var(--danger) !important;
-  border-color: var(--danger) !important;
-  color: white !important;
+  background: var(--button-danger-bg) !important;
+  border-color: var(--button-danger-bg) !important;
+  color: var(--button-danger-text) !important;
+}
+
+[data-theme="dark"] .e-btn.e-danger:hover:not(:disabled) {
+  background: var(--button-danger-hover) !important;
+  border-color: var(--button-danger-hover) !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .e-btn:disabled {
+  background: var(--button-disabled-bg) !important;
+  color: var(--button-disabled-text) !important;
+  border-color: transparent !important;
+  opacity: 1 !important;
 }
 
 [data-theme="dark"] .e-input-group,
@@ -587,13 +733,16 @@ body {
   border-color: var(--border-primary) !important;
 }
 
-/* Frankenstein theme - Syncfusion button styles */
+/* Frankenstein theme - Syncfusion button styles with improved contrast */
 [data-theme="frankenstein"] .e-btn {
-  border: 2px solid var(--border-primary) !important;
+  font-weight: 600;
+  border-width: 2px !important;
+  border-style: solid !important;
   transition: all 0.3s ease !important;
   position: relative;
   color: var(--text-primary) !important;
-  background: var(--bg-secondary) !important;
+  background: var(--button-secondary-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
 }
 
 /* Stitching pattern on Syncfusion buttons using ::before pseudo-element */
@@ -618,10 +767,12 @@ body {
 
 /* Electrical glow effect on hover with transform for tactile feedback */
 [data-theme="frankenstein"] .e-btn:hover:not(:disabled) {
+  background: var(--button-secondary-hover) !important;
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.4),
               inset 0 0 10px rgba(157, 78, 221, 0.1) !important;
   transform: translateY(-1px);
   border-color: var(--accent-primary) !important;
+  opacity: 1 !important;
 }
 
 [data-theme="frankenstein"] .e-btn:active:not(:disabled) {
@@ -630,90 +781,107 @@ body {
               inset 0 0 5px rgba(157, 78, 221, 0.1) !important;
 }
 
-/* Primary buttons with purple gradient */
+/* Primary buttons with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-primary {
-  background: linear-gradient(135deg, var(--accent-primary) 0%, #7b2cbf 100%) !important;
-  border-color: var(--accent-primary) !important;
-  color: white !important;
+  background: var(--button-primary-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-primary-text) !important;
 }
 
 [data-theme="frankenstein"] .e-btn.e-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #7b2cbf 0%, #5a1f8f 100%) !important;
+  background: var(--button-primary-hover) !important;
+  border-color: var(--frankenstein-skin) !important;
   box-shadow: 0 0 20px rgba(157, 78, 221, 0.6),
               inset 0 0 15px rgba(255, 255, 255, 0.1) !important;
-  border-color: var(--accent-primary-hover) !important;
+  opacity: 1 !important;
 }
 
-/* Success buttons with toxic green */
+/* Secondary buttons */
+[data-theme="frankenstein"] .e-btn.e-secondary {
+  background: var(--button-secondary-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-secondary-text) !important;
+}
+
+[data-theme="frankenstein"] .e-btn.e-secondary:hover:not(:disabled) {
+  background: var(--button-secondary-hover) !important;
+  border-color: var(--frankenstein-skin) !important;
+  opacity: 1 !important;
+}
+
+/* Success buttons with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-success {
-  background-color: var(--success) !important;
-  border-color: var(--success) !important;
-  color: #1a1f1a !important;
+  background-color: var(--button-success-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-success-text) !important;
   font-weight: 600;
 }
 
 [data-theme="frankenstein"] .e-btn.e-success:hover:not(:disabled) {
-  background-color: var(--success-hover) !important;
+  background-color: var(--button-success-hover) !important;
   border-color: var(--success-hover) !important;
   box-shadow: 0 0 15px rgba(57, 255, 20, 0.4),
               inset 0 0 10px rgba(57, 255, 20, 0.2) !important;
+  opacity: 1 !important;
 }
 
-/* Warning buttons with lightning bolt color */
+/* Warning buttons with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-warning {
-  background-color: var(--frankenstein-bolt) !important;
-  border-color: var(--frankenstein-bolt) !important;
-  color: #1a1f1a !important;
+  background-color: var(--button-warning-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-warning-text) !important;
   font-weight: 600;
 }
 
 [data-theme="frankenstein"] .e-btn.e-warning:hover:not(:disabled) {
-  background-color: #e6c109 !important;
-  border-color: #e6c109 !important;
+  background-color: var(--button-warning-hover) !important;
+  border-color: var(--frankenstein-bolt) !important;
   box-shadow: 0 0 15px rgba(255, 214, 10, 0.5),
               inset 0 0 10px rgba(255, 214, 10, 0.2) !important;
+  opacity: 1 !important;
 }
 
-/* Danger buttons with pulsing animation */
+/* Danger buttons with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-danger {
-  background: var(--danger) !important;
-  border-color: var(--danger) !important;
-  color: white !important;
-  animation: frankenstein-pulse-danger 2s ease-in-out infinite;
+  background: var(--button-danger-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-danger-text) !important;
 }
 
 [data-theme="frankenstein"] .e-btn.e-danger:hover:not(:disabled) {
-  background: var(--danger-hover) !important;
+  background: var(--button-danger-hover) !important;
   border-color: var(--danger-hover) !important;
   box-shadow: 0 0 20px rgba(255, 0, 110, 0.7),
               inset 0 0 15px rgba(255, 0, 110, 0.2) !important;
-  animation: frankenstein-pulse-danger-hover 1s ease-in-out infinite;
+  opacity: 1 !important;
 }
 
-/* Info buttons */
+/* Info buttons with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-info {
-  background-color: var(--accent-secondary) !important;
-  border-color: var(--accent-primary) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--button-info-bg) !important;
+  border-color: var(--frankenstein-stitch) !important;
+  color: var(--button-info-text) !important;
 }
 
 [data-theme="frankenstein"] .e-btn.e-info:hover:not(:disabled) {
-  background-color: #4a2570 !important;
+  background-color: var(--button-info-hover) !important;
   border-color: var(--accent-primary-hover) !important;
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.4) !important;
+  opacity: 1 !important;
 }
 
-/* Outline variant */
+/* Outline variant with improved contrast */
 [data-theme="frankenstein"] .e-btn.e-outline {
   background-color: transparent !important;
-  border-color: var(--border-primary) !important;
-  color: var(--text-primary) !important;
+  border-color: var(--button-outline-border) !important;
+  color: var(--button-outline-text) !important;
 }
 
 [data-theme="frankenstein"] .e-btn.e-outline:hover:not(:disabled) {
-  background-color: var(--bg-tertiary) !important;
+  background-color: var(--button-outline-hover-bg) !important;
   border-color: var(--accent-primary) !important;
   box-shadow: 0 0 10px rgba(157, 78, 221, 0.3) !important;
+  opacity: 1 !important;
 }
 
 /* Small button variant */
@@ -721,16 +889,19 @@ body {
   font-size: 0.875rem;
 }
 
-/* Disabled state */
+/* Disabled state with improved contrast - no grayscale filter */
 [data-theme="frankenstein"] .e-btn:disabled {
-  opacity: 0.5 !important;
+  background: var(--button-disabled-bg) !important;
+  color: var(--button-disabled-text) !important;
+  border-color: transparent !important;
+  opacity: 1 !important;
   cursor: not-allowed;
-  filter: grayscale(0.5);
+  filter: none !important;
 }
 
 /* Focus state with electrical glow */
 [data-theme="frankenstein"] .e-btn:focus-visible {
-  outline: 2px solid var(--accent-primary) !important;
+  outline: 3px solid var(--accent-primary) !important;
   outline-offset: 2px;
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.5) !important;
 }

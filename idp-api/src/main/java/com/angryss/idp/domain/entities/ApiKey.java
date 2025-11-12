@@ -69,6 +69,12 @@ public class ApiKey extends PanacheEntityBase {
     @Column(name = "is_active", nullable = false)
     public Boolean isActive = true;
 
+    @Column(name = "rotated_from_id")
+    public UUID rotatedFromId;
+
+    @Column(name = "grace_period_ends_at")
+    public LocalDateTime gracePeriodEndsAt;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

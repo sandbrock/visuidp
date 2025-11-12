@@ -157,7 +157,7 @@ public class ApiKeyService {
             throw new IllegalArgumentException("A system API key with name '" + dto.getKeyName() + "' already exists");
         }
 
-        // Generate API key
+        // Generate API key - always SYSTEM type regardless of DTO content
         String plainKey = generateApiKey(ApiKeyType.SYSTEM);
         String keyHash = hashApiKey(plainKey);
         String keyPrefix = plainKey.substring(0, Math.min(plainKey.length(), 20));
@@ -165,12 +165,12 @@ public class ApiKeyService {
         // Calculate expiration
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(expirationDays);
 
-        // Create and persist API key entity
+        // Create and persist API key entity - always SYSTEM type
         ApiKey apiKey = new ApiKey();
         apiKey.keyName = dto.getKeyName();
         apiKey.keyHash = keyHash;
         apiKey.keyPrefix = keyPrefix;
-        apiKey.keyType = ApiKeyType.SYSTEM;
+        apiKey.keyType = ApiKeyType.SYSTEM;  // Always SYSTEM, ignore DTO keyType if present
         apiKey.userEmail = null; // System keys are not tied to a user
         apiKey.createdByEmail = adminEmail;
         apiKey.expiresAt = expiresAt;
@@ -257,6 +257,9 @@ public class ApiKeyService {
         String keyHash = hashApiKey(plainKey);
         String keyPrefix = plainKey.substring(0, Math.min(plainKey.length(), 20));
 
+        // Calculate grace period end time
+        LocalDateTime gracePeriodEndsAt = LocalDateTime.now().plusHours(rotationGracePeriodHours);
+
         // Create new key with same metadata
         ApiKey newKey = new ApiKey();
         newKey.keyName = oldKey.keyName;
@@ -268,10 +271,9 @@ public class ApiKeyService {
         newKey.expiresAt = oldKey.expiresAt;
         newKey = apiKeyRepository.save(newKey);
 
-        // Schedule old key revocation after grace period
-        // Note: In a production system, this would be handled by a background job
-        // For now, we'll set a marker that can be processed by a scheduled task
-        LocalDateTime revokeAfter = LocalDateTime.now().plusHours(rotationGracePeriodHours);
+        // Set grace period on old key
+        oldKey.gracePeriodEndsAt = gracePeriodEndsAt;
+        oldKey = apiKeyRepository.save(oldKey);
         
         // Log rotation event
         logApiKeyEvent("ROTATE", oldKey.id, Map.of(
@@ -279,7 +281,7 @@ public class ApiKeyService {
             "keyType", oldKey.keyType.toString(),
             "newKeyId", newKey.id.toString(),
             "gracePeriodHours", rotationGracePeriodHours,
-            "oldKeyRevokeAfter", revokeAfter.toString(),
+            "gracePeriodEndsAt", gracePeriodEndsAt.toString(),
             "rotatedBy", userEmail
         ));
 
@@ -453,14 +455,15 @@ public class ApiKeyService {
     }
 
     /**
-     * Lists all API keys in the system.
+     * Lists all system-level API keys.
      * Only administrators can access this method.
+     * Only returns SYSTEM type API keys, not user keys.
      *
-     * @return List of all API keys
+     * @return List of system API keys
      */
     @RolesAllowed("admin")
-    public List<ApiKeyResponseDto> listAllApiKeys() {
-        List<ApiKey> apiKeys = apiKeyRepository.findAll();
+    public List<ApiKeyResponseDto> listSystemApiKeys() {
+        List<ApiKey> apiKeys = apiKeyRepository.findByKeyType(ApiKeyType.SYSTEM);
         
         return apiKeys.stream()
             .sorted((a, b) -> b.createdAt.compareTo(a.createdAt))
@@ -721,12 +724,38 @@ public class ApiKeyService {
      */
     @Transactional
     public int processRotationGracePeriod() {
-        // Note: In a production system, we would track rotation relationships
-        // For now, this is a placeholder for future implementation
-        // The actual implementation would require additional fields in the ApiKey entity
-        // to track rotation relationships and grace period end times
+        LocalDateTime now = LocalDateTime.now();
         
-        Log.debug("Rotation grace period processing not yet implemented");
-        return 0;
+        // Find all active keys with expired grace periods
+        List<ApiKey> keysToRevoke = apiKeyRepository.findByIsActive(true).stream()
+            .filter(key -> key.revokedAt == null 
+                && key.gracePeriodEndsAt != null 
+                && key.gracePeriodEndsAt.isBefore(now))
+            .collect(java.util.stream.Collectors.toList());
+        
+        int count = 0;
+        for (ApiKey key : keysToRevoke) {
+            // Revoke the old key
+            key.revoke("system");
+            apiKeyRepository.save(key);
+            
+            // Log revocation event
+            logApiKeyEvent("REVOKE", key.id, Map.of(
+                "keyName", key.keyName,
+                "keyType", key.keyType.toString(),
+                "gracePeriodEndsAt", key.gracePeriodEndsAt.toString(),
+                "userEmail", key.userEmail != null ? key.userEmail : "system",
+                "reason", "Automatic revocation after rotation grace period",
+                "revokedBy", "system"
+            ));
+            
+            count++;
+        }
+        
+        if (count > 0) {
+            Log.infof("Processed %d API keys past rotation grace period", count);
+        }
+        
+        return count;
     }
 }

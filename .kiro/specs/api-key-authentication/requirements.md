@@ -39,6 +39,7 @@ This document specifies requirements for adding API key authentication to the In
 3. WHEN an administrator leaves the organization, THE API_Key_System SHALL maintain all system API keys they created in active status
 4. WHERE an administrator has appropriate permissions, THE API_Key_System SHALL allow viewing and managing all system API keys
 5. WHEN a system API key is used, THE API_Key_System SHALL log the activity with the system key identifier rather than a user identifier
+6. WHEN an administrator accesses the admin API key management interface, THE API_Key_System SHALL only allow creation of system-level API keys
 
 ### Requirement 3
 
@@ -111,3 +112,16 @@ This document specifies requirements for adding API key authentication to the In
 3. WHEN a descriptive name is not provided during creation, THE API_Key_System SHALL generate a default name using the pattern "API Key - [creation timestamp]"
 4. WHEN a user updates an API key name, THE API_Key_System SHALL validate that the name is unique within the user's API keys
 5. WHERE a user has multiple API keys, THE API_Key_System SHALL enforce unique names to prevent confusion
+
+### Requirement 9
+
+**User Story:** As a user, I want to manage my personal API keys separately from system API keys, so that I have a clear distinction between personal and organizational access
+
+#### Acceptance Criteria
+
+1. WHEN a user accesses the personal API keys section, THE API_Key_System SHALL allow creation of user-level API keys only
+2. WHEN a user accesses the personal API keys section, THE API_Key_System SHALL display only API keys owned by that user
+3. WHEN an administrator accesses the admin API keys section, THE API_Key_System SHALL allow creation of system-level API keys only
+4. WHEN an administrator accesses the admin API keys section, THE API_Key_System SHALL display all system-level API keys across the organization
+5. THE API_Key_System SHALL NOT allow creation of user-level API keys from the admin interface to prevent confusion and maintain clear separation of concerns
+6. WHEN an administrator creates an API key from the admin interface, THE API_Key_System SHALL NOT display a key type selector since only system-level keys can be created from this interface

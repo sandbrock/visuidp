@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, type ModalButton } from './Modal';
 import { AngryTextBox, AngryComboBox, AngryButton, type AngryComboItem } from './input';
-import type { ApiKeyType, ApiKeyCreated } from '../types/apiKey';
+import type { ApiKeyCreated } from '../types/apiKey';
 import type { User } from '../types/auth';
 import { apiService } from '../services/api';
 import './ApiKeyCreateModal.css';
@@ -22,29 +22,20 @@ const EXPIRATION_OPTIONS: AngryComboItem[] = [
   { text: '365 days', value: '365' },
 ];
 
-const KEY_TYPE_OPTIONS: AngryComboItem[] = [
-  { text: 'User', value: 'USER' },
-  { text: 'System', value: 'SYSTEM' },
-];
-
 export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'personal' }: ApiKeyCreateModalProps) => {
   const [keyName, setKeyName] = useState('');
   const [expirationDays, setExpirationDays] = useState('90');
-  const [keyType, setKeyType] = useState<ApiKeyType>('USER');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const isAdmin = user.roles?.includes('admin') || false;
   const isAdminMode = mode === 'admin';
-  const showKeyTypeSelector = isAdminMode && isAdmin;
 
   const handleClose = () => {
     // Reset state
     setKeyName('');
     setExpirationDays('90');
-    setKeyType('USER');
     setIsCreating(false);
     setError(null);
     setCreatedKey(null);
@@ -62,19 +53,17 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
     setError(null);
 
     try {
-      // Force USER type in personal mode regardless of user selection
-      const effectiveKeyType = isAdminMode ? keyType : 'USER';
-      
       const payload = {
         keyName: keyName.trim(),
         expirationDays: parseInt(expirationDays, 10),
-        keyType: effectiveKeyType,
       };
 
       let result: ApiKeyCreated;
-      if (effectiveKeyType === 'SYSTEM') {
+      if (isAdminMode) {
+        // Admin mode always creates SYSTEM keys
         result = await apiService.createSystemApiKey(payload, user.email);
       } else {
+        // Personal mode always creates USER keys
         result = await apiService.createUserApiKey(payload, user.email);
       }
 
@@ -133,21 +122,10 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
         </div>
       </div>
 
-      {showKeyTypeSelector && (
+      {isAdminMode && (
         <div className="form-field">
-          <label htmlFor="keyType">Key Type</label>
-          <AngryComboBox
-            id="keyType"
-            items={KEY_TYPE_OPTIONS}
-            value={keyType}
-            onChange={(value) => setKeyType(value as ApiKeyType)}
-            placeholder="Select key type"
-            disabled={isCreating}
-          />
-          <div className="field-hint">
-            {keyType === 'USER'
-              ? 'User keys are tied to your account'
-              : 'System keys persist independently of any user account'}
+          <div className="field-hint admin-key-notice">
+            <strong>Note:</strong> This will create a system-level API key that persists independently of any user account.
           </div>
         </div>
       )}

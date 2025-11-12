@@ -12,7 +12,7 @@ import type { ApiKeyResponse } from '../types/apiKey';
 vi.mock('../services/api', () => ({
   apiService: {
     getUserApiKeys: vi.fn(),
-    getAllApiKeys: vi.fn(),
+    getSystemApiKeys: vi.fn(),
     createUserApiKey: vi.fn(),
     createSystemApiKey: vi.fn(),
     rotateApiKey: vi.fn(),
@@ -127,7 +127,7 @@ describe('Admin API Keys Route Integration Tests', () => {
 
   describe('Route Protection', () => {
     it('should require admin privileges for /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -152,11 +152,11 @@ describe('Admin API Keys Route Integration Tests', () => {
       });
 
       // API should not be called for unauthorized access
-      expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+      expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
     });
 
     it('should allow admin users to access /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -180,12 +180,12 @@ describe('Admin API Keys Route Integration Tests', () => {
       });
 
       // API should be called
-      expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+      expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
     });
 
     it('should not allow non-admin users to bypass protection', async () => {
       const nonAdminUser = { ...mockRegularUser, isAdmin: false };
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -208,13 +208,13 @@ describe('Admin API Keys Route Integration Tests', () => {
         expect(screen.getByTestId('home-page')).toBeInTheDocument();
       });
 
-      expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+      expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
     });
   });
 
   describe('Route Rendering', () => {
     it('should render ApiKeysManagement component with mode="admin" on /admin/api-keys route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -244,8 +244,8 @@ describe('Admin API Keys Route Integration Tests', () => {
       });
     });
 
-    it('should call getAllApiKeys API when rendering admin route', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+    it('should call getSystemApiKeys API when rendering admin route', async () => {
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -263,14 +263,14 @@ describe('Admin API Keys Route Integration Tests', () => {
       );
 
       await waitFor(() => {
-        expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
-        expect(apiService.getAllApiKeys).toHaveBeenCalledTimes(1);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledTimes(1);
         expect(apiService.getUserApiKeys).not.toHaveBeenCalled();
       });
     });
 
     it('should display admin breadcrumb navigation with correct links', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -300,7 +300,7 @@ describe('Admin API Keys Route Integration Tests', () => {
 
   describe('All Keys Display', () => {
     it('should display all keys including system keys on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -331,7 +331,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should display both USER and SYSTEM key types on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -359,7 +359,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should display keys from multiple users on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -389,7 +389,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should show empty state with admin context when no keys exist', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -418,7 +418,7 @@ describe('Admin API Keys Route Integration Tests', () => {
 
   describe('System Key Creation', () => {
     it('should show create button on admin page', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
 
       render(
         <MemoryRouter initialEntries={['/admin/api-keys']}>
@@ -442,7 +442,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should open create modal with admin mode when create button is clicked', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       const user = userEvent.setup();
 
       render(
@@ -475,7 +475,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should pass admin mode to create modal for system key creation', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue([]);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue([]);
       const user = userEvent.setup();
 
       render(
@@ -513,7 +513,7 @@ describe('Admin API Keys Route Integration Tests', () => {
 
   describe('Admin vs Personal Route Comparison', () => {
     it('should show different titles for admin and personal routes', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue([mockUserApiKeys[0]]);
 
       // Render admin route
@@ -553,7 +553,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should show different breadcrumbs for admin and personal routes', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue([mockUserApiKeys[0]]);
 
       // Render admin route
@@ -595,7 +595,7 @@ describe('Admin API Keys Route Integration Tests', () => {
     });
 
     it('should call different API endpoints for admin and personal routes', async () => {
-      vi.mocked(apiService.getAllApiKeys).mockResolvedValue(mockAllApiKeys);
+      vi.mocked(apiService.getSystemApiKeys).mockResolvedValue(mockAllApiKeys);
       vi.mocked(apiService.getUserApiKeys).mockResolvedValue([mockUserApiKeys[0]]);
 
       // Render admin route
@@ -615,7 +615,7 @@ describe('Admin API Keys Route Integration Tests', () => {
       );
 
       await waitFor(() => {
-        expect(apiService.getAllApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
+        expect(apiService.getSystemApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
         expect(apiService.getUserApiKeys).not.toHaveBeenCalled();
       });
 
@@ -633,7 +633,7 @@ describe('Admin API Keys Route Integration Tests', () => {
 
       await waitFor(() => {
         expect(apiService.getUserApiKeys).toHaveBeenCalledWith(mockAdminUser.email);
-        expect(apiService.getAllApiKeys).not.toHaveBeenCalled();
+        expect(apiService.getSystemApiKeys).not.toHaveBeenCalled();
       });
     });
   });

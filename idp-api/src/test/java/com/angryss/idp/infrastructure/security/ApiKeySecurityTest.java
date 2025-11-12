@@ -307,22 +307,22 @@ public class ApiKeySecurityTest {
             .then()
                 .statusCode(201);
 
-        // When - Admin lists all keys via REST endpoint
+        // When - Admin lists system keys via REST endpoint
         given()
             .header("X-Auth-Request-Email", TEST_ADMIN)
             .header("X-Auth-Request-Groups", ADMIN_GROUPS)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(200)
                 .body("size()", greaterThanOrEqualTo(1));
     }
 
     @Test
-    public void testNonAdminCannotAccessAllKeysEndpoint() {
+    public void testNonAdminCannotAccessSystemKeysEndpoint() {
         given()
             .header("X-Auth-Request-Email", TEST_USER)
             .header("X-Auth-Request-Groups", TEST_GROUPS)
-            .when().get("/v1/api-keys/all")
+            .when().get("/v1/api-keys/system")
             .then()
                 .statusCode(403);
     }
