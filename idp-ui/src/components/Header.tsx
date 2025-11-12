@@ -1,9 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { logout } from '../auth';
 import type { User } from '../types/auth';
 import { isAdmin } from '../types/auth';
 import { ThemeToggle } from './ThemeToggle';
-import { AngryButton } from './input';
+import { ProfileMenu } from './ProfileMenu';
 import './Header.css';
 
 interface HeaderProps {
@@ -40,12 +39,6 @@ export const Header = ({ user }: HeaderProps) => {
             >
               Stacks
             </Link>
-            <Link
-              to="/api-keys"
-              className={location.pathname === '/api-keys' ? 'nav-link active' : 'nav-link'}
-            >
-              🔑 API Keys
-            </Link>
             {userIsAdmin && (
               <Link
                 to="/admin"
@@ -57,14 +50,8 @@ export const Header = ({ user }: HeaderProps) => {
           </nav>
         </div>
         <div className="user-info">
-          <span className="user-email">{user.email}</span>
-          <AngryButton 
-            cssClass="e-outline logout-button" 
-            onClick={logout}
-          >
-            Sign out
-          </AngryButton>
           <ThemeToggle />
+          <ProfileMenu user={user} />
         </div>
       </div>
     </header>

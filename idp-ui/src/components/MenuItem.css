@@ -1,0 +1,169 @@
+/* ============================================
+   MENU ITEM COMPONENT
+   ============================================ */
+
+/* Base menu item styles */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-align: left;
+  position: relative;
+  z-index: 2;
+}
+
+.menu-item:hover,
+.menu-item:focus {
+  background: var(--bg-tertiary);
+  outline: none;
+}
+
+.menu-item:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* Icon styling */
+.menu-item-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+}
+
+/* Label styling */
+.menu-item-label {
+  flex: 1;
+}
+
+/* Danger variant for destructive actions */
+.menu-item-danger {
+  color: var(--danger);
+}
+
+.menu-item-danger:hover,
+.menu-item-danger:focus {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger-hover);
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+
+[data-theme="dark"] .menu-item:hover,
+[data-theme="dark"] .menu-item:focus {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .menu-item-danger {
+  color: #ff6b6b;
+}
+
+[data-theme="dark"] .menu-item-danger:hover,
+[data-theme="dark"] .menu-item-danger:focus {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff8787;
+}
+
+/* ============================================
+   FRANKENSTEIN THEME
+   ============================================ */
+
+/* Frankenstein theme specific styling */
+[data-theme="frankenstein"] .menu-item {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+[data-theme="frankenstein"] .menu-item:hover,
+[data-theme="frankenstein"] .menu-item:focus {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 0 10px rgba(122, 155, 122, 0.2),
+              0 0 5px rgba(122, 155, 122, 0.3);
+  border-left-color: var(--frankenstein-skin);
+  padding-left: calc(1rem - 3px);
+}
+
+/* Stitching effect on hover for Frankenstein theme */
+[data-theme="frankenstein"] .menu-item:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 1px dashed var(--frankenstein-stitch);
+  border-bottom: 1px dashed var(--frankenstein-stitch);
+  pointer-events: none;
+}
+
+/* Glow effect for icons in Frankenstein theme */
+[data-theme="frankenstein"] .menu-item:hover .menu-item-icon {
+  filter: drop-shadow(0 0 3px rgba(122, 155, 122, 0.6));
+  animation: menu-icon-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes menu-icon-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(122, 155, 122, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(122, 155, 122, 0.8));
+  }
+}
+
+/* Danger variant in Frankenstein theme */
+[data-theme="frankenstein"] .menu-item-danger {
+  color: var(--danger);
+}
+
+[data-theme="frankenstein"] .menu-item-danger:hover,
+[data-theme="frankenstein"] .menu-item-danger:focus {
+  background: var(--bg-tertiary);
+  box-shadow: inset 0 0 10px rgba(255, 0, 110, 0.2),
+              0 0 5px rgba(255, 0, 110, 0.3);
+  border-left-color: var(--danger);
+}
+
+[data-theme="frankenstein"] .menu-item-danger:hover .menu-item-icon {
+  filter: drop-shadow(0 0 3px rgba(255, 0, 110, 0.6));
+  animation: menu-icon-glow-danger 1.5s ease-in-out infinite;
+}
+
+@keyframes menu-icon-glow-danger {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(255, 0, 110, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.8));
+  }
+}
+
+/* ============================================
+   RESPONSIVE STYLES
+   ============================================ */
+
+/* Responsive design for mobile - ensure touch targets are at least 44px */
+@media (max-width: 768px) {
+  .menu-item {
+    padding: 0.875rem 1rem;
+    min-height: 44px;
+  }
+}
