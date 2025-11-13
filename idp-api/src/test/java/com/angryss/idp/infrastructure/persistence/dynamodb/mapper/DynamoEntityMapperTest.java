@@ -400,7 +400,7 @@ class DynamoEntityMapperTest {
         stack.setCreatedAt(LocalDateTime.of(2024, 1, 15, 10, 30));
         stack.setUpdatedAt(LocalDateTime.of(2024, 1, 15, 11, 30));
         
-        // Relationships
+        // Relationships (domain, category, and cloudProvider removed)
         Team team = new Team();
         team.setId(UUID.randomUUID());
         stack.setTeam(team);
@@ -408,18 +408,6 @@ class DynamoEntityMapperTest {
         StackCollection collection = new StackCollection();
         collection.setId(UUID.randomUUID());
         stack.setStackCollection(collection);
-        
-        Domain domain = new Domain();
-        domain.setId(UUID.randomUUID());
-        stack.setDomain(domain);
-        
-        Category category = new Category();
-        category.setId(UUID.randomUUID());
-        stack.setCategory(category);
-        
-        CloudProvider cloudProvider = new CloudProvider();
-        cloudProvider.id = UUID.randomUUID();
-        stack.setCloudProvider(cloudProvider);
         
         Blueprint blueprint = new Blueprint();
         blueprint.setId(UUID.randomUUID());
@@ -430,9 +418,7 @@ class DynamoEntityMapperTest {
         assertNotNull(result);
         assertEquals(team.getId().toString(), result.get("teamId").s());
         assertEquals(collection.getId().toString(), result.get("stackCollectionId").s());
-        assertEquals(domain.getId().toString(), result.get("domainId").s());
-        assertEquals(category.getId().toString(), result.get("categoryId").s());
-        assertEquals(cloudProvider.id.toString(), result.get("cloudProviderId").s());
+        // domain, category, and cloudProvider assertions removed as these fields no longer exist
         assertEquals(blueprint.getId().toString(), result.get("blueprintId").s());
     }
 

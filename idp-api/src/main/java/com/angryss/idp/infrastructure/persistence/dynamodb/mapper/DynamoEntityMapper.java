@@ -437,17 +437,7 @@ public class DynamoEntityMapper {
             item.put("stackCollectionId", uuidToAttributeValue(stack.getStackCollection().getId()));
         }
 
-        if (stack.getDomain() != null && stack.getDomain().getId() != null) {
-            item.put("domainId", uuidToAttributeValue(stack.getDomain().getId()));
-        }
-
-        if (stack.getCategory() != null && stack.getCategory().getId() != null) {
-            item.put("categoryId", uuidToAttributeValue(stack.getCategory().getId()));
-        }
-
-        if (stack.getCloudProvider() != null && stack.getCloudProvider().id != null) {
-            item.put("cloudProviderId", uuidToAttributeValue(stack.getCloudProvider().id));
-        }
+        // domain, category, and cloudProvider fields removed from Stack entity
 
         if (stack.getBlueprint() != null && stack.getBlueprint().getId() != null) {
             item.put("blueprintId", uuidToAttributeValue(stack.getBlueprint().getId()));
@@ -507,15 +497,13 @@ public class DynamoEntityMapper {
             stack.setEphemeralPrefix(attributeValueToString(item.get("ephemeralPrefix")));
         }
 
-        // Note: Relationship entities (Team, StackCollection, Domain, Category, CloudProvider, Blueprint)
+        // Note: Relationship entities (Team, StackCollection, Blueprint)
         // are not loaded here. The repository layer is responsible for lazy-loading these relationships
         // when needed using the foreign key UUIDs stored in the item:
         // - teamId
         // - stackCollectionId
-        // - domainId
-        // - categoryId
-        // - cloudProviderId
         // - blueprintId
+        // (domain, category, and cloudProvider fields removed from Stack entity)
 
         // Configuration Map field
         if (item.containsKey("configuration")) {

@@ -72,18 +72,6 @@ public class Stack extends PanacheEntityBase {
     @JoinColumn(name = "stack_collection_id")
     private StackCollection stackCollection;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "domain_id")
-    private Domain domain;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cloud_provider_id")
-    private CloudProvider cloudProvider;
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "configuration", columnDefinition = "jsonb")
     private Map<String, Object> configuration;
@@ -124,19 +112,11 @@ public class Stack extends PanacheEntityBase {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        validateCloudProvider();
     }
 
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
-        validateCloudProvider();
-    }
-
-    private void validateCloudProvider() {
-        if (cloudProvider != null && !cloudProvider.enabled) {
-            throw new IllegalStateException("Cannot create or update stack with disabled cloud provider: " + cloudProvider.name);
-        }
     }
 
     public UUID getId() {
@@ -237,19 +217,6 @@ public class Stack extends PanacheEntityBase {
         this.stackCollection = stackCollection;
     }
 
-    public Domain getDomain() { return domain; }
-    public void setDomain(Domain domain) { this.domain = domain; }
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
-
-    public CloudProvider getCloudProvider() {
-        return cloudProvider;
-    }
-
-    public void setCloudProvider(CloudProvider cloudProvider) {
-        this.cloudProvider = cloudProvider;
-    }
-
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
@@ -315,22 +282,6 @@ public class Stack extends PanacheEntityBase {
 
     public static List<Stack> findByStackCollectionId(UUID collectionId) {
         return find("stackCollection.id", collectionId).list();
-    }
-
-    public static List<Stack> findByDomainId(UUID domainId) {
-        return find("domain.id", domainId).list();
-    }
-
-    public static List<Stack> findByCategoryId(UUID categoryId) {
-        return find("category.id", categoryId).list();
-    }
-
-    public static List<Stack> findByCloudProviderId(UUID cloudProviderId) {
-        return find("cloudProvider.id", cloudProviderId).list();
-    }
-
-    public static List<Stack> findByCloudProviderAndCreatedBy(UUID cloudProviderId, String createdBy) {
-        return find("cloudProvider.id = ?1 and createdBy = ?2", cloudProviderId, createdBy).list();
     }
 
     public Blueprint getBlueprint() {

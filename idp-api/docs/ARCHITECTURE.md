@@ -38,7 +38,9 @@ For detailed information about the database architecture, repository pattern imp
 Compute resources will automatically be provisioned by the IDP. Developers do not need to request it specifically. Though they will include configuration files in their repositories that will be used to configure initial sizing and autoscaling.
 
 ## Stack
-The core of the system will be the "stack." A stack is a developer project. There are different types of stacks.
+The core of the system will be the "stack." A stack is a developer project that represents a single service or UI application with its dependent infrastructure resources. Stacks are cloud-agnostic by design - they do not have a direct association with a cloud provider. Instead, cloud provider selection happens at the environment level, allowing the same stack definition to be deployed across multiple cloud providers (AWS, Azure, GCP, on-premises) through different environments. This design principle ensures true portability and flexibility in infrastructure management.
+
+There are different types of stacks.
 
 ### Stack Types
 - Infrastructure - This type of stack only contains infrastructure resources such as databases, queues, and caches. It does not contain any application code.
@@ -71,6 +73,8 @@ For AWS, it will create dynamic Terraform code that will create a Lambda functio
 
 # Environment Progression
 The provisioner will start by provisioning resources in the dev environment. Once the developer is ready, they can promote the resources to the next environment. This will create a new set of resources in the next environment. The developer can then promote the resources to the next environment, and so on.
+
+Each environment is associated with a specific cloud provider, which determines where the stack's resources will be provisioned. This environment-level cloud provider association enables the same stack to be deployed to different cloud providers in different environments, supporting hybrid and multi-cloud deployment strategies.
 
 # Idempotent
 All aspects of the provisioning process should be idempotent. This means that running the process multiple times should produce the same result. This is important for when new features are added to the IDP. The developers can re-run the stack provisioning process to apply the new features to their stack.

@@ -106,8 +106,6 @@ CREATE TABLE IF NOT EXISTS stacks (
     created_by VARCHAR(100) NOT NULL,
     team_id UUID,
     stack_collection_id UUID,
-    domain_id UUID,
-    category_id UUID,
     blueprint_id UUID,
     configuration JSONB,
     ephemeral_prefix VARCHAR(50),
@@ -116,8 +114,6 @@ CREATE TABLE IF NOT EXISTS stacks (
     CONSTRAINT route_path_validation CHECK (LENGTH(route_path) >= 5 AND LENGTH(route_path) <= 22 AND route_path ~ '^/[a-zA-Z][a-zA-Z0-9_-]*/$' AND route_path NOT LIKE '%\_%\_%' ESCAPE '\' AND route_path NOT LIKE '%--%'),
     CONSTRAINT fk_stacks_team FOREIGN KEY (team_id) REFERENCES teams(id),
     CONSTRAINT fk_stacks_collection FOREIGN KEY (stack_collection_id) REFERENCES stack_collections(id),
-    CONSTRAINT fk_stacks_domain FOREIGN KEY (domain_id) REFERENCES domains(id),
-    CONSTRAINT fk_stacks_category FOREIGN KEY (category_id) REFERENCES categories(id),
     CONSTRAINT fk_stacks_blueprint FOREIGN KEY (blueprint_id) REFERENCES blueprints(id)
 );
 
@@ -216,11 +212,6 @@ CREATE TABLE IF NOT EXISTS blueprint_cloud_providers (
         FOREIGN KEY (cloud_provider_id) REFERENCES cloud_providers(id) ON DELETE CASCADE
 );
 
--- Add cloud_provider_id to stacks table
-ALTER TABLE stacks ADD COLUMN IF NOT EXISTS cloud_provider_id UUID;
-ALTER TABLE stacks ADD CONSTRAINT fk_stacks_cloud_provider 
-    FOREIGN KEY (cloud_provider_id) REFERENCES cloud_providers(id);
-
 -- Add resource_type_id and cloud_provider_id to stack_resources table
 ALTER TABLE stack_resources ADD COLUMN IF NOT EXISTS resource_type_id UUID;
 ALTER TABLE stack_resources ADD COLUMN IF NOT EXISTS cloud_provider_id UUID;
@@ -241,8 +232,6 @@ ALTER TABLE blueprint_resources ADD CONSTRAINT fk_blueprint_resources_cloud_prov
 CREATE INDEX IF NOT EXISTS idx_stack_resources_stack_id ON stack_resources(stack_id);
 CREATE INDEX IF NOT EXISTS idx_stacks_team_id ON stacks(team_id);
 CREATE INDEX IF NOT EXISTS idx_stacks_collection_id ON stacks(stack_collection_id);
-CREATE INDEX IF NOT EXISTS idx_stacks_domain_id ON stacks(domain_id);
-CREATE INDEX IF NOT EXISTS idx_stacks_category_id ON stacks(category_id);
 CREATE INDEX IF NOT EXISTS idx_stacks_blueprint_id ON stacks(blueprint_id);
 CREATE INDEX IF NOT EXISTS idx_environments_cloud_provider_id ON environments(cloud_provider_id);
 CREATE INDEX IF NOT EXISTS idx_environments_blueprint_id ON environments(blueprint_id);
@@ -266,12 +255,17 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON admin_audit_logs(timestam
 CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON admin_audit_logs(entity_type, entity_id);
 
 -- Indexes for new foreign keys on existing tables
-CREATE INDEX IF NOT EXISTS idx_stacks_cloud_provider ON stacks(cloud_provider_id);
 CREATE INDEX IF NOT EXISTS idx_stack_resources_resource_type ON stack_resources(resource_type_id);
 CREATE INDEX IF NOT EXISTS idx_stack_resources_cloud_provider ON stack_resources(cloud_provider_id);
 CREATE INDEX IF NOT EXISTS idx_blueprint_resources_cloud_provider ON blueprint_resources(cloud_provider_id);
 CREATE INDEX IF NOT EXISTS idx_blueprint_cloud_providers_blueprint ON blueprint_cloud_providers(blueprint_id);
 CREATE INDEX IF NOT EXISTS idx_blueprint_cloud_providers_cloud_provider ON blueprint_cloud_providers(cloud_provider_id);
+
+-- ============================================================================
+-- Table comments
+-- ============================================================================
+
+COMMENT ON TABLE stacks IS 'Stacks represent logical services or applications. Cloud provider is determined at environment level for true cloud-agnostic deployment. Each stack can be deployed to multiple cloud providers through different environments.';
 
 -- Indexes for resource_types
 CREATE INDEX IF NOT EXISTS idx_resource_types_category ON resource_types(category);
@@ -299,11 +293,14 @@ CREATE TABLE IF NOT EXISTS api_keys (
     revoked_at TIMESTAMP,
     revoked_by_email VARCHAR(255),
     is_active BOOLEAN NOT NULL DEFAULT true,
+    rotated_from_id UUID,
+    grace_period_ends_at TIMESTAMP,
     
     CONSTRAINT chk_user_key_has_email CHECK (
         (key_type = 'USER' AND user_email IS NOT NULL) OR
         (key_type = 'SYSTEM' AND user_email IS NULL)
-    )
+    ),
+    CONSTRAINT fk_api_keys_rotated_from FOREIGN KEY (rotated_from_id) REFERENCES api_keys(id) ON DELETE SET NULL
 );
 
 -- Indexes for api_keys
@@ -312,6 +309,8 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_user_email ON api_keys(user_email);
 CREATE INDEX IF NOT EXISTS idx_api_keys_is_active ON api_keys(is_active);
 CREATE INDEX IF NOT EXISTS idx_api_keys_expires_at ON api_keys(expires_at);
 CREATE INDEX IF NOT EXISTS idx_api_keys_key_type ON api_keys(key_type);
+CREATE INDEX IF NOT EXISTS idx_api_keys_rotated_from ON api_keys(rotated_from_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_grace_period ON api_keys(grace_period_ends_at) WHERE grace_period_ends_at IS NOT NULL;
 
 -- ============================================================================
 -- Table and column comments for documentation
@@ -340,3 +339,5 @@ COMMENT ON COLUMN api_keys.last_used_at IS 'Timestamp of the last successful aut
 COMMENT ON COLUMN api_keys.revoked_at IS 'Timestamp when the key was revoked (NULL if not revoked)';
 COMMENT ON COLUMN api_keys.revoked_by_email IS 'Email of the user who revoked this key';
 COMMENT ON COLUMN api_keys.is_active IS 'Whether the key is currently active and can be used for authentication';
+COMMENT ON COLUMN api_keys.rotated_from_id IS 'ID of the old API key that this key was rotated from (NULL if not a rotation)';
+COMMENT ON COLUMN api_keys.grace_period_ends_at IS 'Timestamp when the grace period ends for the old key after rotation (NULL if not applicable)';

@@ -47,8 +47,6 @@ public class StackCreateDto {
     // Optional associations
     private java.util.UUID teamId;
     private java.util.UUID stackCollectionId;
-    private java.util.UUID domainId;
-    private java.util.UUID categoryId;
     private java.util.UUID blueprintId;
 
     public StackCreateDto() {
@@ -140,10 +138,6 @@ public class StackCreateDto {
     public void setTeamId(java.util.UUID teamId) { this.teamId = teamId; }
     public java.util.UUID getStackCollectionId() { return stackCollectionId; }
     public void setStackCollectionId(java.util.UUID stackCollectionId) { this.stackCollectionId = stackCollectionId; }
-    public java.util.UUID getDomainId() { return domainId; }
-    public void setDomainId(java.util.UUID domainId) { this.domainId = domainId; }
-    public java.util.UUID getCategoryId() { return categoryId; }
-    public void setCategoryId(java.util.UUID categoryId) { this.categoryId = categoryId; }
     public java.util.UUID getBlueprintId() { return blueprintId; }
     public void setBlueprintId(java.util.UUID blueprintId) { this.blueprintId = blueprintId; }
 }

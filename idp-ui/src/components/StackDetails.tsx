@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Stack } from '../types/stack';
 import type { User } from '../types/auth';
 import { 
@@ -6,7 +6,6 @@ import {
   getProgrammingLanguageDisplayName 
 } from '../types/stack';
 import { apiService } from '../services/api';
-import type { Domain, Category } from '../services/api';
 import { AngryButton } from './input';
 import { Modal } from './Modal';
 import './StackDetails.css';
@@ -22,8 +21,6 @@ interface StackDetailsProps {
 export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDetailsProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [domain, setDomain] = useState<Domain | null>(null);
-  const [category, setCategory] = useState<Category | null>(null);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -48,36 +45,6 @@ export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDet
       minute: '2-digit'
     });
   };
-
-  // Resolve domain/category names lazily when present
-  useEffect(() => {
-    (async () => {
-      try {
-        if (stack.domainId) {
-          const list = await apiService.getDomains(user.email);
-          const d = list.find((x: Domain) => x.id === stack.domainId) || null;
-          setDomain(d);
-          if (stack.categoryId && d) {
-            const cats = await apiService.getDomainCategories(d.id, user.email);
-            const c = cats.find((x: Category) => x.id === stack.categoryId) || null;
-            setCategory(c);
-          } else if (stack.categoryId) {
-            const all = await apiService.getCategories(user.email);
-            const c = all.find((x: Category) => x.id === stack.categoryId) || null;
-            setCategory(c);
-          } else {
-            setCategory(null);
-          }
-        } else {
-          setDomain(null);
-          setCategory(null);
-        }
-      } catch (e) {
-        // Non-fatal; just skip names
-        console.warn('Failed to resolve domain/category', e);
-      }
-    })();
-  }, [stack.domainId, stack.categoryId, user.email]);
 
   return (
     <div className="stack-details">
@@ -117,18 +84,6 @@ export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDet
         )}
 
         <div className="stack-info-grid">
-          {domain && (
-            <div className="stack-info-item">
-              <label>Domain</label>
-              <span>{domain.name}</span>
-            </div>
-          )}
-          {category && (
-            <div className="stack-info-item">
-              <label>Category</label>
-              <span>{category.name}</span>
-            </div>
-          )}
           <div className="stack-info-item">
             <label>Stack Type</label>
             <span>{getStackTypeDisplayName(stack.stackType)}</span>

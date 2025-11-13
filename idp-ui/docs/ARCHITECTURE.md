@@ -13,6 +13,8 @@ The user must log in using their AWS credentials using SSO to access this system
 # stack-centric
 The application is stack-centric. When the user logs in, they are presented with a list of stacks that are associated with a "stack collection", which is a new concept. A stack collection is a named list of stacks.
 
+Stacks are cloud-agnostic by design and do not have a direct association with a cloud provider. The cloud provider is determined at the environment level when provisioning, allowing the same stack to be deployed across multiple cloud providers (AWS, Azure, GCP, on-premises) through different environments. This design enables true portability and multi-cloud deployment strategies.
+
 Next to each stack will exist an action icon. If the user clicks the action icon, it will bring up a list of possible actions to perform on the stack. The "Provision" action should be at the top. If the user selects it, a dialog will appear prompting them which environment to provision the stack in. Once the click "Provision" in that dialog, it will run a GitHub Actions workflow that will handle the stack provisioning, which will create all the compute and infrastructure resources.
 
 The second action in for each stack will be the "Select Infrastructure" option. That will bring up a list of infrastructure items that the application needs. Available options are defined in the idp-api architecture documentation.
