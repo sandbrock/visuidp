@@ -177,9 +177,7 @@ describe('StackForm - Task 7.2 Integration Tests', () => {
       expect(screen.getByText('Create New Stack')).toBeInTheDocument();
     });
 
-    // Verify API calls were made
-    expect(apiService.getDomains).toHaveBeenCalledWith(mockUser.email);
-    expect(apiService.getAvailableCloudProvidersForStacks).toHaveBeenCalledWith(mockUser.email);
+    // Verify API calls were made (domain and cloud provider calls removed as part of task 6)
     expect(apiService.getAvailableResourceTypesForStacks).toHaveBeenCalledWith(mockUser.email);
   });
 

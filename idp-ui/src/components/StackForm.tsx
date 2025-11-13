@@ -11,9 +11,8 @@ import {
   getDefaultFrameworkVersion
 } from '../types/stack';
 import { apiService } from '../services/api';
-import type { Domain, Category } from '../services/api';
 import type { User } from '../types/auth';
-import type { CloudProvider, ResourceType } from '../types/admin';
+import type { ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 // SyncFusion imports
 import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input';
@@ -42,20 +41,14 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     programmingLanguage: ProgrammingLanguage.QUARKUS,
     frameworkVersion: undefined,
     isPublic: false,
-    cloudProviderId: null,
     resources: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supportedLanguages, setSupportedLanguages] = useState<ProgrammingLanguage[]>([]);
   const [supportedVersions, setSupportedVersions] = useState<string[]>([]);
-  const [domains, setDomains] = useState<Domain[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   
-  // New state for cloud providers and resources
-  const [cloudProviders, setCloudProviders] = useState<CloudProvider[]>([]);
+  // State for resources
   const [availableResourceTypes, setAvailableResourceTypes] = useState<ResourceType[]>([]);
   const [selectedResources, setSelectedResources] = useState<Array<{
     resourceTypeId: string;
@@ -115,13 +108,8 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
         programmingLanguage: stack.programmingLanguage,
         frameworkVersion: stack.frameworkVersion,
         isPublic: stack.isPublic || false,
-        domainId: stack.domainId || null,
-        categoryId: stack.categoryId || null,
-        cloudProviderId: stack.cloudProviderId || null,
         resources: stack.resources || [],
       });
-      setSelectedDomainId(stack.domainId || null);
-      setSelectedCategoryId(stack.categoryId || null);
       
       // Load resources if editing
       if (stack.resources && stack.resources.length > 0) {
@@ -165,51 +153,17 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     }
   }, [formData.programmingLanguage, formData.frameworkVersion]);
 
-  // Load cloud providers and resource types on mount
+  // Load resource types on mount
   useEffect(() => {
     (async () => {
       try {
-        const [providers, resourceTypes] = await Promise.all([
-          apiService.getAvailableCloudProvidersForStacks(user.email),
-          apiService.getAvailableResourceTypesForStacks(user.email),
-        ]);
-        setCloudProviders(providers);
+        const resourceTypes = await apiService.getAvailableResourceTypesForStacks(user.email);
         setAvailableResourceTypes(resourceTypes);
       } catch (e) {
-        console.error('Failed to load cloud providers or resource types', e);
+        console.error('Failed to load resource types', e);
       }
     })();
   }, [user.email]);
-
-  // Load domains on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const list = await apiService.getDomains(user.email);
-        setDomains(list);
-        // Domain is loaded - no need to set input label for dropdown
-      } catch (e) {
-        console.error('Failed to load domains', e);
-      }
-    })();
-  }, [user.email, stack?.domainId]);
-
-  // Load categories whenever selectedDomainId changes
-  useEffect(() => {
-    (async () => {
-      if (!selectedDomainId) {
-        setCategories([]);
-        setSelectedCategoryId(null);
-        return;
-      }
-      try {
-        const list = await apiService.getDomainCategories(selectedDomainId, user.email);
-        setCategories(list);
-      } catch (e) {
-        console.error('Failed to load categories', e);
-      }
-    })();
-  }, [selectedDomainId, user.email, stack?.categoryId]);
 
 
 
@@ -236,14 +190,12 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       const resources: Omit<StackResource, 'id'>[] = selectedResources.map(res => ({
         name: res.name,
         resourceTypeId: res.resourceTypeId,
-        cloudProviderId: formData.cloudProviderId!,
+        cloudProviderId: res.configuration.cloudProviderId as string || '',
         configuration: res.configuration,
       }));
       
       const payload: StackCreate = {
         ...formData,
-        domainId: selectedDomainId,
-        categoryId: selectedCategoryId,
         resources,
       };
       
@@ -268,11 +220,6 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
 
 
   const handleAddResource = (resourceTypeId: string) => {
-    if (!formData.cloudProviderId) {
-      setError('Please select a cloud provider first');
-      return;
-    }
-
     const resourceType = availableResourceTypes.find(rt => rt.id === resourceTypeId);
     const newResource = {
       resourceTypeId,
@@ -335,75 +282,12 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
           </div>
 
           <div className="form-group">
-            <AngryComboBox
-              id="cloudProvider"
-              value={formData.cloudProviderId || ''}
-              onChange={(val: string) => {
-                handleChange('cloudProviderId', val);
-                // Clear resources when cloud provider changes
-                if (val !== formData.cloudProviderId) {
-                  setSelectedResources([]);
-                }
-              }}
-              items={cloudProviders.map(cp => ({ text: cp.displayName, value: cp.id }))}
-              placeholder="Cloud Provider *"
-            />
-          </div>
-
-          <div className="form-group">
             <AngryTextBox
               id="description"
               value={formData.description || ''}
               onChange={(v) => handleChange('description', v)}
               placeholder="Description"
               multiline={true}
-            />
-          </div>
-
-          {/* Domain select (restrict to available domains) */}
-          <div className="form-group">
-            <AngryComboBox
-              id="domain"
-              value={selectedDomainId || ''}
-              onChange={(val: string) => {
-                if (!val) {
-                  setSelectedDomainId(null);
-                  setFormData(prev => ({ ...prev, domainId: null, categoryId: null }));
-                  setCategories([]);
-                  setSelectedCategoryId(null);
-                  return;
-                }
-                const d = domains.find(x => x.id === val);
-                if (d) {
-                  setSelectedDomainId(d.id);
-                  setFormData(prev => ({ ...prev, domainId: d.id }));
-                }
-              }}
-              items={domains.map(d => ({ text: d.name, value: d.id }))}
-              placeholder="Domain"
-            />
-          </div>
-
-          {/* Category typeahead, depends on domain */}
-          <div className="form-group">
-            <AngryComboBox
-              id="category"
-              value={selectedCategoryId || ''}
-              onChange={(val: string) => {
-                if (!val) {
-                  setSelectedCategoryId(null);
-                  setFormData(prev => ({ ...prev, categoryId: null }));
-                  return;
-                }
-                const category = categories.find(c => c.id === val);
-                if (category) {
-                  setSelectedCategoryId(category.id);
-                  setFormData(prev => ({ ...prev, categoryId: category.id }));
-                }
-              }}
-              items={categories.map(c => ({ text: c.name, value: c.id }))}
-              placeholder="Category"
-              disabled={!selectedDomainId}
             />
           </div>
 
@@ -482,66 +366,64 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
           )}
 
           {/* Resources Section */}
-          {formData.cloudProviderId && (
-            <div className="resources-section">
-              <h3>Infrastructure Resources</h3>
-              
-              {selectedResources.map((resource, index) => (
-                <div key={index} className="resource-item">
-                  <div className="resource-header">
-                    <AngryTextBox
-                      id={`resource-name-${index}`}
-                      value={resource.name}
-                      onChange={(v) => handleResourceNameChange(index, v)}
-                      placeholder="Resource Name *"
-                    />
-                    <button
-                      type="button"
-                      className="remove-resource-btn"
-                      onClick={() => handleRemoveResource(index)}
-                      disabled={loading}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  
-                  <div className="resource-config">
-                    <DynamicResourceForm
-                      resourceTypeId={resource.resourceTypeId}
-                      cloudProviderId={formData.cloudProviderId!}
-                      values={resource.configuration}
-                      onChange={(config) => handleResourceConfigChange(index, config)}
-                      context="stack"
-                      userEmail={user.email}
-                      isEditMode={!!stack}
-                    />
-                  </div>
+          <div className="resources-section">
+            <h3>Infrastructure Resources</h3>
+            
+            {selectedResources.map((resource, index) => (
+              <div key={index} className="resource-item">
+                <div className="resource-header">
+                  <AngryTextBox
+                    id={`resource-name-${index}`}
+                    value={resource.name}
+                    onChange={(v) => handleResourceNameChange(index, v)}
+                    placeholder="Resource Name *"
+                  />
+                  <button
+                    type="button"
+                    className="remove-resource-btn"
+                    onClick={() => handleRemoveResource(index)}
+                    disabled={loading}
+                  >
+                    Remove
+                  </button>
                 </div>
-              ))}
-
-              <div className="add-resource-section">
-                <label htmlFor="add-resource">Add Resource</label>
-                <select
-                  id="add-resource"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      handleAddResource(e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
-                  disabled={loading}
-                  className="add-resource-select"
-                >
-                  <option value="">Select a resource type...</option>
-                  {availableResourceTypes.map(rt => (
-                    <option key={rt.id} value={rt.id}>
-                      {rt.displayName}
-                    </option>
-                  ))}
-                </select>
+                
+                <div className="resource-config">
+                  <DynamicResourceForm
+                    resourceTypeId={resource.resourceTypeId}
+                    cloudProviderId={resource.configuration.cloudProviderId as string || ''}
+                    values={resource.configuration}
+                    onChange={(config) => handleResourceConfigChange(index, config)}
+                    context="stack"
+                    userEmail={user.email}
+                    isEditMode={!!stack}
+                  />
+                </div>
               </div>
+            ))}
+
+            <div className="add-resource-section">
+              <label htmlFor="add-resource">Add Resource</label>
+              <select
+                id="add-resource"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleAddResource(e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+                disabled={loading}
+                className="add-resource-select"
+              >
+                <option value="">Select a resource type...</option>
+                {availableResourceTypes.map(rt => (
+                  <option key={rt.id} value={rt.id}>
+                    {rt.displayName}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+          </div>
 
           <div className="form-actions">
             <AngryButton

@@ -324,23 +324,6 @@ class PostgresRepositoryContractTest extends RepositoryContractTest {
             .forEach(s -> createdStackIds.add(s.getId()));
     }
 
-    @Override
-    @Transactional
-    public void testFindByCloudProviderId_ReturnsStacksForProvider() {
-        super.testFindByCloudProviderId_ReturnsStacksForProvider();
-        // Track created stacks
-        getRepository().findAll().stream()
-            .filter(s -> s.getName().startsWith("test-cp-stack-"))
-            .forEach(s -> createdStackIds.add(s.getId()));
-    }
-
-    @Override
-    @Transactional
-    public void testFindByCloudProviderAndCreatedBy_ReturnsFilteredStacks() {
-        super.testFindByCloudProviderAndCreatedBy_ReturnsFilteredStacks();
-        // Track created stacks
-        getRepository().findAll().stream()
-            .filter(s -> s.getName().startsWith("test-filter-"))
-            .forEach(s -> createdStackIds.add(s.getId()));
-    }
+    // Tests for findByCloudProviderId and findByCloudProviderAndCreatedBy removed
+    // as cloud provider field has been removed from Stack entity
 }

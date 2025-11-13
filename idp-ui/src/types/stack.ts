@@ -52,9 +52,6 @@ export interface Stack {
   createdBy: string;
   teamId?: string | null;
   stackCollectionId?: string | null;
-  domainId?: string | null;
-  categoryId?: string | null;
-  cloudProviderId?: string | null;
   resources?: StackResource[];
   configuration?: Record<string, unknown>;
   ephemeralPrefix?: string;
@@ -84,9 +81,6 @@ export interface StackCreate {
   // Optional associations
   teamId?: string | null;
   stackCollectionId?: string | null;
-  domainId?: string | null;
-  categoryId?: string | null;
-  cloudProviderId?: string | null;
   resources?: Omit<StackResource, 'id'>[];
   configuration?: Record<string, unknown>;
   ephemeralPrefix?: string;

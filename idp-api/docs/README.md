@@ -46,6 +46,7 @@ The IDP API supports multiple database backends through a pluggable architecture
 - **[API Documentation](API_DOCUMENTATION.md)** - REST API reference and endpoint documentation
 - **[API Key Authentication](API_KEY_AUTHENTICATION.md)** - API key authentication system documentation
 - **[API Key OpenAPI Summary](API_KEY_OPENAPI_SUMMARY.md)** - OpenAPI specification for API key endpoints
+- **[Stack Cloud-Agnostic Design](STACK_CLOUD_AGNOSTIC_DESIGN.md)** - Explanation of cloud-agnostic stack architecture
 
 ## Authentication & Security
 
@@ -59,10 +60,11 @@ The IDP API supports multiple database backends through a pluggable architecture
 Start here if you're developing features or fixing bugs:
 
 1. [Architecture](ARCHITECTURE.md) - Understand the Clean Architecture structure
-2. [Database Quick Reference](DATABASE_QUICK_REFERENCE.md) - Learn how to work with repositories
-3. [Testing Guide](TESTING_GUIDE.md) - Learn how to run and write tests
-4. [Database Architecture](DATABASE_ARCHITECTURE.md) - Deep dive into the database abstraction layer
-5. [API Documentation](API_DOCUMENTATION.md) - REST API contracts and examples
+2. [Stack Cloud-Agnostic Design](STACK_CLOUD_AGNOSTIC_DESIGN.md) - Understand cloud-agnostic stack architecture
+3. [Database Quick Reference](DATABASE_QUICK_REFERENCE.md) - Learn how to work with repositories
+4. [Testing Guide](TESTING_GUIDE.md) - Learn how to run and write tests
+5. [Database Architecture](DATABASE_ARCHITECTURE.md) - Deep dive into the database abstraction layer
+6. [API Documentation](API_DOCUMENTATION.md) - REST API contracts and examples
 
 ### For DevOps/Operations
 

@@ -87,23 +87,6 @@ public class StackService {
             if (col == null) throw new IllegalArgumentException("Stack collection not found: " + createDto.getStackCollectionId());
             stack.setStackCollection((com.angryss.idp.domain.entities.StackCollection) col);
         }
-        if (createDto.getDomainId() != null) {
-            var domain = com.angryss.idp.domain.entities.Domain.findById(createDto.getDomainId());
-            if (domain == null) throw new IllegalArgumentException("Domain not found: " + createDto.getDomainId());
-            stack.setDomain((com.angryss.idp.domain.entities.Domain) domain);
-        }
-        if (createDto.getCategoryId() != null) {
-            var category = com.angryss.idp.domain.entities.Category.findById(createDto.getCategoryId());
-            if (category == null) throw new IllegalArgumentException("Category not found: " + createDto.getCategoryId());
-            // If both provided, ensure the category belongs to the domain
-            if (createDto.getDomainId() != null) {
-                var domain = ((com.angryss.idp.domain.entities.Category) category).getDomain();
-                if (domain == null || !domain.getId().equals(createDto.getDomainId())) {
-                    throw new IllegalArgumentException("Category does not belong to the specified domain");
-                }
-            }
-            stack.setCategory((com.angryss.idp.domain.entities.Category) category);
-        }
 
         // Handle blueprint association
         if (createDto.getBlueprintId() != null) {
@@ -225,28 +208,6 @@ public class StackService {
             existingStack.setStackCollection((com.angryss.idp.domain.entities.StackCollection) col);
         } else {
             existingStack.setStackCollection(null);
-        }
-
-        if (updateDto.getDomainId() != null) {
-            var domain = com.angryss.idp.domain.entities.Domain.findById(updateDto.getDomainId());
-            if (domain == null) throw new IllegalArgumentException("Domain not found: " + updateDto.getDomainId());
-            existingStack.setDomain((com.angryss.idp.domain.entities.Domain) domain);
-        } else {
-            existingStack.setDomain(null);
-        }
-
-        if (updateDto.getCategoryId() != null) {
-            var category = com.angryss.idp.domain.entities.Category.findById(updateDto.getCategoryId());
-            if (category == null) throw new IllegalArgumentException("Category not found: " + updateDto.getCategoryId());
-            if (updateDto.getDomainId() != null) {
-                var domain = ((com.angryss.idp.domain.entities.Category) category).getDomain();
-                if (domain == null || !domain.getId().equals(updateDto.getDomainId())) {
-                    throw new IllegalArgumentException("Category does not belong to the specified domain");
-                }
-            }
-            existingStack.setCategory((com.angryss.idp.domain.entities.Category) category);
-        } else {
-            existingStack.setCategory(null);
         }
 
         // Handle blueprint association update

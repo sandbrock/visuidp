@@ -99,6 +99,7 @@ The application includes comprehensive test coverage for both PostgreSQL and Dyn
 - **[API Key Authentication Guide](docs/API_KEY_AUTHENTICATION.md)** - Guide for programmatic access
 - **[Personal API Keys UI Guide](../idp-ui/docs/PERSONAL_API_KEYS.md)** - Managing API keys through the web interface
 - **[Architecture Documentation](docs/ARCHITECTURE.md)** - System architecture details
+- **[Stack Cloud-Agnostic Design](docs/STACK_CLOUD_AGNOSTIC_DESIGN.md)** - Explanation of cloud-agnostic stack architecture
 
 ### Quick Reference
 

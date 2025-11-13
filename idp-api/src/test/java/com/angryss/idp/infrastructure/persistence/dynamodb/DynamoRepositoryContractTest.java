@@ -427,51 +427,6 @@ public class DynamoRepositoryContractTest extends DynamoDbTestBase {
         assertTrue(teamStacks.stream().allMatch(s -> team.getId().equals(s.getTeam().getId())));
     }
 
-    @Test
-    void testFindByCloudProviderId_ReturnsStacksForProvider() {
-        CloudProvider provider = createAndPersistCloudProvider("test-provider-" + UUID.randomUUID());
-        
-        Stack stack1 = createTestStack("test-cp-stack-1", "user@example.com");
-        stack1.setCloudProvider(provider);
-        
-        Stack stack2 = createTestStack("test-cp-stack-2", "user@example.com");
-        stack2.setCloudProvider(provider);
-        
-        Stack stack3 = createTestStack("test-cp-stack-3", "user@example.com");
-        
-        getRepository().save(stack1);
-        getRepository().save(stack2);
-        getRepository().save(stack3);
-
-        List<Stack> providerStacks = getRepository().findByCloudProviderId(provider.id);
-
-        assertEquals(2, providerStacks.size());
-        assertTrue(providerStacks.stream().allMatch(s -> provider.id.equals(s.getCloudProvider().id)));
-    }
-
-    @Test
-    void testFindByCloudProviderAndCreatedBy_ReturnsFilteredStacks() {
-        CloudProvider provider = createAndPersistCloudProvider("test-filter-provider-" + UUID.randomUUID());
-        String user1 = "user1@example.com";
-        String user2 = "user2@example.com";
-        
-        Stack stack1 = createTestStack("test-filter-1", user1);
-        stack1.setCloudProvider(provider);
-        
-        Stack stack2 = createTestStack("test-filter-2", user2);
-        stack2.setCloudProvider(provider);
-        
-        Stack stack3 = createTestStack("test-filter-3", user1);
-        
-        getRepository().save(stack1);
-        getRepository().save(stack2);
-        getRepository().save(stack3);
-
-        List<Stack> filteredStacks = getRepository().findByCloudProviderAndCreatedBy(
-            provider.id, user1);
-
-        assertEquals(1, filteredStacks.size());
-        assertEquals(user1, filteredStacks.get(0).getCreatedBy());
-        assertEquals(provider.id, filteredStacks.get(0).getCloudProvider().id);
-    }
+    // Tests for findByCloudProviderId and findByCloudProviderAndCreatedBy removed
+    // as cloud provider field has been removed from Stack entity
 }

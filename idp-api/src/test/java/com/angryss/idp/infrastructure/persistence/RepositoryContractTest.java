@@ -501,62 +501,8 @@ public abstract class RepositoryContractTest {
                    "All returned stacks should belong to the team");
     }
 
-    @Test
-    public void testFindByCloudProviderId_ReturnsStacksForProvider() {
-        // Given
-        CloudProvider provider = createAndPersistCloudProvider("test-provider-" + UUID.randomUUID());
-        
-        Stack stack1 = createTestStack("test-cp-stack-1", "user@example.com");
-        stack1.setCloudProvider(provider);
-        
-        Stack stack2 = createTestStack("test-cp-stack-2", "user@example.com");
-        stack2.setCloudProvider(provider);
-        
-        Stack stack3 = createTestStack("test-cp-stack-3", "user@example.com");
-        // stack3 has no cloud provider
-        
-        getRepository().save(stack1);
-        getRepository().save(stack2);
-        getRepository().save(stack3);
-
-        // When
-        List<Stack> providerStacks = getRepository().findByCloudProviderId(provider.id);
-
-        // Then
-        assertEquals(2, providerStacks.size(), "Should return exactly 2 stacks for the provider");
-        assertTrue(providerStacks.stream().allMatch(s -> provider.id.equals(s.getCloudProvider().id)),
-                   "All returned stacks should belong to the provider");
-    }
-
-    @Test
-    public void testFindByCloudProviderAndCreatedBy_ReturnsFilteredStacks() {
-        // Given
-        CloudProvider provider = createAndPersistCloudProvider("test-filter-provider-" + UUID.randomUUID());
-        String user1 = "user1@example.com";
-        String user2 = "user2@example.com";
-        
-        Stack stack1 = createTestStack("test-filter-1", user1);
-        stack1.setCloudProvider(provider);
-        
-        Stack stack2 = createTestStack("test-filter-2", user2);
-        stack2.setCloudProvider(provider);
-        
-        Stack stack3 = createTestStack("test-filter-3", user1);
-        // stack3 has no cloud provider
-        
-        getRepository().save(stack1);
-        getRepository().save(stack2);
-        getRepository().save(stack3);
-
-        // When
-        List<Stack> filteredStacks = getRepository().findByCloudProviderAndCreatedBy(
-            provider.id, user1);
-
-        // Then
-        assertEquals(1, filteredStacks.size(), "Should return exactly 1 stack");
-        assertEquals(user1, filteredStacks.get(0).getCreatedBy());
-        assertEquals(provider.id, filteredStacks.get(0).getCloudProvider().id);
-    }
+    // Tests for findByCloudProviderId and findByCloudProviderAndCreatedBy removed
+    // as cloud provider field has been removed from Stack entity
 
     // ========================================================================
     // Helper Methods

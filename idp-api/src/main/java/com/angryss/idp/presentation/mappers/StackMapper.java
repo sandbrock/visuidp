@@ -27,8 +27,6 @@ public class StackMapper {
         dto.setCreatedBy(stack.getCreatedBy());
         dto.setTeamId(stack.getTeam() != null ? stack.getTeam().getId() : null);
         dto.setStackCollectionId(stack.getStackCollection() != null ? stack.getStackCollection().getId() : null);
-        dto.setDomainId(stack.getDomain() != null ? stack.getDomain().getId() : null);
-        dto.setCategoryId(stack.getCategory() != null ? stack.getCategory().getId() : null);
         dto.setConfiguration(stack.getConfiguration());
         dto.setEphemeralPrefix(stack.getEphemeralPrefix());
         dto.setCreatedAt(stack.getCreatedAt());
