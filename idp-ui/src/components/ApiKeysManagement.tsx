@@ -320,7 +320,6 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
         onSuccess={handleRotateSuccess}
         apiKey={selectedApiKey}
         user={user}
-        mode={mode}
       />
 
       <ApiKeyRevokeModal
@@ -329,7 +328,6 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
         onSuccess={handleRevokeSuccess}
         apiKey={selectedApiKey}
         user={user}
-        mode={mode}
       />
 
       <ApiKeyEditNameModal

@@ -11,10 +11,9 @@ interface ApiKeyRevokeModalProps {
   onSuccess: () => void;
   apiKey: ApiKeyResponse | null;
   user: User;
-  mode?: 'personal' | 'admin';
 }
 
-export const ApiKeyRevokeModal = ({ isOpen, onClose, onSuccess, apiKey, user, mode = 'personal' }: ApiKeyRevokeModalProps) => {
+export const ApiKeyRevokeModal = ({ isOpen, onClose, onSuccess, apiKey, user }: ApiKeyRevokeModalProps) => {
   const [isRevoking, setIsRevoking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

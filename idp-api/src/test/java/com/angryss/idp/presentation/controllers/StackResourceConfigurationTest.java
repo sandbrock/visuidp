@@ -1,9 +1,6 @@
 package com.angryss.idp.presentation.controllers;
 
-import com.angryss.idp.domain.entities.BlueprintResource;
 import com.angryss.idp.domain.entities.CloudProvider;
-import com.angryss.idp.domain.entities.EnvironmentConfig;
-import com.angryss.idp.domain.entities.EnvironmentEntity;
 import com.angryss.idp.domain.entities.PropertySchema;
 import com.angryss.idp.domain.entities.ResourceType;
 import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;

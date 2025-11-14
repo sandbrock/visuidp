@@ -484,7 +484,7 @@ export const apiService = {
           console.error('Server error response:', errorBody);
           errorMessage += ` - ${errorBody}`;
         }
-      } catch (e) {
+      } catch {
         // Ignore if we can't read the error body - use basic error message
       }
       throw new Error(errorMessage);

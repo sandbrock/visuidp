@@ -2,15 +2,15 @@ import '@testing-library/jest-dom';
 
 // Mock localStorage for tests
 const localStorageMock = {
-  getItem: (key: string) => null,
-  setItem: (key: string, value: string) => {},
-  removeItem: (key: string) => {},
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
   clear: () => {},
   length: 0,
-  key: (index: number) => null,
+  key: () => null,
 };
 
-global.localStorage = localStorageMock as Storage;
+(globalThis as typeof globalThis & { localStorage: Storage }).localStorage = localStorageMock as unknown as Storage;
 
 // Mock scrollIntoView for jsdom
 Element.prototype.scrollIntoView = () => {};

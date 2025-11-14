@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import './AngryTextBox.css';
+import type { FocusableInputHandle } from '../../types/focus';
 
 interface AngryTextBoxProps {
   id: string;
@@ -13,8 +14,7 @@ interface AngryTextBoxProps {
   className?: string;
   autoFocus?: boolean;
    
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  componentRef?: React.Ref<any>;
+  componentRef?: React.Ref<FocusableInputHandle>;
 }
 
 export const AngryTextBox = ({ 
@@ -34,7 +34,11 @@ export const AngryTextBox = ({
 
   useEffect(() => {
     if (autoFocus && textBoxRef && 'current' in textBoxRef && textBoxRef.current) {
-      textBoxRef.current.focus();
+      if ('focus' in textBoxRef.current && typeof textBoxRef.current.focus === 'function') {
+        textBoxRef.current.focus();
+      } else if ('focusIn' in textBoxRef.current && typeof textBoxRef.current.focusIn === 'function') {
+        textBoxRef.current.focusIn();
+      }
     }
   }, [autoFocus, textBoxRef]);
 

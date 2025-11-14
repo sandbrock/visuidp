@@ -1,7 +1,6 @@
 package com.angryss.idp.infrastructure.filters;
 
 import io.quarkus.vertx.http.runtime.filters.Filters;
-import io.vertx.ext.web.RoutingContext;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 

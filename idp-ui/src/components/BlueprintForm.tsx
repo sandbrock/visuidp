@@ -7,6 +7,7 @@ import { DynamicResourceForm } from './DynamicResourceForm';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBoxGroup } from './input';
 import { Modal } from './Modal';
 import CloudProviderLookupService from '../services/CloudProviderLookupService';
+import type { FocusableInputHandle } from '../types/focus';
 import './BlueprintForm.css';
 
 interface BlueprintFormProps {
@@ -17,8 +18,7 @@ interface BlueprintFormProps {
 }
 
 export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFormProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nameInputRef = useRef<any>(null);
+  const nameInputRef = useRef<FocusableInputHandle>(null);
   
   /**
    * CloudProviderLookupService Reference
@@ -108,8 +108,8 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
               
               if (input) {
                 const actualInput = input.querySelector ? 
-                                  input.querySelector('input') : 
-                                  input;
+                                  (input.querySelector('input') as HTMLInputElement | null) : 
+                                  (input as HTMLInputElement);
                 if (actualInput && actualInput.focus) {
                   actualInput.focus();
                 }

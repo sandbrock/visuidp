@@ -1,11 +1,8 @@
 package com.angryss.idp.presentation.mappers;
 
 import com.angryss.idp.application.dtos.StackResponseDto;
-import com.angryss.idp.domain.entities.Blueprint;
 import com.angryss.idp.domain.entities.Stack;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import java.util.UUID;
 
 @ApplicationScoped
 public class StackMapper {

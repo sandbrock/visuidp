@@ -39,24 +39,26 @@ class PropertySchemaService {
 
     try {
       // Fetch schema from backend based on context
-      let schemaMap: Record<string, PropertySchema>;
+      let schemaArray: PropertySchema[];
       
       if (context === 'blueprint') {
-        schemaMap = await apiService.getResourceSchemaForBlueprint(
+        const response = await apiService.getResourceSchemaForBlueprint(
           resourceTypeId,
           cloudProviderId,
           userEmail
         );
+        schemaArray = response.properties;
       } else {
-        schemaMap = await apiService.getResourceSchemaForStack(
+        const response = await apiService.getResourceSchemaForStack(
           resourceTypeId,
           cloudProviderId,
           userEmail
         );
+        schemaArray = response.properties;
       }
 
-      // Convert schema map to array and sort by displayOrder
-      const schemaArray = Object.values(schemaMap).sort((a, b) => {
+      // Sort by displayOrder
+      schemaArray.sort((a, b) => {
         const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
         const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
         return orderA - orderB;

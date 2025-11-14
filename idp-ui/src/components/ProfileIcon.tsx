@@ -14,7 +14,7 @@ interface ProfileIconProps {
  * - jane@example.com -> JA
  * - user@example.com -> US
  */
-export const getInitials = (email: string): string => {
+const getInitials = (email: string): string => {
   if (!email) return 'U';
   
   const localPart = email.split('@')[0];

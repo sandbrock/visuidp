@@ -14,6 +14,7 @@ import { apiService } from '../services/api';
 import type { User } from '../types/auth';
 import type { ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
+import type { FocusableInputHandle } from '../types/focus';
 // SyncFusion imports
 import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input';
 
@@ -29,8 +30,7 @@ interface StackFormProps {
 
 export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => {
    
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nameInputRef = useRef<any>(null);
+  const nameInputRef = useRef<FocusableInputHandle>(null);
   const [formData, setFormData] = useState<StackCreateForm>({
     name: '',
     cloudName: '',
@@ -78,8 +78,8 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
               if (input) {
                 // If it's the wrapper, find the actual input
                 const actualInput = input.querySelector ? 
-                                  input.querySelector('input') : 
-                                  input;
+                                  (input.querySelector('input') as HTMLInputElement | null) : 
+                                  (input as HTMLInputElement);
                 if (actualInput && actualInput.focus) {
                   actualInput.focus();
                 }

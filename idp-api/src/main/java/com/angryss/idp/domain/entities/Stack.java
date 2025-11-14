@@ -284,6 +284,29 @@ public class Stack extends PanacheEntityBase {
         return find("stackCollection.id", collectionId).list();
     }
 
+    public static List<Stack> findByCloudProviderId(UUID cloudProviderId) {
+        return find("SELECT DISTINCT s FROM Stack s JOIN s.stackResources sr WHERE sr.cloudProvider.id = ?1", cloudProviderId).list();
+    }
+
+    public static List<Stack> findByCloudProviderAndCreatedBy(UUID cloudProviderId, String createdBy) {
+        return find("SELECT DISTINCT s FROM Stack s JOIN s.stackResources sr WHERE sr.cloudProvider.id = ?1 AND s.createdBy = ?2",
+                    cloudProviderId, createdBy).list();
+    }
+
+    public static List<Stack> findByDomainId(UUID domainId) {
+        // Stacks don't have a direct relationship to domains in the current schema
+        // This would require a join through categories if such a relationship exists
+        // For now, return empty list to satisfy the interface
+        return List.of();
+    }
+
+    public static List<Stack> findByCategoryId(UUID categoryId) {
+        // Stacks don't have a direct relationship to categories in the current schema
+        // This would need schema changes to implement properly
+        // For now, return empty list to satisfy the interface
+        return List.of();
+    }
+
     public Blueprint getBlueprint() {
         return blueprint;
     }
