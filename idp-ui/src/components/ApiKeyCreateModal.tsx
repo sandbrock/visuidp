@@ -157,8 +157,8 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
         </div>
         <AngryButton
           onClick={handleCopyKey}
-          cssClass="e-primary copy-button"
-          iconCss={copied ? 'e-icons e-check' : 'e-icons e-copy'}
+          isPrimary={true}
+          className="copy-button"
         >
           {copied ? 'Copied!' : 'Copy to Clipboard'}
         </AngryButton>

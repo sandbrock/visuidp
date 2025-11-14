@@ -36,8 +36,6 @@ export const AngryTextBox = ({
     if (autoFocus && textBoxRef && 'current' in textBoxRef && textBoxRef.current) {
       if ('focus' in textBoxRef.current && typeof textBoxRef.current.focus === 'function') {
         textBoxRef.current.focus();
-      } else if ('focusIn' in textBoxRef.current && typeof textBoxRef.current.focusIn === 'function') {
-        textBoxRef.current.focusIn();
       }
     }
   }, [autoFocus, textBoxRef]);

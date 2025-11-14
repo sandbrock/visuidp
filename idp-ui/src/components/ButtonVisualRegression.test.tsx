@@ -23,7 +23,7 @@ describe('Button Visual Regression Tests', () => {
         <div>
           <AngryButton>Default Button</AngryButton>
           <AngryButton isPrimary>Primary Button</AngryButton>
-          <AngryButton cssClass="e-danger">Danger Button</AngryButton>
+          <AngryButton variant="danger">Danger Button</AngryButton>
           <AngryButton cssClass="e-outline">Outline Button</AngryButton>
         </div>
       );

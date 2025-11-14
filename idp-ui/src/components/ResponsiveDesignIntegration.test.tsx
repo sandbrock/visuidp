@@ -16,11 +16,11 @@ const MockPageWithCards = () => (
       <div className="content-card" data-testid="card-1">
         <h2>Card Title</h2>
         <p>Card content with text</p>
-        <button className="e-btn e-primary">Action Button</button>
+        <button className="btn btn-primary">Action Button</button>
       </div>
       <div className="content-card" data-testid="card-2">
         <h2>Another Card</h2>
-        <input type="text" className="e-input" placeholder="Input field" />
+        <input type="text" className="input-field" placeholder="Input field" />
       </div>
     </main>
   </div>
@@ -32,16 +32,16 @@ const MockFormPage = () => (
       <ThemeToggle />
     </header>
     <form className="form-container">
-      <div className="e-float-input">
+      <div className="float-input">
         <input type="text" required />
         <label>Name</label>
       </div>
-      <div className="e-float-input">
+      <div className="float-input">
         <input type="email" required />
         <label>Email</label>
       </div>
-      <button type="submit" className="e-btn e-primary">Submit</button>
-      <button type="button" className="e-btn e-danger">Cancel</button>
+      <button type="submit" className="btn btn-primary">Submit</button>
+      <button type="button" className="btn btn-danger">Cancel</button>
     </form>
   </div>
 );
@@ -49,16 +49,16 @@ const MockFormPage = () => (
 const MockModalPage = () => (
   <div data-testid="modal-page">
     <ThemeToggle />
-    <div className="e-dialog" role="dialog" aria-modal="true">
-      <div className="e-dlg-header">
+    <div className="dialog" role="dialog" aria-modal="true">
+      <div className="dialog-header">
         <h3>Modal Title</h3>
       </div>
-      <div className="e-dlg-content">
+      <div className="dialog-content">
         <p>Modal content goes here</p>
       </div>
-      <div className="e-dlg-footer">
-        <button className="e-btn e-primary">Confirm</button>
-        <button className="e-btn">Cancel</button>
+      <div className="dialog-footer">
+        <button className="btn btn-primary">Confirm</button>
+        <button className="btn">Cancel</button>
       </div>
     </div>
   </div>

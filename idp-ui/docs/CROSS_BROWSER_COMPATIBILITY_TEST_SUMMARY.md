@@ -82,8 +82,8 @@ Tests verify that all major components render correctly in Frankenstein theme:
 
 **Components Verified**:
 - Headers (`.app-header`)
-- Buttons (`.e-btn`, `.e-primary`, `.e-danger`)
-- Inputs (`.e-float-input`)
+- Buttons (`.btn`, `.btn-primary`, `.btn-danger`)
+- Inputs (`.float-input`)
 - Cards (`.content-card`)
 - Modals (`.e-dialog`)
 - Loading spinners (`.loading-spinner`)

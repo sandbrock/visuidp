@@ -54,8 +54,8 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary Button</AngryButton>
-            <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-            <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+            <AngryButton variant="danger">Danger Button</AngryButton>
+            <AngryButton style="outline">Outline Button</AngryButton>
             <AngryButton disabled={true}>Disabled Button</AngryButton>
           </div>
         </ThemeProvider>
@@ -150,8 +150,8 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary Button</AngryButton>
-            <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-            <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+            <AngryButton variant="danger">Danger Button</AngryButton>
+            <AngryButton style="outline">Outline Button</AngryButton>
             <AngryButton disabled={true}>Disabled Button</AngryButton>
           </div>
         </ThemeProvider>
@@ -241,8 +241,8 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary Button</AngryButton>
-            <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-            <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+            <AngryButton variant="danger">Danger Button</AngryButton>
+            <AngryButton style="outline">Outline Button</AngryButton>
             <AngryButton disabled={true}>Disabled Button</AngryButton>
           </div>
         </ThemeProvider>
@@ -359,7 +359,7 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary</AngryButton>
-            <AngryButton cssClass="e-danger">Danger</AngryButton>
+            <AngryButton variant="danger">Danger</AngryButton>
           </div>
         </ThemeProvider>
       );
@@ -394,8 +394,8 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary</AngryButton>
-            <AngryButton cssClass="e-danger">Danger</AngryButton>
-            <AngryButton cssClass="e-outline">Outline</AngryButton>
+            <AngryButton variant="danger">Danger</AngryButton>
+            <AngryButton style="outline">Outline</AngryButton>
           </div>
         </ThemeProvider>
       );
@@ -456,7 +456,7 @@ describe('Button Theme Switching Tests - Task 12', () => {
           <div>
             <ThemeToggle />
             <AngryButton isPrimary={true}>Create New Resource</AngryButton>
-            <AngryButton cssClass="e-danger">Delete Blueprint</AngryButton>
+            <AngryButton variant="danger">Delete Blueprint</AngryButton>
           </div>
         </ThemeProvider>
       );
@@ -556,11 +556,11 @@ describe('Button Theme Switching Tests - Task 12', () => {
             <ThemeToggle />
             <AngryButton isPrimary={true}>Primary</AngryButton>
             <AngryButton>Secondary</AngryButton>
-            <AngryButton cssClass="e-danger">Danger</AngryButton>
-            <AngryButton cssClass="e-outline">Outline</AngryButton>
-            <AngryButton cssClass="e-success">Success</AngryButton>
-            <AngryButton cssClass="e-warning">Warning</AngryButton>
-            <AngryButton cssClass="e-info">Info</AngryButton>
+            <AngryButton variant="danger">Danger</AngryButton>
+            <AngryButton style="outline">Outline</AngryButton>
+            <AngryButton variant="success">Success</AngryButton>
+            <AngryButton variant="warning">Warning</AngryButton>
+            <AngryButton variant="info">Info</AngryButton>
             <AngryButton disabled={true}>Disabled</AngryButton>
           </div>
         </ThemeProvider>

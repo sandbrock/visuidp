@@ -121,7 +121,7 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
       <Breadcrumb items={breadcrumbItems} />
       <div className="header">
         <h2>Cloud Provider Management</h2>
-        <AngryButton onClick={handleCreate} cssClass="e-primary" isPrimary={true}>
+        <AngryButton onClick={handleCreate} isPrimary={true}>
           Add Cloud Provider
         </AngryButton>
       </div>
@@ -160,13 +160,14 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
                   <td className="actions">
                     <AngryButton
                       onClick={() => handleEdit(provider)}
-                      cssClass="e-small"
+                      size="small"
                     >
                       Edit
                     </AngryButton>
                     <AngryButton
                       onClick={() => handleToggle(provider)}
-                      cssClass={`e-small ${provider.enabled ? 'e-warning' : 'e-success'}`}
+                      size="small"
+                      variant={provider.enabled ? 'warning' : 'success'}
                     >
                       {provider.enabled ? 'Disable' : 'Enable'}
                     </AngryButton>

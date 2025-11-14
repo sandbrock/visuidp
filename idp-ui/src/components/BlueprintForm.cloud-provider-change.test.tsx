@@ -113,12 +113,12 @@ vi.mock('./input', () => ({
       ))}
     </div>
   ),
-  AngryButton: ({ onClick, children, type, disabled, cssClass }: any) => (
+  AngryButton: ({ onClick, children, type, disabled, isPrimary, variant, size, style, className }: any) => (
     <button
       onClick={onClick}
       type={type}
       disabled={disabled}
-      className={cssClass}
+      className={className}
       data-testid={`button-${children?.toString().toLowerCase().replace(/\s+/g, '-')}`}
     >
       {children}

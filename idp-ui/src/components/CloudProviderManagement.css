@@ -108,13 +108,13 @@
 }
 
 /* Improve button contrast in dark mode */
-[data-theme="dark"] .cloud-provider-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning) {
+[data-theme="dark"] .cloud-provider-management .actions button:not(.btn-primary):not(.btn-success):not(.btn-warning) {
   background-color: #3a3a3a;
   border-color: #555555;
   color: #ffffff;
 }
 
-[data-theme="dark"] .cloud-provider-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning):hover {
+[data-theme="dark"] .cloud-provider-management .actions button:not(.btn-primary):not(.btn-success):not(.btn-warning):hover {
   background-color: #4a4a4a;
   border-color: #666666;
   color: #ffffff;

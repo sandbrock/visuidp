@@ -15,19 +15,13 @@ const MockButtonPage = () => (
       <AngryButton isPrimary>
         Primary Action
       </AngryButton>
-      <button className="e-btn e-primary" data-testid="syncfusion-primary">
-        Syncfusion Primary
-      </button>
     </div>
 
     {/* Danger buttons */}
     <div className="button-group" data-testid="danger-group">
-      <AngryButton cssClass="e-danger">
+      <AngryButton variant="danger">
         Delete
       </AngryButton>
-      <button className="e-btn e-danger" data-testid="syncfusion-danger">
-        Syncfusion Danger
-      </button>
     </div>
 
     {/* Secondary buttons */}
@@ -35,14 +29,11 @@ const MockButtonPage = () => (
       <AngryButton>
         Secondary Action
       </AngryButton>
-      <button className="e-btn" data-testid="syncfusion-secondary">
-        Syncfusion Secondary
-      </button>
     </div>
 
     {/* Outline buttons */}
     <div className="button-group" data-testid="outline-group">
-      <AngryButton cssClass="e-outline">
+      <AngryButton variant="outline">
         Outline Action
       </AngryButton>
     </div>
@@ -52,17 +43,14 @@ const MockButtonPage = () => (
       <AngryButton isPrimary disabled>
         Disabled Primary
       </AngryButton>
-      <AngryButton cssClass="e-danger" disabled>
+      <AngryButton variant="danger" disabled>
         Disabled Danger
       </AngryButton>
-      <button className="e-btn e-primary" disabled data-testid="syncfusion-disabled">
-        Disabled Syncfusion
-      </button>
     </div>
   </div>
 );
 
-describe('Cross-Browser Button Compatibility Tests', () => {
+describe('Cross-Browser Custom Button Compatibility Tests', () => {
   let localStorageMock: { [key: string]: string };
 
   beforeEach(() => {

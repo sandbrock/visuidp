@@ -16,11 +16,11 @@ const MockThemedPage = () => (
       <div className="content-card" data-testid="test-card">
         <h2>Test Card</h2>
         <p>Content with themed styling</p>
-        <button className="e-btn e-primary" data-testid="primary-btn">Primary Button</button>
-        <button className="e-btn e-danger" data-testid="danger-btn">Danger Button</button>
+        <button className="btn btn-primary" data-testid="primary-btn">Primary Button</button>
+        <button className="btn btn-danger" data-testid="danger-btn">Danger Button</button>
       </div>
       <div className="form-container">
-        <div className="e-float-input">
+        <div className="float-input">
           <input type="text" required data-testid="test-input" />
           <label>Test Input</label>
         </div>
@@ -33,9 +33,9 @@ const MockThemedPage = () => (
 const MockModalComponent = () => (
   <div data-testid="modal-test">
     <ThemeToggle />
-    <div className="e-dialog" role="dialog" data-testid="test-dialog">
-      <div className="e-dlg-header">Modal Header</div>
-      <div className="e-dlg-content">Modal Content</div>
+    <div className="dialog" role="dialog" data-testid="test-dialog">
+      <div className="dialog-header">Modal Header</div>
+      <div className="dialog-content">Modal Content</div>
     </div>
   </div>
 );
@@ -310,8 +310,8 @@ describe('Cross-Browser Compatibility Tests', () => {
       expect(dangerBtn).toBeInTheDocument();
 
       // Buttons should have appropriate classes for CSS animations
-      expect(primaryBtn).toHaveClass('e-btn', 'e-primary');
-      expect(dangerBtn).toHaveClass('e-btn', 'e-danger');
+      expect(primaryBtn).toHaveClass('btn', 'btn-primary');
+      expect(dangerBtn).toHaveClass('btn', 'btn-danger');
     });
 
     it('should maintain animations during theme transitions', async () => {
@@ -427,7 +427,7 @@ describe('Cross-Browser Compatibility Tests', () => {
 
       const input = screen.getByTestId('test-input');
       expect(input).toBeInTheDocument();
-      expect(input.parentElement).toHaveClass('e-float-input');
+      expect(input.parentElement).toHaveClass('float-input');
     });
 
     it('should render card components correctly in Frankenstein theme', async () => {
@@ -464,7 +464,7 @@ describe('Cross-Browser Compatibility Tests', () => {
 
       const dialog = screen.getByTestId('test-dialog');
       expect(dialog).toBeInTheDocument();
-      expect(dialog).toHaveClass('e-dialog');
+      expect(dialog).toHaveClass('dialog');
       expect(screen.getByText('Modal Header')).toBeInTheDocument();
       expect(screen.getByText('Modal Content')).toBeInTheDocument();
     });

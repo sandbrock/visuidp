@@ -1,9 +1,5 @@
 export interface FocusableInputHandle {
-  focusIn?: () => void;
-  focus?: () => void;
-  inputElement?: HTMLInputElement | HTMLTextAreaElement | null;
-  element?: HTMLElement | null;
-  querySelector?: (selector: string) => Element | null;
+  focus: () => void;
 }
 
 export type FocusableInputElement = HTMLInputElement | HTMLTextAreaElement;

@@ -39,35 +39,6 @@
 /* Remove outer ring; rely on control border only */
 .environment-combobox-wrapper:focus-within::after { display: none; }
 
-/* Kill Syncfusion material-style bottom highlight for this control */
-.infra-combobox.e-input-group::before,
-.infra-combobox.e-input-group::after,
-.infra-combobox.e-control-wrapper::before,
-.infra-combobox.e-control-wrapper::after,
-.infra-combobox.e-input-focus::before,
-.infra-combobox.e-input-focus::after,
-.infra-combobox.e-control-wrapper.e-input-focus::before,
-.infra-combobox.e-control-wrapper.e-input-focus::after,
-.infra-combobox .e-input-group::before,
-.infra-combobox .e-input-group::after,
-.infra-combobox .e-control-wrapper::before,
-.infra-combobox .e-control-wrapper::after,
-.infra-combobox.e-ddl::before,
-.infra-combobox.e-ddl::after,
-.infra-combobox.e-combobox::before,
-.infra-combobox.e-combobox::after {
-  display: none !important;
-  content: none !important;
-  border: 0 !important;
-  height: 0 !important;
-}
-
-/* Prevent default browser blue outline on inner input */
-.infra-combobox input.e-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
 .environment-dropdown {
   padding: 0.5rem 1rem;
   border: 1px solid var(--border-primary);
@@ -95,62 +66,7 @@
   color: var(--text-primary);
 }
 
-/* Infrastructure combobox specific sizing and visibility */
-.infra-combobox.e-input-group,
-.infra-combobox.e-input-group.e-control-wrapper {
-  overflow: visible !important;
-  /* Force a full border box, not material-style bottom-only line */
-  border: 1px solid var(--border-primary) !important;
-  border-bottom: 1px solid var(--border-primary) !important;
-  border-radius: 6px !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
 
-/* Ensure focus does NOT re-enable underline and instead keeps the box border */
-.infra-combobox.e-input-group.e-input-focus,
-.infra-combobox.e-control-wrapper.e-input-focus {
-  border-color: var(--border-primary) !important;
-  border-bottom-color: var(--border-primary) !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-.infra-combobox input.e-input {
-  padding: 10px 12px;
-  font-size: 15px;
-  border: 0 !important;
-}
-
-.infra-combobox.e-input-group.e-error {
-  /* Always show full ring even if internal elements clip */
-  box-shadow: none !important;
-  border-color: var(--danger) !important;
-}
-
-/* Remove any bottom bar driven by nested elements */
-.infra-combobox.e-input-group .e-input:focus,
-.infra-combobox.e-input-group .e-input {
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-
-/* Disable Syncfusion bottom-line ripple used by some themes */
-.infra-combobox.e-input-group::before,
-.infra-combobox.e-input-group::after {
-  display: none !important;
-}
-
-/* Focus state: full border color, no bottom-only highlight */
-.infra-combobox.e-input-group.e-input-focus {
-  /* Keep same color on focus to avoid blue ring */
-  border-color: var(--border-primary) !important;
-  border-bottom-color: var(--border-primary) !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
 
 .infrastructure-content {
   margin-top: 2rem;
@@ -492,26 +408,6 @@
   color: var(--text-primary);
 }
 
-/* Infrastructure combobox Frankenstein styling */
-[data-theme="frankenstein"] .infra-combobox.e-input-group,
-[data-theme="frankenstein"] .infra-combobox.e-input-group.e-control-wrapper {
-  border: 2px solid var(--frankenstein-stitch) !important;
-  background: var(--bg-secondary);
-  transition: all 0.3s ease;
-}
-
-[data-theme="frankenstein"] .infra-combobox.e-input-group.e-input-focus,
-[data-theme="frankenstein"] .infra-combobox.e-control-wrapper.e-input-focus {
-  border-color: var(--frankenstein-skin) !important;
-  box-shadow: 0 2px 8px var(--shadow),
-              inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-}
-
-[data-theme="frankenstein"] .infra-combobox input.e-input {
-  color: var(--text-primary);
-  background: transparent;
-}
-
 [data-theme="frankenstein"] .no-environment-selected {
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
@@ -740,92 +636,4 @@
   letter-spacing: 2px;
 }
 
-/* Button styling for infrastructure controls */
-[data-theme="frankenstein"] .infrastructure-controls button.e-btn {
-  border: 2px solid var(--frankenstein-stitch);
-  transition: all 0.3s ease;
-  position: relative;
-}
 
-[data-theme="frankenstein"] .infrastructure-controls button.e-btn::before {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
-  border: 1px dashed var(--frankenstein-stitch);
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-[data-theme="frankenstein"] .infrastructure-controls button.e-btn:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  border-color: var(--frankenstein-skin);
-  box-shadow: 0 4px 8px var(--shadow);
-  transform: translateY(-2px);
-}
-
-[data-theme="frankenstein"] .infrastructure-controls button.e-primary {
-  background: var(--accent-primary);
-  border-color: var(--frankenstein-stitch);
-  color: var(--bg-primary);
-  font-weight: 600;
-}
-
-[data-theme="frankenstein"] .infrastructure-controls button.e-primary:hover:not(:disabled) {
-  background: var(--accent-primary-hover);
-  box-shadow: 0 4px 12px var(--shadow),
-              inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="frankenstein"] .infrastructure-controls button.e-danger {
-  background: var(--danger);
-  border-color: var(--frankenstein-stitch);
-  color: var(--text-primary);
-}
-
-[data-theme="frankenstein"] .infrastructure-controls button.e-danger:hover:not(:disabled) {
-  background: var(--danger-hover);
-  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
-}
-
-/* Resource action buttons */
-[data-theme="frankenstein"] .table-row button.e-btn {
-  border: 2px solid var(--frankenstein-stitch);
-  transition: all 0.3s ease;
-}
-
-[data-theme="frankenstein"] .table-row button.e-btn:hover:not(:disabled) {
-  box-shadow: 0 4px 8px var(--shadow);
-  transform: translateY(-1px);
-}
-
-[data-theme="frankenstein"] .table-row button.e-danger {
-  background: var(--danger);
-  border-color: var(--frankenstein-stitch);
-  color: var(--text-primary);
-}
-
-[data-theme="frankenstein"] .table-row button.e-danger:hover:not(:disabled) {
-  background: var(--danger-hover);
-  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.5);
-}
-
-/* Infrastructure resources section */
-[data-theme="frankenstein"] .infrastructure-resources h4 {
-  color: var(--text-primary);
-}
-
-[data-theme="frankenstein"] .infrastructure-resources button.e-primary {
-  background: var(--accent-primary);
-  border: 2px solid var(--frankenstein-stitch);
-  color: var(--bg-primary);
-  font-weight: 600;
-}
-
-[data-theme="frankenstein"] .infrastructure-resources button.e-primary:hover:not(:disabled) {
-  background: var(--accent-primary-hover);
-  box-shadow: 0 4px 12px var(--shadow),
-              inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}

@@ -97,24 +97,9 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
     
     attempts.forEach(delay => {
       const timer = setTimeout(() => {
-        if (nameInputRef.current) {
+        if (nameInputRef.current && nameInputRef.current.focus) {
           try {
-            if (nameInputRef.current.focusIn) {
-              nameInputRef.current.focusIn();
-            } else {
-              const input = nameInputRef.current.inputElement || 
-                          nameInputRef.current.element || 
-                          nameInputRef.current;
-              
-              if (input) {
-                const actualInput = input.querySelector ? 
-                                  (input.querySelector('input') as HTMLInputElement | null) : 
-                                  (input as HTMLInputElement);
-                if (actualInput && actualInput.focus) {
-                  actualInput.focus();
-                }
-              }
-            }
+            nameInputRef.current.focus();
           } catch (e) {
             console.log('Focus attempt failed:', e);
           }
@@ -443,7 +428,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
               <AngryButton
                 onClick={handleRetryLoadCloudProviders}
                 disabled={loading}
-                cssClass="e-outline"
+                style="outline"
               >
                 {loading ? 'Retrying...' : 'Retry'}
               </AngryButton>
@@ -602,14 +587,13 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
             <AngryButton
               onClick={onCancel}
               disabled={loading}
-              cssClass="e-outline"
+              style="outline"
             >
               Cancel
             </AngryButton>
             <AngryButton
               type="submit"
               disabled={loading || !cloudProvidersLoaded || !!cloudProvidersLoadError}
-              cssClass="e-primary"
               isPrimary={true}
             >
               {loading ? 'Saving...' : (blueprint ? 'Update Blueprint' : 'Create Blueprint')}

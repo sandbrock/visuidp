@@ -425,7 +425,7 @@ export const PropertySchemaEditor = ({ user }: PropertySchemaEditorProps) => {
     return (
       <div className="property-schema-editor error">
         <div className="error-message">{error}</div>
-        <AngryButton onClick={handleBack} cssClass="e-primary" isPrimary={true}>
+        <AngryButton onClick={handleBack} isPrimary={true}>
           Go Back
         </AngryButton>
       </div>
@@ -452,16 +452,16 @@ export const PropertySchemaEditor = ({ user }: PropertySchemaEditorProps) => {
           </div>
         </div>
         <div className="header-actions">
-          <AngryButton onClick={handleBack} cssClass="e-outline">
+          <AngryButton onClick={handleBack} style="outline">
             Back
           </AngryButton>
           <AngryButton
             onClick={() => setPreviewMode(!previewMode)}
-            cssClass="e-outline"
+            style="outline"
           >
             {previewMode ? 'Edit Mode' : 'Preview Mode'}
           </AngryButton>
-          <AngryButton onClick={handleCreate} cssClass="e-primary" isPrimary={true}>
+          <AngryButton onClick={handleCreate} isPrimary={true}>
             Add Property
           </AngryButton>
         </div>
@@ -528,12 +528,13 @@ export const PropertySchemaEditor = ({ user }: PropertySchemaEditorProps) => {
                           : '-'}
                       </td>
                       <td className="actions">
-                        <AngryButton onClick={() => handleEdit(property)} cssClass="e-small">
+                        <AngryButton onClick={() => handleEdit(property)} size="small">
                           Edit
                         </AngryButton>
                         <AngryButton
                           onClick={() => handleDelete(property)}
-                          cssClass="e-small e-danger"
+                          size="small"
+                          variant="danger"
                         >
                           Delete
                         </AngryButton>

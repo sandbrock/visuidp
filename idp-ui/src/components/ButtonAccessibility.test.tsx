@@ -122,7 +122,7 @@ describe('Button Accessibility Tests', () => {
 
     it('should have visible focus outline on danger button', () => {
       renderWithTheme(
-        <AngryButton cssClass="e-danger">Delete</AngryButton>
+        <AngryButton variant="danger">Delete</AngryButton>
       );
 
       const button = screen.getByRole('button', { name: /delete/i });
@@ -134,7 +134,7 @@ describe('Button Accessibility Tests', () => {
 
     it('should have visible focus outline on outline button', () => {
       renderWithTheme(
-        <AngryButton cssClass="e-outline">Cancel</AngryButton>
+        <AngryButton style="outline">Cancel</AngryButton>
       );
 
       const button = screen.getByRole('button', { name: /cancel/i });
@@ -220,7 +220,7 @@ describe('Button Accessibility Tests', () => {
 
     it('should announce danger button type', () => {
       renderWithTheme(
-        <AngryButton cssClass="e-danger">Delete</AngryButton>
+        <AngryButton variant="danger">Delete</AngryButton>
       );
 
       const button = screen.getByRole('button', { name: /delete/i });
@@ -248,18 +248,17 @@ describe('Button Accessibility Tests', () => {
 
   describe('Button Variants Accessibility', () => {
     it('should be accessible in all button variants', () => {
-      const variants = [
-        { cssClass: 'e-primary', label: 'Primary' },
-        { cssClass: 'e-danger', label: 'Danger' },
-        { cssClass: 'e-success', label: 'Success' },
-        { cssClass: 'e-warning', label: 'Warning' },
-        { cssClass: 'e-info', label: 'Info' },
-        { cssClass: 'e-outline', label: 'Outline' },
+      const variants: Array<{ variant: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = [
+        { variant: 'primary', label: 'Primary' },
+        { variant: 'danger', label: 'Danger' },
+        { variant: 'success', label: 'Success' },
+        { variant: 'warning', label: 'Warning' },
+        { variant: 'info', label: 'Info' },
       ];
 
-      variants.forEach(({ cssClass, label }) => {
+      variants.forEach(({ variant, label }) => {
         const { unmount } = renderWithTheme(
-          <AngryButton cssClass={cssClass}>{label}</AngryButton>
+          <AngryButton variant={variant}>{label}</AngryButton>
         );
 
         const button = screen.getByRole('button', { name: new RegExp(label, 'i') });
@@ -276,8 +275,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary</AngryButton>
-          <AngryButton cssClass="e-danger">Danger</AngryButton>
-          <AngryButton cssClass="e-outline">Outline</AngryButton>
+          <AngryButton variant="danger">Danger</AngryButton>
+          <AngryButton style="outline">Outline</AngryButton>
         </>,
         'light'
       );
@@ -291,8 +290,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary</AngryButton>
-          <AngryButton cssClass="e-danger">Danger</AngryButton>
-          <AngryButton cssClass="e-outline">Outline</AngryButton>
+          <AngryButton variant="danger">Danger</AngryButton>
+          <AngryButton style="outline">Outline</AngryButton>
         </>,
         'dark'
       );
@@ -306,8 +305,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary</AngryButton>
-          <AngryButton cssClass="e-danger">Danger</AngryButton>
-          <AngryButton cssClass="e-outline">Outline</AngryButton>
+          <AngryButton variant="danger">Danger</AngryButton>
+          <AngryButton style="outline">Outline</AngryButton>
         </>,
         'frankenstein'
       );
@@ -376,8 +375,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary Button</AngryButton>
-          <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-          <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+          <AngryButton variant="danger">Danger Button</AngryButton>
+          <AngryButton style="outline">Outline Button</AngryButton>
           <AngryButton disabled>Disabled Button</AngryButton>
         </>,
         'light'
@@ -394,8 +393,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary Button</AngryButton>
-          <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-          <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+          <AngryButton variant="danger">Danger Button</AngryButton>
+          <AngryButton style="outline">Outline Button</AngryButton>
           <AngryButton disabled>Disabled Button</AngryButton>
         </>,
         'dark'
@@ -412,8 +411,8 @@ describe('Button Accessibility Tests', () => {
       renderWithTheme(
         <>
           <AngryButton isPrimary>Primary Button</AngryButton>
-          <AngryButton cssClass="e-danger">Danger Button</AngryButton>
-          <AngryButton cssClass="e-outline">Outline Button</AngryButton>
+          <AngryButton variant="danger">Danger Button</AngryButton>
+          <AngryButton style="outline">Outline Button</AngryButton>
           <AngryButton disabled>Disabled Button</AngryButton>
         </>,
         'frankenstein'

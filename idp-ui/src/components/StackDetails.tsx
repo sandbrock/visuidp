@@ -50,20 +50,23 @@ export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDet
     <div className="stack-details">
       <div className="stack-details-header">
         <AngryButton
-          cssClass="e-outline back-button"
+          style="outline"
+          className="back-button"
           onClick={onBack}
         >
           ← Back to Stacks
         </AngryButton>
         <div className="stack-actions">
           <AngryButton
-            cssClass="e-primary edit-button"
+            isPrimary={true}
+            className="edit-button"
             onClick={() => onEdit(stack)}
           >
             Edit Stack
           </AngryButton>
           <AngryButton
-            cssClass="e-danger delete-button"
+            variant="danger"
+            className="delete-button"
             onClick={() => setShowDeleteConfirm(true)}
           >
             Delete Stack

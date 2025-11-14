@@ -86,14 +86,14 @@ All Frankenstein theme CSS custom properties are defined in:
 **Usage:** Primary buttons, links, focus indicators  
 **Description:** Electric purple for interactive elements  
 **Contrast:** 5.2:1 on `--bg-primary` (WCAG AA)  
-**Applied to:** `.e-btn.e-primary`, `.nav-link:hover`, `input:focus`
+**Applied to:** `.btn-primary`, `.nav-link:hover`, `input:focus`
 
 ```css
 --accent-primary-hover: #7b2cbf;
 ```
 **Usage:** Hover states for accent elements  
 **Description:** Deeper purple for hover feedback  
-**Applied to:** `.e-btn.e-primary:hover`, `.nav-link.active`
+**Applied to:** `.btn-primary:hover`, `.nav-link.active`
 
 ```css
 --accent-secondary: #3c1f5e;
