@@ -1,7 +1,6 @@
 package com.angryss.idp.domain.services;
 
 import com.angryss.idp.domain.entities.PropertySchema;
-import com.angryss.idp.domain.valueobjects.PropertyDataType;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.*;

@@ -1,7 +1,6 @@
 package com.angryss.idp.infrastructure.persistence.dynamodb;
 
 import com.angryss.idp.domain.entities.Stack;
-import com.angryss.idp.domain.repositories.StackRepository;
 import com.angryss.idp.domain.valueobjects.ProgrammingLanguage;
 import com.angryss.idp.domain.valueobjects.StackType;
 import jakarta.inject.Inject;

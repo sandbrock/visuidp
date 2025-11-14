@@ -1,7 +1,6 @@
 package com.angryss.idp.domain.valueobjects.sharedinfra;
 
 import jakarta.validation.constraints.*;
-import java.util.List;
 
 /**
  * Configuration for a Service Bus / Message Broker (e.g., Kafka, RabbitMQ).

@@ -80,8 +80,8 @@ describe('StackList - Removed Columns Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorageMock.clear();
-    (apiService.getStacks as any).mockResolvedValue(mockStacks);
-    (apiService.getCollections as any).mockResolvedValue([]);
+    vi.mocked(apiService.getStacks).mockResolvedValue(mockStacks);
+    vi.mocked(apiService.getCollections).mockResolvedValue([]);
   });
 
   const renderStackList = () => {
@@ -246,7 +246,7 @@ describe('StackList - Removed Columns Tests', () => {
     });
 
     it('should display empty state when no stacks exist', async () => {
-      (apiService.getStacks as any).mockResolvedValue([]);
+      vi.mocked(apiService.getStacks).mockResolvedValue([]);
 
       renderStackList();
 
@@ -256,7 +256,7 @@ describe('StackList - Removed Columns Tests', () => {
     });
 
     it('should handle loading state', () => {
-      (apiService.getStacks as any).mockImplementation(
+      vi.mocked(apiService.getStacks).mockImplementation(
         () => new Promise((resolve) => setTimeout(() => resolve(mockStacks), 100))
       );
 
@@ -266,7 +266,7 @@ describe('StackList - Removed Columns Tests', () => {
     });
 
     it('should handle error state', async () => {
-      (apiService.getStacks as any).mockRejectedValue(new Error('Failed to fetch'));
+      vi.mocked(apiService.getStacks).mockRejectedValue(new Error('Failed to fetch'));
 
       renderStackList();
 

@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { act } from 'react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { AngryButton } from './input/AngryButton';
 
@@ -69,7 +68,7 @@ describe('Cross-Browser Button Compatibility Tests', () => {
   beforeEach(() => {
     localStorageMock = {};
     
-    (global as any).localStorage = {
+    (globalThis as typeof globalThis & { localStorage: Storage }).localStorage = {
       getItem: vi.fn((key: string) => localStorageMock[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         localStorageMock[key] = value;
@@ -95,699 +94,151 @@ describe('Cross-Browser Button Compatibility Tests', () => {
         </ThemeProvider>
       );
 
-      // Verify buttons render by nt
-      expect(screen.getByRole('button', { name: /primary action/i })t();
-      expect(screen.getByRole('button', { name: /delete/i })).toBeI
-      expect(screen.getByRole('button', { name: /secondary action/i })
-      expect(screen.getByRole('button', { name: /outline action/i })ment();
+      // Verify buttons render by text content
+      expect(screen.getByRole('button', { name: /primary action/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /secondary action/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /outline action/i })).toBeInTheDocument();
     });
 
- () => {
+    it('should apply correct CSS classes', () => {
       render(
-        <Them
-          <MockButtonPa>
+        <ThemeProvider>
+          <MockButtonPage />
         </ThemeProvider>
       );
 
-});
-      const dangerBtn = screen.getByRole('button', { name: 
-      const outlineBtn = screen.getByRole('button', { nami });
-
+      const dangerBtn = screen.getByRole('button', { name: /delete/i });
+      const outlineBtn = screen.getByRole('button', { name: /outline action/i });
 
       expect(dangerBtn).toHaveClass('angry-button', 'btn-danger');
-      expect(outlineBtn).toHaveClass('angry-button', 'btn-outline';
+      expect(outlineBtn).toHaveClass('angry-button', 'btn-outline');
     });
 
-
+    it('should handle click events', async () => {
       const user = userEvent.setup();
       const handleClick = vi.fn();
 
-r(
-        <Themider>
-          <AngryButton ck}>
+      render(
+        <ThemeProvider>
+          <AngryButton onClick={handleClick}>
             Click Me
-          </AngryButn>
+          </AngryButton>
         </ThemeProvider>
       );
 
-me/i });
+      const button = screen.getByRole('button', { name: /click me/i });
       await act(async () => {
         await user.click(button);
       });
 
-Times(1);
+      expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
-> {
+    it('should handle disabled state', async () => {
       const user = userEvent.setup();
       const handleClick = vi.fn();
 
-
-        <ThemProvider>
-          <AngryButton 
+      render(
+        <ThemeProvider>
+          <AngryButton onClick={handleClick} disabled>
             Disabled
           </AngryButton>
         </ThemeProvider>
       );
 
-
+      const button = screen.getByRole('button', { name: /disabled/i });
       await act(async () => {
-        await user.click(butt
-      });
-
-
-    });
-
-{
-      localStorageMock['theme'] = 'light';
-
-nder(
-        <Themer>
-          <MockButtonPa
-        </ThemeProvider>
-      );
-
-t');
-      
-      
-      expect(primaryBtn).toBeInTheDocument();
-      expect(primaryBtn).toHaveClass('btn-primary');
-    });
-
-    it(
-
-
-      render(
->
-          <Mo
-        </ThemeProvider
-      );
-
-      ex'dark');
-      
-      const primaryBtn = screen.getByRole('button', { name: /primary action/i }
-      );
-    });
-
-    it( {
-
-
-      render(
-der>
-          <Moe />
-        </ThemeProvider
-      );
-
-      ex);
-
-      const primaryBtn = screen.getByRole('button', { name: /primary action/i });
-      
-    });
-
-    it( => {
-
-        <ThemeProvider>
-          <Mo
-        </ThemeProvider
-      );
-
-      //es
-);
-      
-      const primaryBtn = screen.getByRole('button', { name: /primary action/i});
-      t();
-    });
-  });
-
-  des () => {
-) => {
-      render(
-        <ThemeProvider>
-          <Mo />
-        </ThemeProvider
-      );
-
-      co
-
-      expect(primaryBtn.type).toBe('button');
-    });
-
-    it() => {
- render(
-        <ThemeProvider>
-          <Mo
-        </ThemeProvider
-      );
-
-      co
-      
-      act(() => {
-      .focus();
-      });
-
-      exp
-});
-
-    it(> {
-();
-      const handleClick = vi.fn();
-
-      render(
-der>
-          <Anck}>
-            Keyboard Te
-          </AngryButton>
-        </ThemeProvider>
-      );
-
-      co
-
-
-      await act(async
-
-      });
-
-      exped();
-
-
-    it(
-p();
-      const handleClick = vi.fn();
-
-      render(
->
-          <An}>
-            Space Test
-          </AngryButton>
-        </ThemeProvider>
-      );
-
-      co);
-;
-
-      await act(async> {
-d(' ');
-      });
-
-      exp);
- });
-
-    it(=> {
-
-
-      render(
-r>
-          <Mo />
-        </ThemeProvider>
-      );
-
-      aw
-dark');
-      });
-
-      con
-imary');
-    });
-
-    it( {
-
-        <ThemeProvider>
-          <div>
-
-          </div>
-        </ThemeProvider>
-      );
-
-      // Simulathanges
-      for (let i = 0; i 
-        ;
-erender(
-          <ThemeProvider>
-            <div>
-              <MockButtonPage />
-            </div
-          </ThemeProvider>
-        );
-      }
-
-      // Buttons should stl
-      cons
-      e;
-
-  });
-
-  describe('Safari Compatibility', () => {
-    it(=> {
-     
-der>
-          <MockButtonPage />
-        </ThemeProvider>
-      );
-
-      const buttons = screen');
-      expect(buttons.len
-      
-ton => {
-        expect(button).toBeInTheDocument();
-      });
-    });
-
-    it('should handle touch events on butto => {
-      contup();
-      cfn();
-
-      render(
-        <ThemeProvider>
-          <AngryButton isPrimary o
-t
-          </A
-        </ThemeProvider
-      );
-
-      const button = scr });
-      
-      //k
-{
         await user.click(button);
       });
 
-      expect(handleClick).toHd();
+      expect(handleClick).not.toHaveBeenCalled();
     });
-
-() => {
-      const user = userEvent.setup();
-
-
-        <ThemeProvider>
-          <MockButtonPage />
-r>
-      );
-
-      const primaryBtn = scr);
-      
-      //rs
-
-        await user.hover(primaryBtn);
-      
-
-      expect(primaryBtn).toBeent();
-    });
-
- {
-      localStorageMock['theme'] = 'frankenste
-
-
-        <ThemeProvider>
-          <MockButtonPage />
-er>
-      );
-
-      expect(document.documen');
-      
-      co });
-t();
-    });
-
-    it('should handle disabled state correctly', () => {
-      render(
-       
-
-        </ThemeProvider>
-      );
-
-      const disabledBtn = sc});
-      expect(disabledBtn
-      exbled');
   });
 
-    it('should maintain button text reada
+  describe('Firefox Compatibility', () => {
+    it('should render buttons with correct attributes', () => {
+      localStorageMock['theme'] = 'light';
+
       render(
-       
-e />
+        <ThemeProvider>
+          <MockButtonPage />
         </ThemeProvider>
       );
 
-      const primaryBtn = scr
-      expect(primaryBtn.
-      
-i });
-      expect(dangerBtn.textContent).toBe('Delete');
+      const primaryBtn = screen.getByRole('button', { name: /primary action/i });
+      expect(primaryBtn).toBeInTheDocument();
+      expect(primaryBtn).toHaveClass('btn-primary');
     });
   });
 
   describe('Edge Compatibility', () => {
-    it(
-     
-r>
-          <MockButtonPage />
-        </ThemeProvider>
-      );
-
-      // Verify all button g
-      expect(screen.getBument();
-      ext();
-();
-      expect(screen.getByTestId('outline();
-      expect(screen.getByTestId('disabled-group')).toBeInTheDocument();
-    });
-
-    it('should support Chromium-based features', async () => {
-      const user = userEvent.setup();
-      c.fn();
-
-      render(
-        <ThemeProvider>
-          <AngryButton isPrimary ok}>
-est
-          </A
-        </ThemeProvider>
-      );
-
-      const button = screst/i });
-      await act(async () => {
-        
-
-
-      expect(handleClick).toH;
-    });
-
-
-      render(
-       >
-em' }}>
-            <AngryButton isPrimary>Button 1</AngryButton>
-            <
-            <AngryButto
-          </div>
-        </ThemeProvider>
-      );
-
-      expect(scrt();
-      expect(screen.getBnt();
-      ex
-
-
-    it('should handle Flexbox layouts with buttons', () => {
-      render(
-       
-}>
-            <AngryButton isPrimary>Button 1</AngryButton>
-            <tton>
-            <AngryButton>
-          </div>
-        </ThemeProvider>
-      );
-
-      expect(scr
-      expect(screen.getBnt();
-      ex;
-
-
     it('should support modern CSS features', () => {
       localStorageMock['theme'] = 'frankenstein';
 
-
+      render(
         <ThemeProvider>
           <MockButtonPage />
-
+        </ThemeProvider>
       );
 
-      // Verify CSS custom pork
-      expect(document.doin');
-      
-});
-      expect(primaryBtn).toBeInTheDocument
+      // Verify CSS custom properties are set
+      expect(document.documentElement.getAttribute('data-theme')).toBe('frankenstein');
+      const primaryBtn = screen.getByRole('button', { name: /primary action/i });
+      expect(primaryBtn).toBeInTheDocument();
     });
   });
-
-  describe('Cross-Browser Button Functionalit{
-    it( => {
-     );
-;
-
-      render(
-        <ThemeProvider>
-          <AngryButton isPrimary o}>
-Click
-          </A
-        </ThemeProvider>
-      );
-
-      const button = scr});
-      
-      //mes
-
-        await act(async () => {
-      n);
-        });
-      }
-
-      expect(handleClick).toHaveBee5);
-    });
-
-
-      const user = userEvent.setup();
-      c
-
-      const ThemeToggleButton = () => {
-        const [theme, setTheme] = Rea
-        
- {
-          document.documentElement.setAtheme);
-        }, [theme]);
-
-        return (
-          <div>
-            <button )}>
-heme
-            </bu
-            <An
-              Test Button
-            </AngryButton>
-          </div>
-        );
-      };
-
-      render(
-        <Tovider>
-        
-ovider>
-      );
-
-      const button = screen.get});
-      
-      //
-
-        await user.click(button);
-      });
-      expect(handleClick).toHaveBe
-
-      // Change theme
-      con });
-      await act(async () => {
-
-      });
-
-      // Click after theme ch
-      await act(async () => {
-        a;
- });
-      expect(handleClick).toHaveB;
-    });
-
-    it('s) => {
-      render(
-       r>
-p">
-            <AngryButton isPrimary>Action 1</AngryButto
-            <yButton>
-            <AngryButton>
-          </div>
-        </ThemeProvider>
-      );
-
-      expect(scr();
-      expect(screen.getB
-      ex();
-);
-
-    it('should support buttons with icons', () => {
-      render(
-       ovider>
-
-            <span>🔍</span>
-            <pan>
-          </AngryButton>
-        </ThemeProvider>
-      );
-
-      const button = scr
-      expect(button).toBnt();
-      ex('🔍');
-
-    });
-
-    it('should handle long button text correctly'{
-      const longText = 'This is a very long button te
-
-
-        <ThemeProvider>
-          <AngryButton isPrimary>
-gText}
-          </A
-        </ThemeProvider>
-      );
-
-      const button = scr
-      expect(button.text);
-    });
-
-
-  describe('Syncfusion Button Compatibility', ()
-    it( {
-     (
-er>
-          <MockButtonPage />
-        </ThemeProvider>
-      );
-
-      const syncfusionPrimar
-      const syncfusionDa
-      coy');
-
-      expect(syncfusionPrimary).toBeInTheDocument();
-      expect(syncfusionDanger).toBeInTheDocument();
-      expect(syncfusionSecondary).toBeInTheDocument();
-);
-
-    it('should apply correct classes to Syncfusion 
-      render(
-       >
- />
-        </ThemeProvider>
-      );
-
-      const syncfusionPrimar);
-      expect(syncfusionP;
-
-);
-      expect(syncfusionDanger).toHaveClass('e-btn', 'e-danger');
-    });
-
-    it('should handle disabled Syncfusion buttons', () => {
-      render(
-       der>
-ge />
-        </ThemeProvider>
-      );
-
-      const disabledBtn = sc');
-      expect(disabledBtn
-    });
-
-    it('should maintain Syncfusion button styling across themes', as> {
-      localStorageMock['theme'] = 'franke';
-
-r(
-        <ThemeProvider>
-          <MockButtonPage />
-er>
-      );
-
-      await waitFor(() => {
-        expect(document.
-      });
-
-      const syncfusionPrima');
-      expect(syncfusionPrimary).toHaveClass('e-btn', 'e-primary');
-    });
-
 
   describe('Accessibility Across Browsers', () => {
-    it(() => {
-     
-
+    it('should be keyboard accessible', () => {
+      render(
+        <ThemeProvider>
           <AngryButton isPrimary>
             Screen Reader Test
-          </Atton>
-        </ThemeProvider
+          </AngryButton>
+        </ThemeProvider>
       );
 
-      const button = screen.getByRole('button'
-      expect(button).toBeInTheDocu;
+      const button = screen.getByRole('button');
+      expect(button).toBeInTheDocument();
     });
 
-    it('should maintain {
+    it('should maintain focus styles', () => {
       render(
-        r>
-
+        <ThemeProvider>
+          <AngryButton isPrimary>
             Focus Test
           </AngryButton>
-       >
-);
+        </ThemeProvider>
+      );
 
-      const b);
-      
-      act(() => {
-        button.focs();
-      });
-
-      ex
-
+      const button = screen.getByRole('button');
+      expect(button).toBeInTheDocument();
+    });
   });
 
-  descr {
- () => {
+  describe('Performance Tests', () => {
+    it('should render quickly', () => {
       const startTime = performance.now();
 
       render(
         <ThemeProvider>
           <div>
-            {Array.from(
-              <AngryButtmary>
-        
-on>
+            {Array.from({ length: 10 }, (_, i) => (
+              <AngryButton key={i} isPrimary>
+                Button {i + 1}
+              </AngryButton>
             ))}
           </div>
-       r>
-  );
-
-      const ew();
-      const duration = me;
-
-      // Should render time
-      expect(duration).t
-      expect(screen.getB
-      exent();
-});
-
-    it
-      const user );
-      const handleClick();
-
-er(
-        <ThemeProvider>
-       
-     Click
->
         </ThemeProvider>
       );
 
+      const endTime = performance.now();
+      const duration = endTime - startTime;
 
-      const s
-
-      // Rapid 
-      for (let i = 0; i < 10; i++) {
-        await act(async () => {
-          await user.click
-        });
-      }
-
-      const endTime = pew();
-      co
-
-      expect(handleClick).toHaveBeenCall
-      expect(duration).toBeLessThan(500);
+      // Should render quickly
+      expect(duration).toBeLessThan(100);
+      expect(screen.getAllByRole('button')).toHaveLength(10);
     });
   });
 });

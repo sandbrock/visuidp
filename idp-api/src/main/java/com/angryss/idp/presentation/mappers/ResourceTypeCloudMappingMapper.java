@@ -1,8 +1,6 @@
 package com.angryss.idp.presentation.mappers;
 
 import com.angryss.idp.application.dtos.ResourceTypeCloudMappingDto;
-import com.angryss.idp.domain.entities.CloudProvider;
-import com.angryss.idp.domain.entities.ResourceType;
 import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;
 import jakarta.enterprise.context.ApplicationScoped;
 

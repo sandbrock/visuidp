@@ -1,9 +1,7 @@
 package com.angryss.idp.application.usecases;
 
 import com.angryss.idp.application.dtos.AdminDashboardDto;
-import com.angryss.idp.application.dtos.CloudProviderDto;
 import com.angryss.idp.application.dtos.ResourceTypeCloudMappingDto;
-import com.angryss.idp.application.dtos.ResourceTypeDto;
 import com.angryss.idp.domain.repositories.CloudProviderRepository;
 import com.angryss.idp.domain.repositories.PropertySchemaRepository;
 import com.angryss.idp.domain.repositories.ResourceTypeCloudMappingRepository;

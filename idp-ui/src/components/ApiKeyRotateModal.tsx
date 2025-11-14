@@ -12,10 +12,9 @@ interface ApiKeyRotateModalProps {
   onSuccess: (rotatedKey: ApiKeyCreated) => void;
   apiKey: ApiKeyResponse | null;
   user: User;
-  mode?: 'personal' | 'admin';
 }
 
-export const ApiKeyRotateModal = ({ isOpen, onClose, onSuccess, apiKey, user, mode = 'personal' }: ApiKeyRotateModalProps) => {
+export const ApiKeyRotateModal = ({ isOpen, onClose, onSuccess, apiKey, user }: ApiKeyRotateModalProps) => {
   const [isRotating, setIsRotating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rotatedKey, setRotatedKey] = useState<ApiKeyCreated | null>(null);
