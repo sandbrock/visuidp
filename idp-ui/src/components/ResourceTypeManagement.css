@@ -215,157 +215,157 @@
 }
 
 /* Improve button contrast in dark mode */
-[data-theme="dark"] .resource-type-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning) {
+[data-theme="dark"] .resource-type-management .actions button:not(.btn-primary):not(.btn-success):not(.btn-warning) {
   background-color: #3a3a3a;
   border-color: #555555;
   color: #ffffff;
 }
 
-[data-theme="dark"] .resource-type-management .actions button.e-btn:not(.e-primary):not(.e-success):not(.e-warning):hover {
+[data-theme="dark"] .resource-type-management .actions button:not(.btn-primary):not(.btn-success):not(.btn-warning):hover {
   background-color: #4a4a4a;
   border-color: #666666;
   color: #ffffff;
 }
 
 /* Dark mode support for modal dialog */
-[data-theme="dark"] .e-dialog {
+[data-theme="dark"] .dialog {
   background-color: #2a2a2a;
   border-color: #444444;
 }
 
-[data-theme="dark"] .e-dialog .e-dlg-header-content {
+[data-theme="dark"] .dialog .dialog-header-content {
   background-color: #333333;
   border-bottom-color: #444444;
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-dialog .e-dlg-header {
+[data-theme="dark"] .dialog .dialog-header {
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-dialog .e-dlg-content {
+[data-theme="dark"] .dialog .dialog-content {
   background-color: #2a2a2a;
   color: #e0e0e0;
 }
 
-[data-theme="dark"] .e-dialog .e-footer-content {
+[data-theme="dark"] .dialog .footer-content {
   background-color: #333333;
   border-top-color: #444444;
 }
 
-[data-theme="dark"] .e-dialog .e-footer-content .e-btn {
+[data-theme="dark"] .dialog .footer-content button {
   background-color: #3a3a3a;
   border-color: #555555;
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-dialog .e-footer-content .e-btn:hover {
+[data-theme="dark"] .dialog .footer-content button:hover {
   background-color: #4a4a4a;
   border-color: #666666;
 }
 
-[data-theme="dark"] .e-dialog .e-footer-content .e-btn.e-primary {
+[data-theme="dark"] .dialog .footer-content button.btn-primary {
   background-color: #0d6efd;
   border-color: #0d6efd;
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-dialog .e-footer-content .e-btn.e-primary:hover {
+[data-theme="dark"] .dialog .footer-content button.btn-primary:hover {
   background-color: #0b5ed7;
   border-color: #0a58ca;
 }
 
-[data-theme="dark"] .e-dialog .e-icon-dlg-close {
+[data-theme="dark"] .dialog .icon-close {
   color: #cccccc;
 }
 
-[data-theme="dark"] .e-dialog .e-icon-dlg-close:hover {
+[data-theme="dark"] .dialog .icon-close:hover {
   color: #ffffff;
   background-color: #444444;
 }
 
 /* Dark mode support for form controls */
-[data-theme="dark"] .resource-type-form .e-input-group,
-[data-theme="dark"] .resource-type-form .e-input-group.e-control-wrapper {
+[data-theme="dark"] .resource-type-form .input-group,
+[data-theme="dark"] .resource-type-form .input-group.control-wrapper {
   background-color: #333333;
   border-color: #555555;
 }
 
-[data-theme="dark"] .resource-type-form .e-input-group input,
-[data-theme="dark"] .resource-type-form .e-input-group textarea,
-[data-theme="dark"] .resource-type-form .e-input-group .e-input {
+[data-theme="dark"] .resource-type-form .input-group input,
+[data-theme="dark"] .resource-type-form .input-group textarea,
+[data-theme="dark"] .resource-type-form .input-group .input {
   background-color: #333333;
   color: #ffffff;
   border-color: #555555;
 }
 
-[data-theme="dark"] .resource-type-form .e-input-group input::placeholder,
-[data-theme="dark"] .resource-type-form .e-input-group textarea::placeholder {
+[data-theme="dark"] .resource-type-form .input-group input::placeholder,
+[data-theme="dark"] .resource-type-form .input-group textarea::placeholder {
   color: #888888;
 }
 
-[data-theme="dark"] .resource-type-form .e-input-group:hover,
-[data-theme="dark"] .resource-type-form .e-input-group.e-input-focus {
+[data-theme="dark"] .resource-type-form .input-group:hover,
+[data-theme="dark"] .resource-type-form .input-group.input-focus {
   border-color: #777777;
 }
 
-[data-theme="dark"] .resource-type-form .e-input-group.e-input-focus {
+[data-theme="dark"] .resource-type-form .input-group.input-focus {
   background-color: #3a3a3a;
 }
 
 /* Dark mode support for ComboBox/DropDown */
-[data-theme="dark"] .resource-type-form .e-ddl.e-input-group,
-[data-theme="dark"] .resource-type-form .e-dropdownbase {
+[data-theme="dark"] .resource-type-form .dropdown.input-group,
+[data-theme="dark"] .resource-type-form .dropdownbase {
   background-color: #333333;
   border-color: #555555;
 }
 
-[data-theme="dark"] .resource-type-form .e-ddl .e-input {
+[data-theme="dark"] .resource-type-form .dropdown .input {
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-popup.e-ddl.e-popup-open {
+[data-theme="dark"] .popup.dropdown.popup-open {
   background-color: #2a2a2a;
   border-color: #555555;
 }
 
-[data-theme="dark"] .e-popup.e-ddl .e-list-item {
+[data-theme="dark"] .popup.dropdown .list-item {
   color: #e0e0e0;
   background-color: #2a2a2a;
 }
 
-[data-theme="dark"] .e-popup.e-ddl .e-list-item:hover,
-[data-theme="dark"] .e-popup.e-ddl .e-list-item.e-hover {
+[data-theme="dark"] .popup.dropdown .list-item:hover,
+[data-theme="dark"] .popup.dropdown .list-item.hover {
   background-color: #3a3a3a;
   color: #ffffff;
 }
 
-[data-theme="dark"] .e-popup.e-ddl .e-list-item.e-active {
+[data-theme="dark"] .popup.dropdown .list-item.active {
   background-color: #444444;
   color: #ffffff;
 }
 
 /* Dark mode support for CheckBox */
-[data-theme="dark"] .resource-type-form .e-checkbox-wrapper .e-frame {
+[data-theme="dark"] .resource-type-form .checkbox-wrapper .frame {
   background-color: #333333;
   border-color: #555555;
 }
 
-[data-theme="dark"] .resource-type-form .e-checkbox-wrapper:hover .e-frame {
+[data-theme="dark"] .resource-type-form .checkbox-wrapper:hover .frame {
   border-color: #777777;
 }
 
-[data-theme="dark"] .resource-type-form .e-checkbox-wrapper .e-label {
+[data-theme="dark"] .resource-type-form .checkbox-wrapper .label {
   color: #e0e0e0;
 }
 
-[data-theme="dark"] .resource-type-form .e-checkbox-wrapper .e-check {
+[data-theme="dark"] .resource-type-form .checkbox-wrapper .check {
   color: #ffffff;
 }
 
 /* Dark mode support for disabled inputs */
-[data-theme="dark"] .resource-type-form .e-input-group.e-disabled,
-[data-theme="dark"] .resource-type-form .e-input-group.e-disabled input {
+[data-theme="dark"] .resource-type-form .input-group.disabled,
+[data-theme="dark"] .resource-type-form .input-group.disabled input {
   background-color: #252525;
   color: #666666;
   border-color: #444444;

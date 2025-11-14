@@ -113,8 +113,8 @@ export const ApiKeyRotateModal = ({ isOpen, onClose, onSuccess, apiKey, user }: 
         </div>
         <AngryButton
           onClick={handleCopyKey}
-          cssClass="e-primary copy-button"
-          iconCss={copied ? 'e-icons e-check' : 'e-icons e-copy'}
+          isPrimary={true}
+          className="copy-button"
         >
           {copied ? 'Copied!' : 'Copy to Clipboard'}
         </AngryButton>

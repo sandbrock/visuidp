@@ -276,13 +276,13 @@
 }
 
 /* Dark mode support */
-[data-theme="dark"] .dashboard-header button.e-btn:not(.e-primary) {
+[data-theme="dark"] .dashboard-header button:not(.btn-primary) {
   background-color: #3a3a3a;
   border-color: #555555;
   color: #ffffff;
 }
 
-[data-theme="dark"] .dashboard-header button.e-btn:not(.e-primary):hover {
+[data-theme="dark"] .dashboard-header button:not(.btn-primary):hover {
   background-color: #4a4a4a;
   border-color: #666666;
   color: #ffffff;

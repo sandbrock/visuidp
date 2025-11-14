@@ -193,7 +193,6 @@ const inputRef = useRef<any>(null);
 ```tsx
 <AngryButton
   onClick={handleSave}
-  cssClass="e-primary"
   isPrimary={true}
 >
   Save
@@ -204,7 +203,7 @@ const inputRef = useRef<any>(null);
 ```tsx
 <AngryButton
   onClick={handleCancel}
-  cssClass="e-outline"
+  style="outline"
 >
   Cancel
 </AngryButton>
@@ -214,7 +213,7 @@ const inputRef = useRef<any>(null);
 ```tsx
 <AngryButton
   onClick={handleEdit}
-  cssClass="e-small"
+  style="small"
 >
   Edit
 </AngryButton>
@@ -224,7 +223,7 @@ const inputRef = useRef<any>(null);
 ```tsx
 <AngryButton
   onClick={handleDelete}
-  cssClass="e-small e-danger"
+  style="danger small"
 >
   Delete
 </AngryButton>
@@ -235,7 +234,6 @@ const inputRef = useRef<any>(null);
 <AngryButton
   type="submit"
   disabled={loading}
-  cssClass="e-primary"
   isPrimary={true}
 >
   {loading ? 'Saving...' : 'Save'}
@@ -243,13 +241,13 @@ const inputRef = useRef<any>(null);
 ```
 
 ### Available Variants
-- `e-primary` - Blue background (use with isPrimary={true})
-- `e-success` - Green background
-- `e-warning` - Yellow background
-- `e-danger` - Red background
-- `e-outline` - Transparent with border
-- `e-small` - Reduced size
-- `e-flat` - No background or border
+- `isPrimary={true}` - Blue background
+- `style="success"` - Green background
+- `style="warning"` - Yellow background
+- `style="danger"` - Red background
+- `style="outline"` - Transparent with border
+- `style="small"` - Reduced size
+- `style="flat"` - No background or border
 
 ### Styling Notes
 - Base padding: 0.5rem 1rem
@@ -336,14 +334,13 @@ const inputRef = useRef<any>(null);
   <AngryButton
     onClick={onCancel}
     disabled={loading}
-    cssClass="e-outline"
+    style="outline"
   >
     Cancel
   </AngryButton>
   <AngryButton
     type="submit"
     disabled={loading}
-    cssClass="e-primary"
     isPrimary={true}
   >
     {loading ? 'Saving...' : 'Save'}

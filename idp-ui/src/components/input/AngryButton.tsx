@@ -6,13 +6,24 @@ interface AngryButtonProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   isPrimary?: boolean;
-  cssClass?: string;
-  iconCss?: string;
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+  size?: 'small' | 'normal';
+  style?: 'solid' | 'outline' | 'flat';
   className?: string;
 }
 
 export const AngryButton = (props: AngryButtonProps) => {
-  const { onClick, type = 'button', children, disabled, isPrimary, cssClass, iconCss, className } = props;
+  const { 
+    onClick, 
+    type = 'button', 
+    children, 
+    disabled, 
+    isPrimary, 
+    variant,
+    size,
+    style,
+    className 
+  } = props;
   
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (onClick && !disabled) {
@@ -20,32 +31,16 @@ export const AngryButton = (props: AngryButtonProps) => {
     }
   };
 
-  // Map SyncFusion cssClass values to custom CSS classes
-  const mapCssClass = (syncfusionClass?: string): string => {
-    if (!syncfusionClass) return '';
-    
-    const classMap: Record<string, string> = {
-      'e-primary': 'btn-primary',
-      'e-success': 'btn-success',
-      'e-warning': 'btn-warning',
-      'e-danger': 'btn-danger',
-      'e-info': 'btn-info',
-      'e-small': 'btn-small',
-      'e-outline': 'btn-outline',
-      'e-flat': 'btn-flat',
-    };
-    
-    // Split by space to handle multiple classes
-    return syncfusionClass
-      .split(' ')
-      .map(cls => classMap[cls] || cls)
-      .join(' ');
-  };
-
+  // Build class list using semantic props
   const buttonClasses = [
     'angry-button',
-    isPrimary ? 'btn-primary' : '',
-    mapCssClass(cssClass),
+    // Handle variant - isPrimary takes precedence for backward compatibility
+    isPrimary ? 'btn-primary' : variant ? `btn-${variant}` : '',
+    // Handle size
+    size === 'small' ? 'btn-small' : '',
+    // Handle style
+    style === 'outline' ? 'btn-outline' : style === 'flat' ? 'btn-flat' : '',
+    // Custom classes
     className || '',
   ].filter(Boolean).join(' ');
 
@@ -56,7 +51,6 @@ export const AngryButton = (props: AngryButtonProps) => {
       disabled={disabled}
       className={buttonClasses}
     >
-      {iconCss && <span className={iconCss}></span>}
       {children}
     </button>
   );

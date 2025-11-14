@@ -410,7 +410,7 @@
   color: var(--frankenstein-skin);
 }
 
-[data-theme="frankenstein"] .collection-btn.e-primary {
+[data-theme="frankenstein"] .collection-btn.btn-primary {
   background: var(--accent-primary);
   border-color: var(--frankenstein-stitch);
   color: var(--bg-primary);

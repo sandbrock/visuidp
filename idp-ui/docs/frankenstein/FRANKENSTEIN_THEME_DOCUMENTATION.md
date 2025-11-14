@@ -417,7 +417,7 @@ All animations follow performance best practices:
 
 **Files:** 
 - `idp-ui/src/components/input/AngryButton.css`
-- `idp-ui/src/App.css` (Syncfusion buttons)
+- `idp-ui/src/App.css`
 
 **Key Features:**
 - Stitching pattern appears on hover
@@ -454,7 +454,8 @@ All animations follow performance best practices:
 **Files:**
 - `idp-ui/src/components/input/AngryTextBox.css`
 - `idp-ui/src/components/input/AngryComboBox.css`
-- `idp-ui/src/App.css` (Syncfusion inputs)
+- `idp-ui/src/components/input/AngryDatePicker.css`
+- `idp-ui/src/App.css`
 
 **Key Features:**
 - Dark laboratory background
@@ -465,7 +466,7 @@ All animations follow performance best practices:
 
 **Example:**
 ```css
-[data-theme="frankenstein"] .e-input-group:focus-within {
+[data-theme="frankenstein"] .angry-textbox:focus-within {
   border-color: var(--accent-primary);
   box-shadow: 0 0 10px rgba(157, 78, 221, 0.3),
               inset 0 0 5px rgba(157, 78, 221, 0.1);
@@ -506,7 +507,7 @@ All animations follow performance best practices:
 
 **Example:**
 ```css
-[data-theme="frankenstein"] .e-dialog {
+[data-theme="frankenstein"] .modal-dialog {
   background: var(--bg-primary);
   border: 3px solid var(--border-primary);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
@@ -573,7 +574,7 @@ All text colors meet or exceed WCAG AA requirements:
 All interactive elements have visible focus indicators:
 
 ```css
-[data-theme="frankenstein"] .e-btn:focus-visible {
+[data-theme="frankenstein"] .angry-button:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
@@ -819,7 +820,8 @@ The theme includes responsive adjustments for mobile devices:
 ✓ Test with keyboard navigation  
 ✓ Respect reduced motion preferences  
 ✓ Use GPU-accelerated animations  
-✓ Keep animations subtle and purposeful  
+✓ Keep animations subtle and purposeful
+✓ Use custom Angry components for consistency
 
 ### Don'ts
 

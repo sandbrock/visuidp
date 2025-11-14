@@ -179,7 +179,7 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
               : 'Manage your personal API keys for programmatic access to the IDP API'}
           </p>
         </div>
-        <AngryButton onClick={handleCreateKey} cssClass="e-primary" isPrimary={true}>
+        <AngryButton onClick={handleCreateKey} isPrimary={true}>
           Create New API Key
         </AngryButton>
       </div>
@@ -208,7 +208,7 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
                 <li>Access the API without interactive login</li>
               </ul>
               <div className="empty-state-action">
-                <AngryButton onClick={handleCreateKey} cssClass="e-primary" isPrimary={true}>
+                <AngryButton onClick={handleCreateKey} isPrimary={true}>
                   Create Your First API Key
                 </AngryButton>
               </div>
@@ -263,19 +263,21 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
                       <>
                         <AngryButton
                           onClick={() => handleEditName(key.id)}
-                          cssClass="e-small"
+                          size="small"
                         >
                           Edit Name
                         </AngryButton>
                         <AngryButton
                           onClick={() => handleRotateKey(key.id)}
-                          cssClass="e-small e-info"
+                          size="small"
+                          variant="info"
                         >
                           Rotate
                         </AngryButton>
                         <AngryButton
                           onClick={() => handleRevokeKey(key.id)}
-                          cssClass="e-small e-danger"
+                          size="small"
+                          variant="danger"
                         >
                           Revoke
                         </AngryButton>

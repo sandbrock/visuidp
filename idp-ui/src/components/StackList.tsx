@@ -90,7 +90,8 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
         <div className="stack-list-header">
           <h2>Your Stacks</h2>
           <AngryButton
-            cssClass="e-primary create-stack-btn"
+            isPrimary={true}
+            className="create-stack-btn"
             onClick={onCreateNew}
           >
             Create New Stack
@@ -101,13 +102,14 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           <p>{error}</p>
           <div className="error-actions">
             <AngryButton
-              cssClass="e-outline"
+              style="outline"
               onClick={() => window.location.reload()}
             >
               Retry
             </AngryButton>
             <AngryButton
-              cssClass="e-primary create-stack-btn"
+              isPrimary={true}
+              className="create-stack-btn"
               onClick={onCreateNew}
             >
               Create New Stack
@@ -125,9 +127,9 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           <h3>No stacks yet</h3>
           <p>Create your first stack to get started with the IDP Portal.</p>
           <AngryButton
-            cssClass="e-primary create-stack-btn"
-            onClick={onCreateNew}
             isPrimary={true}
+            className="create-stack-btn"
+            onClick={onCreateNew}
           >
             Create Your First Stack
           </AngryButton>
@@ -172,9 +174,9 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           <h3>No collections available</h3>
           <p>Create a collection to organize your stacks by groups.</p>
           <AngryButton
-            cssClass="e-primary create-stack-btn"
-            onClick={onCreateNew}
             isPrimary={true}
+            className="create-stack-btn"
+            onClick={onCreateNew}
           >
             Create New Stack
           </AngryButton>
@@ -188,7 +190,9 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           {collections.map(col => (
             <AngryButton
               key={col.id}
-              cssClass={selectedCollection === col.id ? 'e-primary collection-btn' : 'e-outline collection-btn'}
+              isPrimary={selectedCollection === col.id}
+              style={selectedCollection === col.id ? undefined : 'outline'}
+              className="collection-btn"
               onClick={() => handleSelectCollection(col.id)}
             >
               {col.name}
@@ -201,9 +205,9 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
               <h3>No stacks in this collection</h3>
               <p>Add stacks to this collection to see them here.</p>
               <AngryButton
-                cssClass="e-primary create-stack-btn"
-                onClick={onCreateNew}
                 isPrimary={true}
+                className="create-stack-btn"
+                onClick={onCreateNew}
               >
                 Create New Stack
               </AngryButton>
@@ -256,7 +260,8 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           <h2>Stacks</h2>
         </div>
         <AngryButton
-          cssClass="e-primary create-stack-btn"
+          isPrimary={true}
+          className="create-stack-btn"
           onClick={onCreateNew}
         >
           Create New Stack

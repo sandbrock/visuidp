@@ -74,9 +74,8 @@ From `App.css`:
 ### Component Coverage
 
 Error states implemented for:
-- ✅ Syncfusion input components (e-input-group, e-float-input)
-- ✅ Syncfusion ComboBox and DropDownList (e-combobox, e-ddl)
-- ✅ Custom Angry components (angry-textbox, angry-combobox)
+- ✅ Custom Angry components (AngryTextBox, AngryComboBox, AngryCheckBox, AngryDatePicker, AngryButton)
+- ✅ Input groups and form controls
 - ✅ Checkboxes and radio buttons
 - ✅ Date pickers
 - ✅ Textareas

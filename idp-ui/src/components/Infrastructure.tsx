@@ -7,6 +7,7 @@ import {
   type BlueprintResource
 } from '../services/api';
 import type { ResourceType, CloudProvider } from '../types/admin';
+import type { FocusableInputHandle } from '../types/focus';
 import './Infrastructure.css';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBox } from './input';
 import ContainerOrchestratorConfigFormWithoutCloudServiceName from './infrastructure/ContainerOrchestratorConfigFormWithoutCloudServiceName';
@@ -19,7 +20,7 @@ interface InfrastructureProps {
 }
 
 export const Infrastructure = ({ user }: InfrastructureProps) => {
-  const nameInputRef = useRef<{ focusIn?: () => void } | null>(null);
+  const nameInputRef = useRef<FocusableInputHandle | null>(null);
   const [selectedBlueprintId, setSelectedBlueprintId] = useState('');
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
   const [resources, setResources] = useState<BlueprintResource[]>([]);
@@ -87,11 +88,9 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
       
       attempts.forEach(delay => {
         const timer = setTimeout(() => {
-          if (nameInputRef.current) {
+          if (nameInputRef.current && nameInputRef.current.focus) {
             try {
-              if (nameInputRef.current.focusIn) {
-                nameInputRef.current.focusIn();
-              }
+              nameInputRef.current.focus();
             } catch (e) {
               console.log('Focus attempt failed:', e);
             }
@@ -451,8 +450,8 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             />
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-end' }}>
-            <button className="e-btn e-primary e-small" onClick={() => { setMode('create'); setFormData({ name: '', description: '', configuration: {}, supportedCloudProviderIds: [] }); }}>New</button>
-            <button className="e-btn e-outline e-small" disabled={!selectedBlueprint} onClick={() => {
+            <button className="btn btn-primary btn-small" onClick={() => { setMode('create'); setFormData({ name: '', description: '', configuration: {}, supportedCloudProviderIds: [] }); }}>New</button>
+            <button className="btn btn-outline btn-small" disabled={!selectedBlueprint} onClick={() => {
               if (!selectedBlueprint) return;
               setMode('edit');
               setFormData({
@@ -462,7 +461,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                 supportedCloudProviderIds: selectedBlueprint.supportedCloudProviderIds || []
               });
             }}>Edit</button>
-            <button className="e-btn e-danger e-small" disabled={!selectedBlueprint} onClick={async () => {
+            <button className="btn btn-danger btn-small" disabled={!selectedBlueprint} onClick={async () => {
               if (!selectedBlueprint) return;
               try {
                 setSaving(true);
@@ -546,14 +545,13 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
               <AngryButton
                 onClick={() => { setMode('idle'); setFormData(null); setError(null); }}
                 disabled={saving}
-                cssClass="e-outline"
+                style="outline"
               >
                 Cancel
               </AngryButton>
               <AngryButton
                 type="submit"
                 disabled={saving || !formData.name}
-                cssClass="e-primary"
                 isPrimary={true}
               >
                 {saving ? 'Saving...' : (mode === 'create' ? 'Create Blueprint' : 'Update Blueprint')}
@@ -609,7 +607,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h4 style={{ margin: 0 }}>Shared Infrastructure Resources</h4>
                 <button 
-                  className="e-btn e-primary e-small" 
+                  className="btn btn-primary btn-small" 
                   disabled={!selectedBlueprintId || saving}
                   onClick={() => {
                     if (!selectedBlueprintId) return;
@@ -704,7 +702,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                       </div>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button 
-                          className="e-btn e-outline e-small" 
+                          className="btn btn-outline btn-small" 
                           onClick={() => handleResourceUpdate(resource)}
                           disabled={saving}
                           title="Edit resource"
@@ -712,7 +710,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                           Edit
                         </button>
                         <button 
-                          className="e-btn e-danger e-small" 
+                          className="btn btn-danger btn-small" 
                           onClick={() => handleResourceDelete(resource)}
                           disabled={saving}
                           title="Delete resource"
@@ -856,14 +854,13 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                           setError(null); 
                         }}
                         disabled={saving}
-                        cssClass="e-outline"
+                        style="outline"
                       >
                         Cancel
                       </AngryButton>
                       <AngryButton
                         type="submit"
                         disabled={saving || !resourceFormData.name || !resourceFormData.resourceTypeId}
-                        cssClass="e-primary"
                         isPrimary={true}
                       >
                         {saving ? (resourceMode === 'create' ? 'Creating...' : 'Updating...') : (resourceMode === 'create' ? 'Create Resource' : 'Update Resource')}

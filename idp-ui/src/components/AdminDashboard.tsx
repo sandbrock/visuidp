@@ -61,7 +61,7 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
     return (
       <div className="admin-dashboard error">
         <div className="error-message">{error}</div>
-        <AngryButton onClick={loadDashboard} cssClass="e-primary" isPrimary={true}>
+        <AngryButton onClick={loadDashboard} isPrimary={true}>
           Retry
         </AngryButton>
       </div>
@@ -81,7 +81,7 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
     <div className="admin-dashboard">
       <div className="dashboard-header">
         <h2>Admin Dashboard</h2>
-        <AngryButton onClick={loadDashboard} cssClass="e-small">
+        <AngryButton onClick={loadDashboard} size="small">
           Refresh
         </AngryButton>
       </div>
@@ -96,7 +96,8 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
           </div>
           <AngryButton
             onClick={() => handleNavigate('cloud-providers')}
-            cssClass="e-small e-outline"
+            size="small"
+            style="outline"
           >
             Manage
           </AngryButton>
@@ -111,7 +112,8 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
           </div>
           <AngryButton
             onClick={() => handleNavigate('resource-types')}
-            cssClass="e-small e-outline"
+            size="small"
+            style="outline"
           >
             Manage
           </AngryButton>
@@ -128,7 +130,8 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
           </div>
           <AngryButton
             onClick={() => handleNavigate('mappings')}
-            cssClass="e-small e-outline"
+            size="small"
+            style="outline"
           >
             Manage
           </AngryButton>
@@ -145,7 +148,8 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
           </div>
           <AngryButton
             onClick={() => handleNavigate('api-keys')}
-            cssClass="e-small e-outline"
+            size="small"
+            style="outline"
           >
             Manage
           </AngryButton>
@@ -182,7 +186,7 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
                       cloudProviderName: mapping.cloudProviderName,
                     },
                   })}
-                  cssClass="e-small e-primary"
+                  size="small"
                   isPrimary={true}
                 >
                   Add Properties

@@ -15,7 +15,6 @@ import type { User } from '../types/auth';
 import type { ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import type { FocusableInputHandle } from '../types/focus';
-// SyncFusion imports
 import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input';
 
 type StackCreateForm = StackCreate;
@@ -64,27 +63,9 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     
     attempts.forEach(delay => {
       const timer = setTimeout(() => {
-        if (nameInputRef.current) {
+        if (nameInputRef.current && nameInputRef.current.focus) {
           try {
-            // Syncfusion components expose focusIn method
-            if (nameInputRef.current.focusIn) {
-              nameInputRef.current.focusIn();
-            } else {
-              // Fallback: try to find the input element
-              const input = nameInputRef.current.inputElement || 
-                          nameInputRef.current.element || 
-                          nameInputRef.current;
-              
-              if (input) {
-                // If it's the wrapper, find the actual input
-                const actualInput = input.querySelector ? 
-                                  (input.querySelector('input') as HTMLInputElement | null) : 
-                                  (input as HTMLInputElement);
-                if (actualInput && actualInput.focus) {
-                  actualInput.focus();
-                }
-              }
-            }
+            nameInputRef.current.focus();
           } catch (e) {
             console.log('Focus attempt failed:', e);
           }
@@ -429,14 +410,13 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
             <AngryButton
               onClick={onCancel}
               disabled={loading}
-              cssClass="e-outline"
+              style="outline"
             >
               Cancel
             </AngryButton>
             <AngryButton
               type="submit"
               disabled={loading}
-              cssClass="e-primary"
               isPrimary={true}
             >
               {loading ? 'Saving...' : (stack ? 'Update Stack' : 'Create Stack')}

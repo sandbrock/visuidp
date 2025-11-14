@@ -53,33 +53,6 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* Syncfusion button overrides for better contrast */
-button.e-warning,
-button.e-btn.e-warning {
-  background-color: #d97706;
-  color: #ffffff;
-  border-color: #d97706;
-}
-
-button.e-warning:hover,
-button.e-btn.e-warning:hover {
-  background-color: #b45309;
-  border-color: #b45309;
-}
-
-button.e-success,
-button.e-btn.e-success {
-  background-color: #059669;
-  color: #ffffff;
-  border-color: #059669;
-}
-
-button.e-success:hover,
-button.e-btn.e-success:hover {
-  background-color: #047857;
-  border-color: #047857;
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -90,32 +63,5 @@ button.e-btn.e-success:hover {
   }
   button {
     background-color: #f9f9f9;
-  }
-
-  /* Light mode button overrides - slightly different shades for better contrast */
-  button.e-warning,
-  button.e-btn.e-warning {
-    background-color: #f59e0b;
-    color: #ffffff;
-    border-color: #f59e0b;
-  }
-
-  button.e-warning:hover,
-  button.e-btn.e-warning:hover {
-    background-color: #d97706;
-    border-color: #d97706;
-  }
-
-  button.e-success,
-  button.e-btn.e-success {
-    background-color: #10b981;
-    color: #ffffff;
-    border-color: #10b981;
-  }
-
-  button.e-success:hover,
-  button.e-btn.e-success:hover {
-    background-color: #059669;
-    border-color: #059669;
   }
 }

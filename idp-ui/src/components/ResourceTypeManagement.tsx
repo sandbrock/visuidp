@@ -167,7 +167,7 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
       <Breadcrumb items={breadcrumbItems} />
       <div className="header">
         <h2>Resource Type Management</h2>
-        <AngryButton onClick={handleCreate} cssClass="e-primary" isPrimary={true}>
+        <AngryButton onClick={handleCreate} isPrimary={true}>
           Add Resource Type
         </AngryButton>
       </div>
@@ -229,13 +229,14 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
                   <td className="actions">
                     <AngryButton
                       onClick={() => handleEdit(resourceType)}
-                      cssClass="e-small"
+                      size="small"
                     >
                       Edit
                     </AngryButton>
                     <AngryButton
                       onClick={() => handleToggle(resourceType)}
-                      cssClass={`e-small ${resourceType.enabled ? 'e-warning' : 'e-success'}`}
+                      size="small"
+                      variant={resourceType.enabled ? 'warning' : 'success'}
                     >
                       {resourceType.enabled ? 'Disable' : 'Enable'}
                     </AngryButton>

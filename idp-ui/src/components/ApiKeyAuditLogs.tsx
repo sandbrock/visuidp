@@ -147,14 +147,14 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
         <AngryButton
           onClick={() => handlePageChange(1)}
           disabled={currentPage === 1}
-          cssClass="e-small"
+          size="small"
         >
           First
         </AngryButton>
         <AngryButton
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          cssClass="e-small"
+          size="small"
         >
           Previous
         </AngryButton>
@@ -186,14 +186,14 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
         <AngryButton
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          cssClass="e-small"
+          size="small"
         >
           Next
         </AngryButton>
         <AngryButton
           onClick={() => handlePageChange(totalPages)}
           disabled={currentPage === totalPages}
-          cssClass="e-small"
+          size="small"
         >
           Last
         </AngryButton>
@@ -262,7 +262,7 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
         </div>
         
         <div className="filters-actions">
-          <AngryButton onClick={handleClearFilters} cssClass="e-small">
+          <AngryButton onClick={handleClearFilters} size="small">
             Clear Filters
           </AngryButton>
           <span className="results-count">
