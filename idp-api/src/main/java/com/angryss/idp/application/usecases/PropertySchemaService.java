@@ -2,6 +2,7 @@ package com.angryss.idp.application.usecases;
 
 import com.angryss.idp.application.dtos.PropertySchemaCreateDto;
 import com.angryss.idp.application.dtos.PropertySchemaDto;
+import com.angryss.idp.application.dtos.PropertySchemaResponseDto;
 import com.angryss.idp.application.dtos.PropertySchemaUpdateDto;
 import com.angryss.idp.domain.entities.PropertySchema;
 import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;
@@ -15,9 +16,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -216,15 +215,15 @@ public class PropertySchemaService {
     }
 
     /**
-     * Retrieves a map of property schemas for a specific resource type and cloud provider combination.
-     * This is useful for UI form generation where property names are keys.
+     * Retrieves property schema response for a specific resource type and cloud provider combination.
+     * This includes metadata about the resource type and cloud provider along with the property schemas.
      *
      * @param resourceTypeId The resource type ID
      * @param cloudProviderId The cloud provider ID
-     * @return Map of property name to property schema DTO
+     * @return Property schema response DTO with metadata and properties list
      * @throws NotFoundException if mapping not found
      */
-    public Map<String, PropertySchemaDto> getSchemaMap(UUID resourceTypeId, UUID cloudProviderId) {
+    public PropertySchemaResponseDto getSchemaResponse(UUID resourceTypeId, UUID cloudProviderId) {
         // Find the mapping
         ResourceTypeCloudMapping mapping = resourceTypeCloudMappingRepository
             .findByResourceTypeIdAndCloudProviderId(resourceTypeId, cloudProviderId)
@@ -236,13 +235,25 @@ public class PropertySchemaService {
         // Get all property schemas for this mapping
         List<PropertySchema> schemas = propertySchemaRepository.findByMappingId(mapping.id);
         
-        // Convert to map with property name as key
-        Map<String, PropertySchemaDto> schemaMap = new HashMap<>();
-        for (PropertySchema schema : schemas) {
-            schemaMap.put(schema.propertyName, toDto(schema));
-        }
+        // Convert to DTOs and sort by display order
+        List<PropertySchemaDto> propertyDtos = schemas.stream()
+            .map(this::toDto)
+            .sorted((a, b) -> {
+                Integer orderA = a.getDisplayOrder() != null ? a.getDisplayOrder() : Integer.MAX_VALUE;
+                Integer orderB = b.getDisplayOrder() != null ? b.getDisplayOrder() : Integer.MAX_VALUE;
+                return orderA.compareTo(orderB);
+            })
+            .collect(Collectors.toList());
 
-        return schemaMap;
+        // Build response DTO
+        PropertySchemaResponseDto response = new PropertySchemaResponseDto();
+        response.setResourceTypeId(mapping.resourceType.id);
+        response.setResourceTypeName(mapping.resourceType.name);
+        response.setCloudProviderId(mapping.cloudProvider.id);
+        response.setCloudProviderName(mapping.cloudProvider.name);
+        response.setProperties(propertyDtos);
+
+        return response;
     }
 
     /**

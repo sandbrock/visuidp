@@ -417,7 +417,7 @@ export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicRes
    * Sort properties by displayOrder field
    * Properties without displayOrder are placed at the end
    */
-  const sortedProperties = schema ? [...schema].sort((a, b) => {
+  const sortedProperties = (schema && Array.isArray(schema)) ? [...schema].sort((a, b) => {
     const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
     const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
     return orderA - orderB;
