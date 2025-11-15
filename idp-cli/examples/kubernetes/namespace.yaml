@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{stack.name}}-{{environment|default:"dev"}}
+  labels:
+    name: {{stack.name}}-{{environment|default:"dev"}}
+    managed-by: idp
+    stack-name: {{stack.name}}
+    stack-type: {{stack.stack_type}}
+    cloud-name: {{stack.cloud_name}}
+    environment: {{environment|default:"dev"}}
+  {{#if additional_labels}}
+  annotations:
+    {{#each additional_labels}}
+    {{@key}}: "{{this}}"
+    {{/each}}
+  {{/if}}

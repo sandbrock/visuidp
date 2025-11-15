@@ -1,220 +1,248 @@
 # Implementation Plan
 
-- [x] 1. Set up Rust project structure and dependencies
-  - Initialize Cargo project in idp-cli directory with proper workspace configuration
-  - Add core dependencies: clap, reqwest, tokio, serde, serde_json, uuid, thiserror, anyhow, env_logger, log
-  - Add development dependencies: mockito, tempfile, assert_cmd, predicates
-  - Create Rust source module files in idp-cli/src/ directory: main.rs, cli.rs, api_client.rs, models.rs, generator.rs, resource_mapper.rs, file_writer.rs, error.rs
-  - Configure Cargo.toml with proper metadata and feature flags
-  - _Requirements: 6.1, 6.5_
+- [x] 1. Update project dependencies for template processing
+  - Add handlebars dependency for template engine (version 5.0)
+  - Add serde_yaml dependency for YAML processing (version 0.9)
+  - Add walkdir dependency for directory traversal (version 2.4)
+  - Update Cargo.toml with new dependencies
+  - Remove unused dependencies (resource_mapper if no longer needed)
+  - _Requirements: 2.1, 2.4, 10.2, 10.3_
 
-- [x] 2. Implement error handling types
-  - Define CliError enum with variants for authentication, not found, API, network, IO, configuration, and generation errors
-  - Implement Display and Error traits for CliError
-  - Add user_message() method for user-friendly error messages
-  - Implement From traits for automatic error conversion from reqwest::Error and std::io::Error
-  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
+- [ ] 2. Update command-line interface for template-based workflow
+  - [x] 2.1 Modify Command enum to support new commands
+    - Replace Blueprint and Stack commands with Generate command
+    - Add Generate variant with data_source, identifier, template_dir, and variables_file fields
+    - Add ListVariables variant with data_source and identifier fields
+    - Add DataSource enum with Blueprint and Stack variants
+    - _Requirements: 3.1, 3.2, 4.1, 4.2, 7.2, 12.1, 12.5_
+  
+  - [x] 2.2 Update CliArgs struct and validation
+    - Add template_dir field to CliArgs
+    - Add variables_file field to CliArgs
+    - Update validation to require template_dir for Generate command
+    - Update help text with new command structure and examples
+    - _Requirements: 2.1, 2.2, 7.2, 7.4, 7.6, 11.1, 11.2_
+  
+  - [x] 2.3 Update default values and environment variables
+    - Change default output directory from ./terraform to ./output
+    - Add IDP_TEMPLATE_DIR environment variable support
+    - Update configuration precedence documentation
+    - _Requirements: 6.1, 6.2, 6.3, 9.1, 9.2, 9.3_
 
-- [x] 3. Implement command-line argument parsing
-  - Create CliArgs struct with command, api_key, api_url, and output_dir fields
-  - Define Command enum with Blueprint, Stack, and Version variants
-  - Implement clap derive macros for argument parsing with proper help text
-  - Add support for environment variables: IDP_API_KEY, IDP_API_URL, IDP_OUTPUT_DIR
-  - Implement validation for required arguments and display helpful error messages
-  - Add version information display
-  - _Requirements: 1.1, 1.2, 6.1, 6.2, 6.3, 6.4, 6.5, 8.1, 8.2, 8.3_
+- [ ] 3. Implement template discovery module
+  - [x] 3.1 Create template discovery structures
+    - Create TemplateDiscovery struct with template_dir field
+    - Create TemplateFile struct with path, relative_path, and file_type fields
+    - Create TemplateFileType enum with Terraform, Yaml, and Json variants
+    - _Requirements: 2.1, 2.2, 2.4_
+  
+  - [x] 3.2 Implement template file discovery
+    - Implement discover_templates() method using walkdir
+    - Identify files by extension (.tf, .yaml, .yml, .json)
+    - Preserve relative paths for output structure
+    - Skip hidden files and directories (starting with .)
+    - Return Vec<TemplateFile> with discovered templates
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+  
+  - [x] 3.3 Add error handling for template discovery
+    - Create DiscoveryError type for template discovery failures
+    - Handle directory not found errors
+    - Handle permission denied errors
+    - Provide clear error messages for discovery failures
+    - _Requirements: 2.2, 8.5_
 
-- [x] 4. Implement data models for API responses
-  - Create Blueprint struct with id, name, description, resources, and supported_cloud_providers fields
-  - Create BlueprintResource struct with id, name, description, resource_type, cloud_provider, configuration, and cloud_specific_properties fields
-  - Create Stack struct with id, name, description, cloud_name, stack_type, stack_resources, and blueprint fields
-  - Create StackResource struct with id, name, description, resource_type, cloud_provider, and configuration fields
-  - Create ResourceType struct with id, name, and category fields
-  - Create CloudProvider struct with id, name, and display_name fields
-  - Add serde Deserialize derives to all structs
-  - _Requirements: 2.3, 3.3_
+- [ ] 4. Implement variable context builder module
+  - [x] 4.1 Create variable context structures
+    - Create VariableContextBuilder struct
+    - Create VariableContext struct with variables HashMap
+    - Implement get() method for variable lookup with dot notation
+    - Implement list_all() method for variable inspection
+    - _Requirements: 3.5, 4.5, 5.1, 5.2, 5.3, 12.2, 12.3, 12.4_
+  
+  - [x] 4.2 Implement blueprint variable extraction
+    - Implement from_blueprint() method
+    - Extract blueprint metadata (id, name, description)
+    - Extract resources array with all properties
+    - Flatten nested structures with dot notation (e.g., resources[0].name)
+    - Create array accessors for list items
+    - _Requirements: 3.1, 3.2, 3.3, 3.5, 5.1, 5.2, 5.4_
+  
+  - [x] 4.3 Implement stack variable extraction
+    - Implement from_stack() method
+    - Extract stack metadata (id, name, description, cloud_name, stack_type)
+    - Extract stack_resources array with all properties
+    - Flatten nested structures with dot notation
+    - Create array accessors for list items
+    - _Requirements: 4.1, 4.2, 4.3, 4.5, 5.1, 5.2, 5.4_
+  
+  - [x] 4.4 Implement custom variables merging
+    - Implement merge_custom_variables() method
+    - Load variables from JSON or YAML files
+    - Merge custom variables with blueprint/stack data
+    - Override blueprint/stack variables with custom values when conflicts occur
+    - Display warnings for variable overrides
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [x] 5. Implement API client for IDP communication
-  - Create ApiClient struct with base_url, api_key, and reqwest::Client fields
-  - Implement new() constructor that initializes HTTP client with connection pooling
-  - Implement get_blueprint() method that fetches blueprint by ID or name from /api/v1/blueprints endpoint
-  - Implement get_stack() method that fetches stack by ID or name from /api/v1/stacks endpoint
-  - Add Authorization header with Bearer token format for API key authentication
-  - Implement error handling for 401, 404, 500 status codes and network errors
-  - Add request timeout configuration (default 30 seconds)
-  - _Requirements: 1.4, 2.1, 2.2, 3.1, 3.2, 7.1, 7.2, 7.3, 7.4, 8.4, 8.5_
+- [ ] 5. Implement template processor module
+  - [x] 5.1 Create template processor structures
+    - Create TemplateProcessor struct with VariableContext field
+    - Create ProcessedFile struct with relative_path and content fields
+    - Initialize Handlebars engine with custom configuration
+    - _Requirements: 5.1, 5.2, 5.6_
+  
+  - [x] 5.2 Implement basic template processing
+    - Implement process_template() method for string templates
+    - Implement process_file() method for TemplateFile processing
+    - Support {{variable_name}} syntax for substitution
+    - Support dot notation for nested access ({{resource.name}})
+    - Support array indexing ({{resources[0].name}})
+    - Preserve file formatting (indentation, line endings)
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
+  
+  - [x] 5.3 Add Handlebars helpers for template features
+    - Register default value helper ({{variable|default:"value"}})
+    - Register conditional helpers (if/else blocks)
+    - Register loop helpers (each blocks)
+    - Register case conversion helpers (uppercase, lowercase, capitalize)
+    - Register string operation helpers (trim, replace)
+    - _Requirements: 5.1, 5.2, 5.3_
+  
+  - [x] 5.4 Implement YAML validation for Kubernetes manifests
+    - Validate YAML syntax after variable substitution
+    - Support multi-document YAML files (--- separators)
+    - Provide clear error messages for YAML syntax errors
+    - _Requirements: 10.2, 10.3, 10.4, 10.5_
+  
+  - [x] 5.5 Add error handling for template processing
+    - Create ProcessingError type for template processing failures
+    - Create VariableNotFoundError for missing variables
+    - Handle template syntax errors with line numbers
+    - Provide suggestions for undefined variables
+    - _Requirements: 5.3, 8.5_
 
-- [x] 6. Implement resource type to Terraform mapping
-  - Create ResourceMapper struct with HashMap of (resource_type, cloud_provider) to TerraformResourceType
-  - Create TerraformResourceType struct with provider, resource_type, and attribute_mappings fields
-  - Implement new() constructor that initializes mappings for common resource types
-  - Add mappings for AWS resources: RelationalDatabaseServer → aws_db_instance, ContainerOrchestrator → aws_ecs_cluster, Storage → aws_s3_bucket
-  - Add mappings for Azure resources: RelationalDatabaseServer → azurerm_mssql_server, ContainerOrchestrator → azurerm_kubernetes_cluster
-  - Add mappings for GCP resources: RelationalDatabaseServer → google_sql_database_instance, ContainerOrchestrator → google_container_cluster
-  - Implement get_terraform_resource_type() method for lookup
-  - _Requirements: 4.4_
+- [ ] 6. Update file writer for template-based output
+  - [x] 6.1 Modify FileWriter for processed templates
+    - Update write_generated_code() to write_processed_files()
+    - Accept Vec<ProcessedFile> instead of GeneratedCode
+    - Preserve directory structure from template directory
+    - Create parent directories as needed
+    - _Requirements: 6.1, 6.2, 6.4, 6.5_
+  
+  - [x] 6.2 Implement file overwrite warnings
+    - Check if output files already exist
+    - Display warning message before overwriting
+    - Write files atomically (write to temp, then rename)
+    - Set appropriate file permissions
+    - _Requirements: 6.6, 6.7_
 
-- [x] 7. Implement HCL code generation for providers
-  - Create function to generate providers.tf content from cloud provider list
-  - Generate terraform required_providers block with appropriate provider sources and versions
-  - Generate provider configuration blocks for each unique cloud provider (AWS, Azure, GCP)
-  - Add region variable references in provider blocks
-  - Include proper formatting and indentation for HCL syntax
-  - _Requirements: 4.2_
+- [ ] 7. Implement generate command handler
+  - [x] 7.1 Create handle_generate() function
+    - Accept data_source, identifier, template_dir, variables_file, api_client, and output_dir parameters
+    - Fetch blueprint or stack data based on data_source
+    - Build variable context from API response
+    - Merge custom variables if variables_file is provided
+    - _Requirements: 3.1, 3.2, 4.1, 4.2, 11.1, 11.2_
+  
+  - [x] 7.2 Implement template processing workflow
+    - Discover templates in template_dir
+    - Create TemplateProcessor with variable context
+    - Process each template file
+    - Collect processed files
+    - _Requirements: 2.1, 2.2, 5.1, 5.2_
+  
+  - [x] 7.3 Implement file writing and success reporting
+    - Write processed files to output directory
+    - Display success message with generated file paths
+    - Provide next steps guidance (e.g., terraform init, kubectl apply)
+    - Handle and propagate errors appropriately
+    - _Requirements: 6.7, 8.5_
 
-- [x] 8. Implement HCL code generation for variables
-  - Create function to generate variables.tf content from resource configurations
-  - Extract configurable properties from resource configurations
-  - Generate variable blocks with description, type, and default value
-  - Add variables for provider regions
-  - Add variables for resource identifiers and names
-  - Include proper formatting and indentation for HCL syntax
-  - _Requirements: 4.5_
+- [ ] 8. Implement list-variables command handler
+  - [x] 8.1 Create handle_list_variables() function
+    - Accept data_source, identifier, and api_client parameters
+    - Fetch blueprint or stack data based on data_source
+    - Build variable context from API response
+    - _Requirements: 12.1, 12.2, 12.5_
+  
+  - [x] 8.2 Implement variable display formatting
+    - Display variable names, types, and sample values
+    - Show nested structure of complex variables (objects and arrays)
+    - Format output in readable table or tree structure
+    - Do not generate any output files
+    - _Requirements: 12.2, 12.3, 12.4_
 
-- [x] 9. Implement HCL code generation for resources
-  - Create function to generate main.tf content from blueprint or stack resources
-  - Map each resource to appropriate Terraform resource type using ResourceMapper
-  - Generate resource blocks with proper resource type and name
-  - Convert JSON configuration properties to HCL attributes
-  - Add tags for managed resources (Name, ManagedBy, Blueprint/Stack)
-  - Handle nested configuration objects and lists
-  - Include proper formatting and indentation for HCL syntax
-  - _Requirements: 4.1, 4.3, 4.4_
+- [ ] 9. Update main CLI application flow
+  - [x] 9.1 Update command routing
+    - Route Generate command to handle_generate()
+    - Route ListVariables command to handle_list_variables()
+    - Keep Version command handling
+    - _Requirements: 7.2, 12.1_
+  
+  - [x] 9.2 Update validation and error handling
+    - Validate template_dir exists for Generate command
+    - Validate variables_file exists if provided
+    - Update error messages for new command structure
+    - _Requirements: 2.2, 7.3, 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [x] 10. Implement HCL code generation for outputs
-  - Create function to generate outputs.tf content from resources
-  - Generate output blocks for resource IDs and important attributes
-  - Add descriptions to output blocks
-  - Include proper formatting and indentation for HCL syntax
-  - _Requirements: 4.1_
+- [x] 10. Remove obsolete code generation modules
+  - Remove or refactor generator.rs (old HCL generation)
+  - Remove resource_mapper.rs (no longer needed for templates)
+  - Clean up unused imports and dependencies
+  - Update module declarations in lib.rs or main.rs
+  - _Requirements: N/A (cleanup)_
 
-- [x] 11. Implement code generator orchestration
-  - Create CodeGenerator struct with ResourceMapper field
-  - Implement new() constructor
-  - Implement generate_from_blueprint() method that orchestrates generation of all HCL files from Blueprint
-  - Implement generate_from_stack() method that orchestrates generation of all HCL files from Stack
-  - Create GeneratedCode struct to hold main_tf, variables_tf, providers_tf, and outputs_tf strings
-  - Coordinate calls to provider, variable, resource, and output generation functions
-  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+- [x] 11. Write unit tests for template discovery
+  - Test template file discovery in directory
+  - Test file type identification by extension
+  - Test relative path preservation
+  - Test hidden file/directory exclusion
+  - Test error handling for non-existent directories
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [x] 12. Implement file writer for generated code
-  - Create FileWriter struct with output_dir PathBuf field
-  - Implement new() constructor
-  - Implement ensure_directory_exists() method that creates output directory if needed
-  - Implement write_generated_code() method that writes all HCL files to output directory
-  - Write main.tf, variables.tf, providers.tf, and outputs.tf files
-  - Display warning message when overwriting existing files
-  - Set restrictive file permissions (0600) on generated files
-  - Return list of written file paths
-  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
+- [x] 12. Write unit tests for variable context builder
+  - Test blueprint variable extraction
+  - Test stack variable extraction
+  - Test nested structure flattening
+  - Test array accessor creation
+  - Test custom variable merging
+  - Test variable override warnings
+  - _Requirements: 3.5, 4.5, 5.1, 5.2, 5.4, 11.3, 11.4, 11.5_
 
-- [x] 13. Implement main CLI application flow
-  - Create main() function with tokio async runtime
-  - Initialize logging with env_logger
-  - Parse command-line arguments using cli module
-  - Validate API key is provided (via flag or environment variable)
-  - Determine API URL with proper precedence (flag > env > default)
-  - Determine output directory with proper precedence (flag > env > default)
-  - Create ApiClient instance
-  - Route to appropriate handler based on command (blueprint or stack)
-  - Handle Version command by displaying version information
-  - Implement error handling and display user-friendly error messages
-  - Exit with appropriate exit codes (0 for success, non-zero for errors)
-  - _Requirements: 1.1, 1.2, 1.3, 6.1, 6.2, 6.3, 7.5, 8.1, 8.2, 8.3, 8.5_
+- [x] 13. Write unit tests for template processor
+  - Test basic variable substitution
+  - Test dot notation access
+  - Test array indexing
+  - Test default value helper
+  - Test conditional blocks
+  - Test loop blocks
+  - Test case conversion helpers
+  - Test string operation helpers
+  - Test YAML validation
+  - Test error handling for undefined variables
+  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 10.3, 10.5_
 
-- [x] 14. Implement blueprint command handler
-  - Create handle_blueprint() async function that accepts identifier, ApiClient, and output_dir
-  - Call ApiClient.get_blueprint() to fetch blueprint from API
-  - Create CodeGenerator instance
-  - Call generate_from_blueprint() to generate HCL code
-  - Create FileWriter instance with output directory
-  - Call write_generated_code() to write files
-  - Display success message with list of generated file paths
-  - Handle and propagate errors appropriately
-  - _Requirements: 2.1, 2.2, 2.3, 2.4, 4.1, 5.7_
+- [x] 14. Write integration tests for end-to-end template processing
+  - Test complete generate flow with Terraform templates
+  - Test complete generate flow with Kubernetes templates
+  - Test generate flow with custom variables
+  - Test list-variables command output
+  - Test error scenarios (missing template dir, invalid templates)
+  - Verify output file structure matches template structure
+  - _Requirements: 2.5, 5.6, 6.4, 6.7, 12.2, 12.4_
 
-- [x] 15. Implement stack command handler
-  - Create handle_stack() async function that accepts identifier, ApiClient, and output_dir
-  - Call ApiClient.get_stack() to fetch stack from API
-  - Create CodeGenerator instance
-  - Call generate_from_stack() to generate HCL code
-  - Create FileWriter instance with output directory
-  - Call write_generated_code() to write files
-  - Display success message with list of generated file paths
-  - Handle and propagate errors appropriately
-  - _Requirements: 3.1, 3.2, 3.3, 3.4, 4.1, 5.7_
+- [x] 15. Update README documentation
+  - Document new template-based workflow
+  - Provide example template structures for Terraform
+  - Provide example template structures for Kubernetes
+  - Document variable syntax and available helpers
+  - Document custom variables file format
+  - Include examples of generate and list-variables commands
+  - Add troubleshooting section for template errors
+  - _Requirements: 7.2, 7.6, 11.1, 12.1_
 
-- [ ]* 16. Write unit tests for command parser
-  - Test argument parsing with various flag combinations
-  - Test environment variable precedence over defaults
-  - Test validation of required arguments
-  - Test help text generation
-  - Test version information display
-  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
-
-- [ ]* 17. Write unit tests for API client
-  - Mock HTTP responses using mockito
-  - Test successful blueprint retrieval
-  - Test successful stack retrieval
-  - Test 401 authentication error handling
-  - Test 404 not found error handling
-  - Test 500 server error handling
-  - Test network error handling
-  - Test authentication header inclusion
-  - _Requirements: 1.4, 2.1, 2.2, 3.1, 3.2, 7.1, 7.2, 7.3, 7.4_
-
-- [ ]* 18. Write unit tests for code generator
-  - Test HCL generation from sample Blueprint data
-  - Test HCL generation from sample Stack data
-  - Test resource mapping for AWS resources
-  - Test resource mapping for Azure resources
-  - Test resource mapping for GCP resources
-  - Test variable generation from configurations
-  - Test provider configuration generation
-  - Test output generation
-  - Verify generated HCL syntax validity
-  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
-
-- [ ]* 19. Write unit tests for resource mapper
-  - Test mapping lookup for known AWS resource types
-  - Test mapping lookup for known Azure resource types
-  - Test mapping lookup for known GCP resource types
-  - Test handling of unknown resource types
-  - Test attribute mapping transformations
-  - _Requirements: 4.4_
-
-- [ ]* 20. Write unit tests for file writer
-  - Test directory creation when output directory doesn't exist
-  - Test file writing to temporary directory
-  - Test overwrite warning when files exist
-  - Test file permission setting
-  - Test error handling for permission denied
-  - Test error handling for disk full
-  - _Requirements: 5.3, 5.4, 5.5, 5.6_
-
-- [ ]* 21. Write integration tests for end-to-end flows
-  - Test complete blueprint flow with mock API server
-  - Test complete stack flow with mock API server
-  - Test authentication failure scenario
-  - Test 404 not found scenario
-  - Test network timeout scenario
-  - Test file write permission error scenario
-  - Verify generated file contents match expected output
-  - _Requirements: 2.1, 2.2, 3.1, 3.2, 7.1, 7.2, 7.4_
-
-- [ ] 22. Create README documentation
-  - Write installation instructions for different platforms
-  - Document command-line usage with examples
-  - Document environment variable configuration
-  - Provide example workflows for blueprint and stack generation
-  - Include troubleshooting section
-  - Add examples of generated OpenTofu code
-  - _Requirements: 6.1, 6.2, 6.3_
-
-- [ ] 23. Create Cargo.toml with proper metadata
-  - Set package name, version, authors, and description
-  - Configure edition = "2021"
-  - Add license and repository information
-  - Configure binary target
-  - Set up release profile optimizations
-  - _Requirements: 6.5_
+- [x] 16. Create example template directories
+  - Create examples/terraform/ with sample Terraform templates
+  - Create examples/kubernetes/ with sample Kubernetes manifest templates
+  - Include README in each example directory explaining usage
+  - Demonstrate common patterns (loops, conditionals, defaults)
+  - _Requirements: 7.6_

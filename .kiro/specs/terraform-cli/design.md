@@ -2,7 +2,7 @@
 
 ## Overview
 
-The IDP Terraform CLI is a Rust-based command-line tool that generates OpenTofu (Terraform-compatible) infrastructure-as-code from blueprints and stacks managed by the IDP API. The tool authenticates using API keys, fetches infrastructure definitions via REST API calls, and generates idiomatic HCL configuration files that can be used for infrastructure provisioning and management.
+The IDP Template CLI is a Rust-based command-line tool that processes infrastructure-as-code and Kubernetes manifest templates by substituting variables with data from blueprints and stacks managed by the IDP API. The tool provides a flexible, template-driven approach that allows organizations to define their own Terraform/OpenTofu and Kubernetes configurations while leveraging IDP's infrastructure definitions for variable population.
 
 ## Architecture
 
@@ -12,54 +12,72 @@ The IDP Terraform CLI is a Rust-based command-line tool that generates OpenTofu 
 ┌─────────────────┐
 │   CLI User      │
 └────────┬────────┘
-         │ Commands
+         │ Commands + Template Directory
          ▼
-┌─────────────────────────────────────────┐
-│         IDP Terraform CLI               │
-│         (Rust source in idp-cli/src/)   │
-│  ┌───────────────────────────────────┐  │
-│  │   Command Parser (clap)           │  │
-│  └───────────┬───────────────────────┘  │
-│              │                           │
-│  ┌───────────▼───────────────────────┐  │
-│  │   API Client (reqwest)            │  │
-│  │   - Authentication                │  │
-│  │   - Blueprint/Stack Fetching      │  │
-│  └───────────┬───────────────────────┘  │
-│              │                           │
-│  ┌───────────▼───────────────────────┐  │
-│  │   Code Generator                  │  │
-│  │   - HCL Generation                │  │
-│  │   - Resource Mapping              │  │
-│  │   - File Organization             │  │
-│  └───────────┬───────────────────────┘  │
-│              │                           │
-│  ┌───────────▼───────────────────────┐  │
-│  │   File Writer                     │  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
-         │ Generated OpenTofu Files
+┌──────────────────────────────────────────────┐
+│         IDP Template CLI                     │
+│         (Rust source in idp-cli/src/)        │
+│  ┌────────────────────────────────────────┐  │
+│  │   Command Parser (clap)                │  │
+│  └───────────┬────────────────────────────┘  │
+│              │                                │
+│  ┌───────────▼────────────────────────────┐  │
+│  │   Template Discovery                   │  │
+│  │   - Scan template directory            │  │
+│  │   - Identify file types (.tf, .yaml)   │  │
+│  └───────────┬────────────────────────────┘  │
+│              │                                │
+│  ┌───────────▼────────────────────────────┐  │
+│  │   API Client (reqwest)                 │  │
+│  │   - Authentication                     │  │
+│  │   - Blueprint/Stack Fetching           │  │
+│  └───────────┬────────────────────────────┘  │
+│              │                                │
+│  ┌───────────▼────────────────────────────┐  │
+│  │   Variable Context Builder             │  │
+│  │   - Extract data from API response     │  │
+│  │   - Build variable map                 │  │
+│  │   - Merge custom variables             │  │
+│  └───────────┬────────────────────────────┘  │
+│              │                                │
+│  ┌───────────▼────────────────────────────┐  │
+│  │   Template Processor                   │  │
+│  │   - Parse template files               │  │
+│  │   - Substitute {{variables}}           │  │
+│  │   - Preserve formatting                │  │
+│  └───────────┬────────────────────────────┘  │
+│              │                                │
+│  ┌───────────▼────────────────────────────┐  │
+│  │   File Writer                          │  │
+│  │   - Preserve directory structure       │  │
+│  │   - Write processed files              │  │
+│  └────────────────────────────────────────┘  │
+└──────────────────────────────────────────────┘
+         │ Processed Template Files
          ▼
 ┌──────────────────────────┐
 │  User-Defined Directory  │
-│  (e.g., ./terraform/)    │
-│  - main.tf               │
-│  - variables.tf          │
-│  - providers.tf          │
-│  - outputs.tf            │
+│  (e.g., ./output/)       │
+│  - Processed templates   │
+│  - Same structure as     │
+│    template directory    │
 └──────────────────────────┘
 ```
 
 ### Component Interaction Flow
 
 ```
-User Command → CLI Parser → API Client → IDP API
-                                ↓
-                         JSON Response
-                                ↓
-                         Code Generator
-                                ↓
-                         HCL Files → File System
+User Command + Template Dir → CLI Parser
+                                  ↓
+                         Template Discovery
+                                  ↓
+                         API Client → IDP API
+                                  ↓
+                         Variable Context Builder
+                                  ↓
+                         Template Processor
+                                  ↓
+                         Processed Files → File System
 ```
 
 ## Components and Interfaces
@@ -80,19 +98,34 @@ pub struct CliArgs {
 }
 
 pub enum Command {
-    Blueprint { identifier: String },
-    Stack { identifier: String },
+    Generate {
+        data_source: DataSource,
+        identifier: String,
+        template_dir: PathBuf,
+        variables_file: Option<PathBuf>,
+    },
+    ListVariables {
+        data_source: DataSource,
+        identifier: String,
+    },
     Version,
+}
+
+pub enum DataSource {
+    Blueprint,
+    Stack,
 }
 
 pub fn parse_args() -> Result<CliArgs, CliError>;
 ```
 
 **Key Features**:
-- Subcommands for `blueprint` and `stack`
+- `generate` command for template processing
+- `list-variables` command for inspecting available variables
 - Global flags: `--api-key`, `--api-url`, `--output-dir`
-- Environment variable support: `IDP_API_KEY`, `IDP_API_URL`
-- Help text generation
+- Command-specific flags: `--template-dir`, `--variables-file`
+- Environment variable support: `IDP_API_KEY`, `IDP_API_URL`, `IDP_OUTPUT_DIR`
+- Help text generation with examples
 - Version information
 
 ### 2. API Client Module
@@ -196,79 +229,122 @@ pub struct CloudProvider {
 }
 ```
 
-### 4. Code Generator Module
+### 4. Template Discovery Module
 
-**Responsibility**: Transform API data into OpenTofu HCL code
+**Responsibility**: Scan template directory and identify template files
 
-**Dependencies**: Custom HCL generation logic
-
-**Interface**:
-```rust
-pub struct CodeGenerator {
-    resource_mapper: ResourceMapper,
-}
-
-impl CodeGenerator {
-    pub fn new() -> Self;
-    
-    pub fn generate_from_blueprint(&self, blueprint: &Blueprint) -> GeneratedCode;
-    
-    pub fn generate_from_stack(&self, stack: &Stack) -> GeneratedCode;
-}
-
-pub struct GeneratedCode {
-    pub main_tf: String,
-    pub variables_tf: String,
-    pub providers_tf: String,
-    pub outputs_tf: String,
-}
-```
-
-**HCL Generation Strategy**:
-- Use string templates for basic structure
-- Generate provider blocks based on cloud providers
-- Map resource types to Terraform resource types
-- Convert JSON configuration to HCL attributes
-- Generate variables for configurable properties
-- Create outputs for resource identifiers
-
-### 5. Resource Mapper Module
-
-**Responsibility**: Map IDP resource types to Terraform resource types
+**Dependencies**: Standard library `std::fs`, `walkdir` crate
 
 **Interface**:
 ```rust
-pub struct ResourceMapper {
-    mappings: HashMap<(String, String), TerraformResourceType>,
+pub struct TemplateDiscovery {
+    template_dir: PathBuf,
 }
 
-impl ResourceMapper {
-    pub fn new() -> Self;
+impl TemplateDiscovery {
+    pub fn new(template_dir: PathBuf) -> Self;
     
-    pub fn get_terraform_resource_type(
-        &self,
-        resource_type: &str,
-        cloud_provider: &str
-    ) -> Option<&TerraformResourceType>;
+    pub fn discover_templates(&self) -> Result<Vec<TemplateFile>, DiscoveryError>;
 }
 
-pub struct TerraformResourceType {
-    pub provider: String,
-    pub resource_type: String,
-    pub attribute_mappings: HashMap<String, String>,
+pub struct TemplateFile {
+    pub path: PathBuf,
+    pub relative_path: PathBuf,
+    pub file_type: TemplateFileType,
+}
+
+pub enum TemplateFileType {
+    Terraform,      // .tf files
+    Yaml,           // .yaml, .yml files
+    Json,           // .json files
 }
 ```
 
-**Example Mappings**:
-- (RelationalDatabaseServer, AWS) → `aws_db_instance`
-- (ContainerOrchestrator, AWS) → `aws_ecs_cluster`
-- (Storage, AWS) → `aws_s3_bucket`
-- (RelationalDatabaseServer, Azure) → `azurerm_mssql_server`
-- (ContainerOrchestrator, Azure) → `azurerm_kubernetes_cluster`
+**Discovery Strategy**:
+- Recursively walk template directory
+- Identify files by extension
+- Preserve relative paths for output structure
+- Skip hidden files and directories
+- Support .gitignore-style exclusions
 
-### 6. File Writer Module
+### 5. Variable Context Builder Module
 
-**Responsibility**: Write generated code to file system
+**Responsibility**: Extract data from API responses and build variable context
+
+**Dependencies**: `serde_json` for JSON manipulation
+
+**Interface**:
+```rust
+pub struct VariableContextBuilder;
+
+impl VariableContextBuilder {
+    pub fn from_blueprint(blueprint: &Blueprint) -> VariableContext;
+    
+    pub fn from_stack(stack: &Stack) -> VariableContext;
+    
+    pub fn merge_custom_variables(
+        context: &mut VariableContext,
+        custom_vars: HashMap<String, serde_json::Value>
+    );
+}
+
+pub struct VariableContext {
+    variables: HashMap<String, serde_json::Value>,
+}
+
+impl VariableContext {
+    pub fn get(&self, path: &str) -> Option<&serde_json::Value>;
+    
+    pub fn list_all(&self) -> Vec<(String, &serde_json::Value)>;
+}
+```
+
+**Variable Extraction Strategy**:
+- Flatten nested structures with dot notation
+- Create array accessors for list items
+- Provide common shortcuts (e.g., `name`, `id`)
+- Support both camelCase and snake_case
+- Preserve original JSON structure for complex objects
+
+### 6. Template Processor Module
+
+**Responsibility**: Parse templates and substitute variables
+
+**Dependencies**: `handlebars` or custom template engine
+
+**Interface**:
+```rust
+pub struct TemplateProcessor {
+    context: VariableContext,
+}
+
+impl TemplateProcessor {
+    pub fn new(context: VariableContext) -> Self;
+    
+    pub fn process_template(&self, template_content: &str) -> Result<String, ProcessError>;
+    
+    pub fn process_file(&self, template_file: &TemplateFile) -> Result<ProcessedFile, ProcessError>;
+}
+
+pub struct ProcessedFile {
+    pub relative_path: PathBuf,
+    pub content: String,
+}
+```
+
+**Template Processing Strategy**:
+- Use `{{variable_name}}` syntax for substitution
+- Support dot notation: `{{resource.name}}`
+- Support array indexing: `{{resources[0].name}}`
+- Support default values: `{{variable|default:"value"}}`
+- Support conditional blocks: `{{#if variable}}...{{/if}}`
+- Support loops: `{{#each resources}}...{{/each}}`
+- Preserve file formatting (indentation, line endings)
+- Validate YAML/JSON syntax after processing
+
+### 7. File Writer Module
+
+**Responsibility**: Write processed template files to file system
 
 **Dependencies**: Standard library `std::fs`
 
@@ -281,55 +357,107 @@ pub struct FileWriter {
 impl FileWriter {
     pub fn new(output_dir: PathBuf) -> Self;
     
-    pub fn write_generated_code(&self, code: &GeneratedCode) -> Result<Vec<PathBuf>, IoError>;
+    pub fn write_processed_files(&self, files: &[ProcessedFile]) -> Result<Vec<PathBuf>, IoError>;
     
-    fn ensure_directory_exists(&self) -> Result<(), IoError>;
+    fn ensure_directory_exists(&self, path: &Path) -> Result<(), IoError>;
+    
+    fn write_with_warning(&self, path: &Path, content: &str) -> Result<(), IoError>;
 }
 ```
+
+**File Writing Strategy**:
+- Preserve directory structure from template directory
+- Create parent directories as needed
+- Warn before overwriting existing files
+- Use atomic writes (write to temp, then rename)
+- Set appropriate file permissions
 
 **Rust Source Code Organization** (idp-cli/src/):
 ```
 idp-cli/src/
-├── main.rs              # CLI entry point
-├── cli.rs               # Command parser
-├── api_client.rs        # API communication
-├── models.rs            # Data structures
-├── generator.rs         # Code generation
-├── resource_mapper.rs   # Resource type mapping
-├── file_writer.rs       # File I/O
-└── error.rs             # Error types
+├── main.rs                    # CLI entry point
+├── cli.rs                     # Command parser
+├── api_client.rs              # API communication
+├── models.rs                  # Data structures
+├── template_discovery.rs      # Template file discovery
+├── variable_context.rs        # Variable context building
+├── template_processor.rs      # Template processing
+├── file_writer.rs             # File I/O
+└── error.rs                   # Error types
 ```
 
-**Generated OpenTofu Files** (user-defined output directory):
+**Output Directory Structure** (preserves template structure):
 ```
 <output-dir>/
-├── main.tf          # Main resource definitions
-├── variables.tf     # Input variables
-├── providers.tf     # Provider configurations
-└── outputs.tf       # Output values
+├── <same structure as template-dir>
+│   ├── main.tf (if template had main.tf)
+│   ├── variables.tf (if template had variables.tf)
+│   ├── k8s/
+│   │   ├── deployment.yaml (if template had k8s/deployment.yaml)
+│   │   └── service.yaml (if template had k8s/service.yaml)
+│   └── ... (other processed files)
 ```
 
 ## Data Models
 
-### Configuration Flow
+### Processing Flow
 
 ```
-API JSON Response
-       ↓
-Rust Structs (serde deserialization)
-       ↓
-Internal Representation
-       ↓
-HCL Generation
-       ↓
-String Output
-       ↓
-File System
+Template Directory + API JSON Response
+              ↓
+    Template Discovery
+              ↓
+    Rust Structs (serde deserialization)
+              ↓
+    Variable Context Building
+              ↓
+    Template Processing (variable substitution)
+              ↓
+    Processed Files
+              ↓
+    File System
 ```
 
-### Example Blueprint JSON to HCL Transformation
+### Variable Context Structure
 
-**Input (API Response)**:
+The Variable Context is a flattened representation of the API response that makes data easily accessible in templates:
+
+```rust
+// Example variable context for a blueprint
+{
+  "blueprint.id": "550e8400-e29b-41d4-a716-446655440000",
+  "blueprint.name": "web-app-blueprint",
+  "blueprint.description": "Web application infrastructure",
+  "resources": [...],  // Array of resources
+  "resources[0].name": "postgres-db",
+  "resources[0].resource_type.name": "RelationalDatabaseServer",
+  "resources[0].cloud_provider.name": "AWS",
+  "resources[0].cloud_specific_properties.engine": "postgres",
+  "resources[0].cloud_specific_properties.engine_version": "14.7",
+  "resources[0].cloud_specific_properties.instance_class": "db.t3.micro",
+  // ... additional resources
+}
+```
+
+### Example Template Processing
+
+**Input Template (templates/terraform/main.tf)**:
+```hcl
+resource "aws_db_instance" "{{resources[0].name}}" {
+  identifier     = "{{resources[0].name}}"
+  engine         = "{{resources[0].cloud_specific_properties.engine}}"
+  engine_version = "{{resources[0].cloud_specific_properties.engine_version}}"
+  instance_class = "{{resources[0].cloud_specific_properties.instance_class}}"
+  
+  tags = {
+    Name        = "{{resources[0].name}}"
+    ManagedBy   = "IDP"
+    Blueprint   = "{{blueprint.name}}"
+  }
+}
+```
+
+**Input API Response**:
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -353,10 +481,10 @@ File System
 }
 ```
 
-**Output (main.tf)**:
+**Output (output/terraform/main.tf)**:
 ```hcl
-resource "aws_db_instance" "postgres_db" {
-  identifier     = var.postgres_db_identifier
+resource "aws_db_instance" "postgres-db" {
+  identifier     = "postgres-db"
   engine         = "postgres"
   engine_version = "14.7"
   instance_class = "db.t3.micro"
@@ -369,29 +497,149 @@ resource "aws_db_instance" "postgres_db" {
 }
 ```
 
-**Output (variables.tf)**:
-```hcl
-variable "postgres_db_identifier" {
-  description = "Identifier for postgres-db database instance"
-  type        = string
-  default     = "postgres-db"
-}
+### Example Kubernetes Template Processing
+
+**Input Template (templates/k8s/deployment.yaml)**:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{stack.name}}
+  labels:
+    app: {{stack.name}}
+spec:
+  replicas: {{stack.stack_resources[0].configuration.replicas|default:"3"}}
+  selector:
+    matchLabels:
+      app: {{stack.name}}
+  template:
+    metadata:
+      labels:
+        app: {{stack.name}}
+    spec:
+      containers:
+      - name: {{stack.name}}
+        image: {{stack.stack_resources[0].configuration.image}}
+        ports:
+        - containerPort: {{stack.stack_resources[0].configuration.port}}
 ```
 
-**Output (providers.tf)**:
-```hcl
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
+**Output (output/k8s/deployment.yaml)**:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-web-app
+  labels:
+    app: my-web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-web-app
+  template:
+    metadata:
+      labels:
+        app: my-web-app
+    spec:
+      containers:
+      - name: my-web-app
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+```
 
+## Template Syntax and Features
+
+### Variable Substitution
+
+**Basic Substitution**:
+```
+{{variable_name}}
+```
+
+**Nested Access**:
+```
+{{blueprint.name}}
+{{resources[0].cloud_provider.name}}
+```
+
+**Default Values**:
+```
+{{variable|default:"default_value"}}
+{{resources[0].replicas|default:"3"}}
+```
+
+### Conditional Blocks
+
+**If/Else**:
+```hcl
+{{#if resources[0].cloud_provider.name == "AWS"}}
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
+{{else}}
+provider "azurerm" {
+  features {}
+}
+{{/if}}
+```
+
+### Loops
+
+**Iterating Over Arrays**:
+```yaml
+{{#each resources}}
+- name: {{this.name}}
+  type: {{this.resource_type.name}}
+  provider: {{this.cloud_provider.name}}
+{{/each}}
+```
+
+**Iterating with Index**:
+```hcl
+{{#each resources}}
+resource "aws_instance" "instance_{{@index}}" {
+  ami           = "{{this.configuration.ami}}"
+  instance_type = "{{this.configuration.instance_type}}"
+}
+{{/each}}
+```
+
+### Comments
+
+**Template Comments** (not included in output):
+```
+{{!-- This is a comment --}}
+```
+
+### Escaping
+
+**Literal Braces**:
+```
+\{{not_a_variable}}  # Outputs: {{not_a_variable}}
+```
+
+### Built-in Helpers
+
+**Case Conversion**:
+```
+{{uppercase blueprint.name}}
+{{lowercase blueprint.name}}
+{{capitalize blueprint.name}}
+```
+
+**String Operations**:
+```
+{{trim "  value  "}}
+{{replace blueprint.name "-" "_"}}
+```
+
+**Type Checking**:
+```
+{{#if (is_array resources)}}
+  # Handle array
+{{/if}}
 ```
 
 ## Error Handling
@@ -419,8 +667,20 @@ pub enum CliError {
     #[error("Invalid configuration: {0}")]
     ConfigurationError(String),
     
-    #[error("Code generation error: {0}")]
-    GenerationError(String),
+    #[error("Template error: {0}")]
+    TemplateError(String),
+    
+    #[error("Template discovery error: {0}")]
+    DiscoveryError(String),
+    
+    #[error("Variable not found: {0}")]
+    VariableNotFoundError(String),
+    
+    #[error("Template processing error: {0}")]
+    ProcessingError(String),
+    
+    #[error("YAML validation error: {0}")]
+    YamlValidationError(String),
 }
 ```
 
@@ -430,7 +690,10 @@ pub enum CliError {
 2. **Network Errors**: Provide clear messages about connectivity issues
 3. **File System Errors**: Handle permission and disk space issues
 4. **Validation Errors**: Validate inputs before making API calls
-5. **Graceful Degradation**: Continue processing when possible, report all errors at end
+5. **Template Errors**: Catch and report template syntax errors with line numbers
+6. **Variable Errors**: Report missing or undefined variables with suggestions
+7. **YAML/JSON Validation**: Validate output syntax before writing files
+8. **Graceful Degradation**: Continue processing when possible, report all errors at end
 
 ### User-Facing Error Messages
 
@@ -534,9 +797,16 @@ tokio = { version = "1.35", features = ["full"] }
 # JSON serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_yaml = "0.9"
 
 # UUID handling
 uuid = { version = "1.6", features = ["serde"] }
+
+# Template engine
+handlebars = "5.0"
+
+# Directory walking
+walkdir = "2.4"
 
 # Error handling
 thiserror = "1.0"
@@ -568,13 +838,15 @@ predicates = "3.0"
 
 - `IDP_API_KEY`: API key for authentication (overridden by `--api-key` flag)
 - `IDP_API_URL`: Base URL for IDP API (overridden by `--api-url` flag)
-- `IDP_OUTPUT_DIR`: Output directory for generated files (overridden by `--output-dir` flag)
+- `IDP_OUTPUT_DIR`: Output directory for processed files (overridden by `--output-dir` flag)
+- `IDP_TEMPLATE_DIR`: Template directory path (overridden by `--template-dir` flag)
 - `RUST_LOG`: Logging level (debug, info, warn, error)
 
 ### Default Values
 
 - API URL: `http://localhost:8082/api/v1`
-- Output Directory: `./terraform` (current working directory + terraform subdirectory)
+- Output Directory: `./output` (current working directory + output subdirectory)
+- Template Directory: No default (must be specified)
 - Log Level: `info`
 
 ### Configuration Precedence
@@ -582,6 +854,31 @@ predicates = "3.0"
 1. Command-line flags (highest priority)
 2. Environment variables
 3. Default values (lowest priority)
+
+### Example Usage
+
+```bash
+# Generate from blueprint with templates
+idp-cli generate \
+  --data-source blueprint \
+  --identifier web-app-blueprint \
+  --template-dir ./templates/terraform \
+  --output-dir ./generated/terraform \
+  --api-key $IDP_API_KEY
+
+# Generate Kubernetes manifests from stack
+idp-cli generate \
+  --data-source stack \
+  --identifier my-prod-stack \
+  --template-dir ./templates/k8s \
+  --output-dir ./generated/k8s \
+  --variables-file ./custom-vars.yaml
+
+# List available variables
+idp-cli list-variables \
+  --data-source blueprint \
+  --identifier web-app-blueprint
+```
 
 ## Security Considerations
 
@@ -629,23 +926,67 @@ predicates = "3.0"
 
 ### Phase 2 Features
 
-1. **Template Support**: Allow custom HCL templates
-2. **Multi-Environment**: Generate code for multiple environments
-3. **State Management**: Generate backend configuration for remote state
-4. **Module Generation**: Create reusable Terraform modules
-5. **Validation**: Validate generated code before writing
-6. **Dry Run**: Preview generated code without writing files
-7. **Interactive Mode**: Prompt for missing configuration
-8. **Diff Mode**: Show changes between existing and new code
+1. **Template Helpers**: Add custom Handlebars helpers for common transformations
+   - Case conversion (camelCase, snake_case, kebab-case)
+   - String manipulation (trim, replace, concat)
+   - Math operations (add, subtract, multiply)
+   - Conditional logic (equals, contains, greater_than)
+
+2. **Template Validation**: Validate templates before processing
+   - Check for undefined variables
+   - Validate template syntax
+   - Detect circular references
+
+3. **Multi-Environment Support**: Process templates for multiple environments
+   - Environment-specific variable files
+   - Conditional template sections based on environment
+   - Batch processing for dev/staging/prod
+
+4. **Dry Run Mode**: Preview processed templates without writing files
+   - Show diff between template and output
+   - Highlight variable substitutions
+   - Validate output syntax
+
+5. **Interactive Mode**: Prompt for missing variables
+   - Detect undefined variables
+   - Prompt user for values
+   - Save responses to variables file
+
+6. **Template Library**: Built-in template examples
+   - AWS Terraform templates
+   - Azure Terraform templates
+   - GCP Terraform templates
+   - Kubernetes manifest templates
+   - Helm chart templates
 
 ### Phase 3 Features
 
-1. **Plan Integration**: Execute `terraform plan` automatically
-2. **Apply Integration**: Execute `terraform apply` with approval
-3. **State Import**: Import existing infrastructure into state
-4. **Drift Detection**: Compare IDP state with Terraform state
-5. **Cost Estimation**: Integrate with cost estimation tools
-6. **Policy Validation**: Validate against organizational policies
+1. **Integration with IaC Tools**: Execute tools after generation
+   - `terraform init/plan/apply`
+   - `kubectl apply`
+   - `helm install`
+
+2. **Template Marketplace**: Share and discover templates
+   - Community-contributed templates
+   - Organization-specific template repositories
+   - Template versioning and updates
+
+3. **Advanced Variable Sources**: Support additional data sources
+   - Environment variables
+   - AWS Parameter Store
+   - HashiCorp Vault
+   - Kubernetes ConfigMaps/Secrets
+
+4. **Policy Validation**: Validate generated output against policies
+   - OPA (Open Policy Agent) integration
+   - Custom validation rules
+   - Security scanning
+
+5. **CI/CD Integration**: Streamline pipeline usage
+   - GitHub Actions integration
+   - GitLab CI integration
+   - Jenkins plugin
+   - Automated PR creation with generated code
 
 ## Deployment
 
