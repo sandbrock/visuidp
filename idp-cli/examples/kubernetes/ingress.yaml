@@ -1,0 +1,72 @@
+{{#if ingress.enabled}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{stack.name}}-ingress
+  namespace: {{stack.name}}-{{environment|default:"dev"}}
+  labels:
+    app: {{stack.name}}
+    managed-by: idp
+  annotations:
+    {{#if ingress.class}}
+    kubernetes.io/ingress.class: "{{ingress.class}}"
+    {{/if}}
+    {{#if ingress.cert_manager}}
+    cert-manager.io/cluster-issuer: "{{ingress.cert_manager.issuer|default:"letsencrypt-prod"}}"
+    {{/if}}
+    {{#if ingress.rate_limit}}
+    nginx.ingress.kubernetes.io/limit-rps: "{{ingress.rate_limit.rps|default:"100"}}"
+    {{/if}}
+    {{#if ingress.cors_enabled}}
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "{{ingress.cors_origins|default:"*"}}"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "{{ingress.cors_methods|default:"GET, POST, PUT, DELETE, OPTIONS"}}"
+    {{/if}}
+    {{#if ingress.ssl_redirect}}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    {{/if}}
+    {{#if ingress.custom_annotations}}
+    {{#each ingress.custom_annotations}}
+    {{@key}}: "{{this}}"
+    {{/each}}
+    {{/if}}
+spec:
+  {{#if ingress.tls_enabled}}
+  tls:
+  - hosts:
+    - {{ingress.host}}
+    {{#if ingress.additional_hosts}}
+    {{#each ingress.additional_hosts}}
+    - {{this}}
+    {{/each}}
+    {{/if}}
+    secretName: {{ingress.tls_secret|default:(concat stack.name "-tls")}}
+  {{/if}}
+  
+  rules:
+  - host: {{ingress.host}}
+    http:
+      paths:
+      - path: {{ingress.path|default:"/"}}
+        pathType: {{ingress.path_type|default:"Prefix"}}
+        backend:
+          service:
+            name: {{stack.name}}
+            port:
+              number: {{service_port|default:"80"}}
+  
+  {{#if ingress.additional_hosts}}
+  {{#each ingress.additional_hosts}}
+  - host: {{this}}
+    http:
+      paths:
+      - path: {{../ingress.path|default:"/"}}
+        pathType: {{../ingress.path_type|default:"Prefix"}}
+        backend:
+          service:
+            name: {{../stack.name}}
+            port:
+              number: {{../service_port|default:"80"}}
+  {{/each}}
+  {{/if}}
+{{/if}}

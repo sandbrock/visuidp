@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{stack.name}}
+  namespace: {{stack.name}}-{{environment|default:"dev"}}
+  labels:
+    app: {{stack.name}}
+    managed-by: idp
+  {{#if service_annotations}}
+  annotations:
+    {{#each service_annotations}}
+    {{@key}}: "{{this}}"
+    {{/each}}
+  {{/if}}
+spec:
+  type: {{service_type|default:"ClusterIP"}}
+  
+  {{#if (eq service_type "LoadBalancer")}}
+  {{#if load_balancer_ip}}
+  loadBalancerIP: {{load_balancer_ip}}
+  {{/if}}
+  {{#if load_balancer_source_ranges}}
+  loadBalancerSourceRanges:
+  {{#each load_balancer_source_ranges}}
+  - {{this}}
+  {{/each}}
+  {{/if}}
+  {{/if}}
+  
+  selector:
+    app: {{stack.name}}
+  
+  ports:
+  {{#each stack_resources}}
+  {{#if (eq this.resource_type.name "ContainerOrchestrator")}}
+  - name: http
+    port: {{../../service_port|default:"80"}}
+    targetPort: {{this.configuration.port|default:"80"}}
+    protocol: TCP
+    {{#if (eq ../../service_type "NodePort")}}
+    nodePort: {{../../node_port}}
+    {{/if}}
+  {{#if this.configuration.metrics_port}}
+  - name: metrics
+    port: {{this.configuration.metrics_port}}
+    targetPort: {{this.configuration.metrics_port}}
+    protocol: TCP
+  {{/if}}
+  {{/if}}
+  {{/each}}
+  
+  {{#if session_affinity}}
+  sessionAffinity: {{session_affinity}}
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{session_affinity_timeout|default:"10800"}}
+  {{/if}}

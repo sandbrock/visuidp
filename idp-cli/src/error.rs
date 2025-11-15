@@ -22,6 +22,27 @@ pub enum CliError {
 
     #[error("Code generation error: {0}")]
     GenerationError(String),
+
+    #[error("Variable file error: {0}")]
+    VariableFileError(String),
+
+    #[error("Template discovery error: {0}")]
+    DiscoveryError(String),
+
+    #[error("Template processing error: {0}")]
+    ProcessingError(String),
+
+    #[error("Template syntax error at line {line}: {message}")]
+    TemplateSyntaxError { line: usize, message: String },
+
+    #[error("Variable not found: {variable}\n{suggestion}")]
+    VariableNotFoundError { variable: String, suggestion: String },
+
+    #[error("YAML parsing error: {0}")]
+    YamlParseError(#[from] serde_yaml::Error),
+
+    #[error("JSON parsing error: {0}")]
+    JsonParseError(#[from] serde_json::Error),
 }
 
 impl CliError {

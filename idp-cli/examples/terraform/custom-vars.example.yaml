@@ -1,0 +1,39 @@
+# Example Custom Variables for Terraform Templates
+# Copy this file and customize for your environment
+
+# Environment configuration
+environment: production
+
+# AWS-specific configuration (if using AWS)
+aws_region: us-west-2
+
+# Azure-specific configuration (if using Azure)
+azure_location: westus2
+resource_group_name: my-app-prod-rg
+
+# GCP-specific configuration (if using GCP)
+gcp_project: my-project-id
+gcp_region: us-central1
+
+# Database passwords (use secure methods in production)
+# These should be provided via environment variables or secret management
+db_password_postgres-db: "CHANGE_ME_SECURE_PASSWORD"
+
+# Additional tags for all resources
+additional_tags:
+  Team: Platform
+  CostCenter: Engineering
+  Project: MyApp
+  Owner: platform-team@example.com
+
+# Container configuration
+my_app_container_image: "myregistry.io/myapp:v1.2.3"
+my_app_container_port: 8080
+
+# Storage configuration
+my_storage_versioning_enabled: true
+
+# Custom application settings
+enable_monitoring: true
+enable_backup: true
+backup_retention_days: 30

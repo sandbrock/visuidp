@@ -1,0 +1,162 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{stack.name}}
+  namespace: {{stack.name}}-{{environment|default:"dev"}}
+  labels:
+    app: {{stack.name}}
+    managed-by: idp
+    stack-type: {{stack.stack_type}}
+    version: {{version|default:"1.0.0"}}
+spec:
+  replicas: {{replicas|default:"3"}}
+  selector:
+    matchLabels:
+      app: {{stack.name}}
+  template:
+    metadata:
+      labels:
+        app: {{stack.name}}
+        version: {{version|default:"1.0.0"}}
+      {{#if enable_monitoring}}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{metrics_port|default:"9090"}}"
+        prometheus.io/path: "/metrics"
+      {{/if}}
+    spec:
+      {{#if service_account_name}}
+      serviceAccountName: {{service_account_name}}
+      {{/if}}
+      
+      containers:
+      {{#each stack_resources}}
+      {{#if (eq this.resource_type.name "ContainerOrchestrator")}}
+      - name: {{this.name}}
+        image: {{this.configuration.image|default:"nginx:latest"}}
+        imagePullPolicy: {{image_pull_policy|default:"IfNotPresent"}}
+        
+        ports:
+        - name: http
+          containerPort: {{this.configuration.port|default:"80"}}
+          protocol: TCP
+        {{#if this.configuration.metrics_port}}
+        - name: metrics
+          containerPort: {{this.configuration.metrics_port}}
+          protocol: TCP
+        {{/if}}
+        
+        env:
+        - name: ENVIRONMENT
+          value: "{{../../environment|default:"dev"}}"
+        - name: STACK_NAME
+          value: "{{../../stack.name}}"
+        - name: CLOUD_NAME
+          value: "{{../../stack.cloud_name}}"
+        {{#if ../../database}}
+        - name: DATABASE_HOST
+          value: "{{../../database.host}}"
+        - name: DATABASE_PORT
+          value: "{{../../database.port}}"
+        - name: DATABASE_NAME
+          value: "{{../../database.name}}"
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{../../stack.name}}-db-credentials
+              key: username
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{../../stack.name}}-db-credentials
+              key: password
+        {{/if}}
+        {{#if ../../custom_env_vars}}
+        {{#each ../../custom_env_vars}}
+        - name: {{@key}}
+          value: "{{this}}"
+        {{/each}}
+        {{/if}}
+        
+        envFrom:
+        - configMapRef:
+            name: {{../../stack.name}}-config
+        
+        resources:
+          requests:
+            memory: "{{../../resources.requests.memory|default:"128Mi"}}"
+            cpu: "{{../../resources.requests.cpu|default:"100m"}}"
+          limits:
+            memory: "{{../../resources.limits.memory|default:"256Mi"}}"
+            cpu: "{{../../resources.limits.cpu|default:"200m"}}"
+        
+        {{#if (eq ../../stack.stack_type "RestfulApi")}}
+        livenessProbe:
+          httpGet:
+            path: {{../../health_check_path|default:"/health"}}
+            port: http
+          initialDelaySeconds: {{../../liveness_initial_delay|default:"30"}}
+          periodSeconds: {{../../liveness_period|default:"10"}}
+          timeoutSeconds: {{../../liveness_timeout|default:"5"}}
+          failureThreshold: {{../../liveness_failure_threshold|default:"3"}}
+        
+        readinessProbe:
+          httpGet:
+            path: {{../../readiness_check_path|default:"/ready"}}
+            port: http
+          initialDelaySeconds: {{../../readiness_initial_delay|default:"10"}}
+          periodSeconds: {{../../readiness_period|default:"5"}}
+          timeoutSeconds: {{../../readiness_timeout|default:"3"}}
+          failureThreshold: {{../../readiness_failure_threshold|default:"3"}}
+        {{/if}}
+        
+        {{#if ../../enable_volume_mounts}}
+        volumeMounts:
+        - name: app-data
+          mountPath: {{../../volume_mount_path|default:"/data"}}
+        {{/if}}
+      {{/if}}
+      {{/each}}
+      
+      {{#if enable_volume_mounts}}
+      volumes:
+      - name: app-data
+        {{#if use_persistent_volume}}
+        persistentVolumeClaim:
+          claimName: {{stack.name}}-pvc
+        {{else}}
+        emptyDir: {}
+        {{/if}}
+      {{/if}}
+      
+      {{#if node_selector}}
+      nodeSelector:
+        {{#each node_selector}}
+        {{@key}}: "{{this}}"
+        {{/each}}
+      {{/if}}
+      
+      {{#if tolerations}}
+      tolerations:
+      {{#each tolerations}}
+      - key: "{{this.key}}"
+        operator: "{{this.operator}}"
+        value: "{{this.value}}"
+        effect: "{{this.effect}}"
+      {{/each}}
+      {{/if}}
+      
+      {{#if affinity_rules}}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{stack.name}}
+              topologyKey: kubernetes.io/hostname
+      {{/if}}

@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Blueprint {
     pub id: Uuid,
     pub name: String,
@@ -11,7 +11,7 @@ pub struct Blueprint {
     pub supported_cloud_providers: Vec<CloudProvider>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BlueprintResource {
     pub id: Uuid,
     pub name: String,
@@ -22,7 +22,7 @@ pub struct BlueprintResource {
     pub cloud_specific_properties: HashMap<String, serde_json::Value>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Stack {
     pub id: Uuid,
     pub name: String,
@@ -33,7 +33,7 @@ pub struct Stack {
     pub blueprint: Option<Blueprint>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct StackResource {
     pub id: Uuid,
     pub name: String,
@@ -43,14 +43,14 @@ pub struct StackResource {
     pub configuration: HashMap<String, serde_json::Value>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ResourceType {
     pub id: Uuid,
     pub name: String,
     pub category: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CloudProvider {
     pub id: Uuid,
     pub name: String,

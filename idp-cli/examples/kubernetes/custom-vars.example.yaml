@@ -1,0 +1,149 @@
+# Example Custom Variables for Kubernetes Templates
+# Copy this file and customize for your environment
+
+# Environment configuration
+environment: production
+namespace: my-app-prod
+
+# Deployment configuration
+replicas: 5
+version: "1.2.3"
+image_pull_policy: Always
+
+# Service configuration
+service_type: LoadBalancer
+service_port: 80
+node_port: 30080  # Only used if service_type is NodePort
+
+# Resource limits
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# Health checks
+health_check_path: /health
+readiness_check_path: /ready
+liveness_initial_delay: 30
+readiness_initial_delay: 10
+
+# Monitoring configuration
+enable_monitoring: true
+metrics_port: 9090
+tracing_enabled: true
+
+# Ingress configuration
+ingress:
+  enabled: true
+  class: nginx
+  host: api.example.com
+  path: /
+  path_type: Prefix
+  tls_enabled: true
+  tls_secret: api-tls-cert
+  ssl_redirect: true
+  cors_enabled: true
+  cors_origins: "https://app.example.com"
+  cors_methods: "GET, POST, PUT, DELETE, OPTIONS"
+  rate_limit:
+    rps: 100
+  cert_manager:
+    issuer: letsencrypt-prod
+  additional_hosts:
+    - api-backup.example.com
+
+# Autoscaling configuration
+enable_autoscaling: true
+autoscaling:
+  min_replicas: 2
+  max_replicas: 10
+  target_cpu: 70
+  target_memory: 80
+  scale_down_window: 300
+  scale_down_percent: 50
+  scale_down_pods: 2
+  scale_down_period: 60
+  scale_up_window: 0
+  scale_up_percent: 100
+  scale_up_pods: 4
+  scale_up_period: 30
+
+# Database configuration
+database:
+  host: postgres.example.com
+  port: 5432
+  name: myapp_db
+
+# Logging configuration
+log_level: info
+log_format: json
+
+# API configuration (for RestfulApi stack type)
+api_base_path: /api/v1
+api_timeout: 30
+cors_enabled: true
+cors_origins: "*"
+
+# Cache configuration
+cache_config:
+  enabled: true
+  ttl: 3600
+  max_size: 1000
+
+# Feature flags
+feature_flags:
+  new_ui: true
+  beta_features: false
+  experimental_api: false
+
+# Custom environment variables
+custom_env_vars:
+  CUSTOM_VAR_1: value1
+  CUSTOM_VAR_2: value2
+
+# Custom configuration
+custom_config:
+  max_connections: "100"
+  timeout_seconds: "30"
+  retry_attempts: "3"
+
+# Volume configuration
+enable_volume_mounts: true
+use_persistent_volume: true
+volume_mount_path: /data
+
+# Node selection
+node_selector:
+  node-type: application
+  environment: production
+
+# Tolerations
+tolerations:
+  - key: dedicated
+    operator: Equal
+    value: application
+    effect: NoSchedule
+
+# Affinity rules
+affinity_rules: true
+
+# Service account
+service_account_name: my-app-sa
+
+# Session affinity
+session_affinity: ClientIP
+session_affinity_timeout: 10800
+
+# Service annotations
+service_annotations:
+  service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+
+# Additional labels
+additional_labels:
+  team: platform
+  project: myapp
+  cost-center: engineering

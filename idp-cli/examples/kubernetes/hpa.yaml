@@ -1,0 +1,72 @@
+{{#if enable_autoscaling}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{stack.name}}-hpa
+  namespace: {{stack.name}}-{{environment|default:"dev"}}
+  labels:
+    app: {{stack.name}}
+    managed-by: idp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{stack.name}}
+  
+  minReplicas: {{autoscaling.min_replicas|default:"2"}}
+  maxReplicas: {{autoscaling.max_replicas|default:"10"}}
+  
+  metrics:
+  {{#if autoscaling.target_cpu}}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{autoscaling.target_cpu}}
+  {{/if}}
+  
+  {{#if autoscaling.target_memory}}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{autoscaling.target_memory}}
+  {{/if}}
+  
+  {{#if autoscaling.custom_metrics}}
+  {{#each autoscaling.custom_metrics}}
+  - type: Pods
+    pods:
+      metric:
+        name: {{this.name}}
+      target:
+        type: AverageValue
+        averageValue: "{{this.target_value}}"
+  {{/each}}
+  {{/if}}
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{autoscaling.scale_down_window|default:"300"}}
+      policies:
+      - type: Percent
+        value: {{autoscaling.scale_down_percent|default:"50"}}
+        periodSeconds: {{autoscaling.scale_down_period|default:"60"}}
+      - type: Pods
+        value: {{autoscaling.scale_down_pods|default:"2"}}
+        periodSeconds: {{autoscaling.scale_down_period|default:"60"}}
+      selectPolicy: Min
+    
+    scaleUp:
+      stabilizationWindowSeconds: {{autoscaling.scale_up_window|default:"0"}}
+      policies:
+      - type: Percent
+        value: {{autoscaling.scale_up_percent|default:"100"}}
+        periodSeconds: {{autoscaling.scale_up_period|default:"30"}}
+      - type: Pods
+        value: {{autoscaling.scale_up_pods|default:"4"}}
+        periodSeconds: {{autoscaling.scale_up_period|default:"30"}}
+      selectPolicy: Max
+{{/if}}
