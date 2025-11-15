@@ -1,0 +1,58 @@
+[package]
+name = "idp-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["VisuIDP Team"]
+description = "CLI tool for generating OpenTofu infrastructure-as-code from IDP blueprints and stacks"
+license = "MIT"
+repository = "https://github.com/angryss/idp-cli"
+
+[lib]
+name = "idp_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "idp-cli"
+path = "src/main.rs"
+
+[dependencies]
+# CLI argument parsing
+clap = { version = "4.4", features = ["derive", "env"] }
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# JSON serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# UUID handling
+uuid = { version = "1.6", features = ["serde", "v4"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+env_logger = "0.11"
+log = "0.4"
+
+[dev-dependencies]
+# HTTP mocking
+mockito = "1.2"
+
+# Temporary directories for testing
+tempfile = "3.8"
+
+# Command testing
+assert_cmd = "2.0"
+predicates = "3.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

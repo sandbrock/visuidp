@@ -2,7 +2,7 @@
 
 ## Overview
 
-The IDP Terraform CLI is a Rust-based command-line application that bridges the IDP API and Terraform infrastructure-as-code. It queries stack and resource definitions from the IDP API and generates cloud-provider-specific Terraform configurations. The CLI emphasizes developer experience with clear error messages, flexible configuration options, and support for multiple cloud providers.
+The IDP Terraform CLI is a Rust-based command-line tool that generates OpenTofu (Terraform-compatible) infrastructure-as-code from blueprints and stacks managed by the IDP API. The tool authenticates using API keys, fetches infrastructure definitions via REST API calls, and generates idiomatic HCL configuration files that can be used for infrastructure provisioning and management.
 
 ## Architecture
 
@@ -12,685 +12,387 @@ The IDP Terraform CLI is a Rust-based command-line application that bridges the 
 ┌─────────────────┐
 │   CLI User      │
 └────────┬────────┘
-         │
+         │ Commands
          ▼
 ┌─────────────────────────────────────────┐
-│         CLI Application                 │
+│         IDP Terraform CLI               │
+│         (Rust source in idp-cli/src/)   │
 │  ┌───────────────────────────────────┐  │
 │  │   Command Parser (clap)           │  │
 │  └───────────┬───────────────────────┘  │
 │              │                           │
 │  ┌───────────▼───────────────────────┐  │
-│  │   Configuration Manager           │  │
-│  └───────────┬───────────────────────┘  │
-│              │                           │
-│  ┌───────────▼───────────────────────┐  │
 │  │   API Client (reqwest)            │  │
+│  │   - Authentication                │  │
+│  │   - Blueprint/Stack Fetching      │  │
 │  └───────────┬───────────────────────┘  │
 │              │                           │
 │  ┌───────────▼───────────────────────┐  │
-│  │   Terraform Generator             │  │
-│  │   ┌─────────────────────────────┐ │  │
-│  │   │  Provider Mappers           │ │  │
-│  │   │  - AWS Mapper               │ │  │
-│  │   │  - Azure Mapper             │ │  │
-│  │   │  - GCP Mapper               │ │  │
-│  │   │  - Kubernetes Mapper        │ │  │
-│  │   └─────────────────────────────┘ │  │
+│  │   Code Generator                  │  │
+│  │   - HCL Generation                │  │
+│  │   - Resource Mapping              │  │
+│  │   - File Organization             │  │
 │  └───────────┬───────────────────────┘  │
 │              │                           │
 │  ┌───────────▼───────────────────────┐  │
 │  │   File Writer                     │  │
 │  └───────────────────────────────────┘  │
 └─────────────────────────────────────────┘
-         │
+         │ Generated OpenTofu Files
          ▼
-┌─────────────────┐
-│   IDP API       │
-└─────────────────┘
+┌──────────────────────────┐
+│  User-Defined Directory  │
+│  (e.g., ./terraform/)    │
+│  - main.tf               │
+│  - variables.tf          │
+│  - providers.tf          │
+│  - outputs.tf            │
+└──────────────────────────┘
 ```
 
-### Module Structure
+### Component Interaction Flow
 
 ```
-idp-cli/
-├── Cargo.toml
-├── src/
-│   ├── main.rs                    # Entry point, CLI setup
-│   ├── cli/
-│   │   ├── mod.rs                 # CLI module exports
-│   │   ├── commands.rs            # Command definitions
-│   │   └── args.rs                # Argument parsing structures
-│   ├── config/
-│   │   ├── mod.rs                 # Configuration module exports
-│   │   ├── loader.rs              # Config file loading
-│   │   └── settings.rs            # Settings structure
-│   ├── api/
-│   │   ├── mod.rs                 # API module exports
-│   │   ├── client.rs              # HTTP client wrapper
-│   │   ├── models.rs              # API response models
-│   │   └── endpoints.rs           # API endpoint definitions
-│   ├── terraform/
-│   │   ├── mod.rs                 # Terraform module exports
-│   │   ├── generator.rs           # Main generation orchestrator
-│   │   ├── hcl_builder.rs         # HCL syntax builder
-│   │   ├── providers/
-│   │   │   ├── mod.rs             # Provider module exports
-│   │   │   ├── aws.rs             # AWS resource mapper
-│   │   │   ├── azure.rs           # Azure resource mapper
-│   │   │   ├── gcp.rs             # GCP resource mapper
-│   │   │   └── kubernetes.rs      # Kubernetes resource mapper
-│   │   └── templates/
-│   │       ├── mod.rs             # Template module exports
-│   │       ├── compute.rs         # Compute resource templates
-│   │       ├── database.rs        # Database resource templates
-│   │       ├── networking.rs      # Networking resource templates
-│   │       └── storage.rs         # Storage resource templates
-│   ├── output/
-│   │   ├── mod.rs                 # Output module exports
-│   │   ├── writer.rs              # File writing logic
-│   │   └── formatter.rs           # Output formatting
-│   └── error.rs                   # Error types and handling
-└── tests/
-    ├── integration/
-    │   ├── api_tests.rs           # API client tests
-    │   └── generation_tests.rs    # Terraform generation tests
-    └── fixtures/
-        └── sample_responses.json  # Mock API responses
+User Command → CLI Parser → API Client → IDP API
+                                ↓
+                         JSON Response
+                                ↓
+                         Code Generator
+                                ↓
+                         HCL Files → File System
 ```
 
 ## Components and Interfaces
 
-### 1. CLI Command Parser
+### 1. Command Parser Module
 
-**Responsibility:** Parse command-line arguments and route to appropriate handlers
+**Responsibility**: Parse command-line arguments and route to appropriate handlers
 
-**Key Dependencies:**
-- `clap` v4.x for argument parsing with derive macros
-- `clap_complete` for shell completion generation
+**Dependencies**: `clap` crate for argument parsing
 
-**Commands:**
+**Interface**:
 ```rust
+pub struct CliArgs {
+    pub command: Command,
+    pub api_key: Option<String>,
+    pub api_url: Option<String>,
+    pub output_dir: Option<PathBuf>,
+}
+
 pub enum Command {
-    // Stack operations
-    ListStacks {
-        stack_type: Option<String>,
-        cloud_provider: Option<String>,
-    },
-    GetStack {
-        id: String,
-    },
-    Generate {
-        stack_id: String,
-        output_dir: Option<PathBuf>,
-        dry_run: bool,
-        force: bool,
-        skip_validation: bool,
-    },
-    
-    // Resource type operations
-    ListResourceTypes {
-        category: Option<String>,
-    },
-    
-    // Configuration operations
-    InitConfig {
-        output_path: Option<PathBuf>,
-    },
-    
-    // Utility operations
+    Blueprint { identifier: String },
+    Stack { identifier: String },
     Version,
 }
+
+pub fn parse_args() -> Result<CliArgs, CliError>;
 ```
 
-**Global Options:**
-```rust
-pub struct GlobalOpts {
-    pub api_url: Option<String>,
-    pub api_key: Option<String>,
-    pub verbose: bool,
-    pub config_file: Option<PathBuf>,
-}
-```
+**Key Features**:
+- Subcommands for `blueprint` and `stack`
+- Global flags: `--api-key`, `--api-url`, `--output-dir`
+- Environment variable support: `IDP_API_KEY`, `IDP_API_URL`
+- Help text generation
+- Version information
 
-### 2. Configuration Manager
+### 2. API Client Module
 
-**Responsibility:** Load and merge configuration from multiple sources (file, env vars, CLI args)
+**Responsibility**: Handle HTTP communication with IDP API
 
-**Configuration Priority (highest to lowest):**
-1. Command-line flags
-2. Environment variables
-3. Local config file (`.idp-cli.toml`)
-4. User config file (`~/.config/idp-cli/config.toml`)
-5. Default values
+**Dependencies**: `reqwest` for HTTP, `serde` for JSON serialization
 
-**Configuration Structure:**
-```rust
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Config {
-    pub api: ApiConfig,
-    pub output: OutputConfig,
-    pub terraform: TerraformConfig,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ApiConfig {
-    pub base_url: String,
-    pub api_key: Option<String>,
-    pub timeout_seconds: u64,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct OutputConfig {
-    pub default_directory: PathBuf,
-    pub overwrite_without_prompt: bool,
-    pub use_colors: bool,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct TerraformConfig {
-    pub validate_after_generation: bool,
-    pub terraform_binary_path: Option<PathBuf>,
-    pub backend: Option<BackendConfig>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct BackendConfig {
-    pub backend_type: String,  // "s3", "azurerm", "gcs", "local"
-    pub config: HashMap<String, String>,
-}
-```
-
-**File Format (TOML):**
-```toml
-[api]
-base_url = "https://api.example.com/api/v1"
-timeout_seconds = 30
-
-[output]
-default_directory = "./terraform-output"
-overwrite_without_prompt = false
-use_colors = true
-
-[terraform]
-validate_after_generation = true
-
-[terraform.backend]
-backend_type = "s3"
-config = { bucket = "my-terraform-state", key = "idp/terraform.tfstate", region = "us-east-1" }
-```
-
-### 3. API Client
-
-**Responsibility:** Handle HTTP communication with IDP API
-
-**Key Dependencies:**
-- `reqwest` for HTTP client with async support
-- `serde` and `serde_json` for JSON serialization
-
-**Interface:**
+**Interface**:
 ```rust
 pub struct ApiClient {
-    client: reqwest::Client,
     base_url: String,
     api_key: String,
+    client: reqwest::Client,
 }
 
 impl ApiClient {
-    pub fn new(base_url: String, api_key: String) -> Result<Self>;
+    pub fn new(base_url: String, api_key: String) -> Self;
     
-    // Stack operations
-    pub async fn list_stacks(&self, filters: StackFilters) -> Result<Vec<Stack>>;
-    pub async fn get_stack(&self, id: &str) -> Result<StackDetail>;
+    pub async fn get_blueprint(&self, identifier: &str) -> Result<Blueprint, ApiError>;
     
-    // Resource type operations
-    pub async fn list_resource_types(&self, category: Option<&str>) -> Result<Vec<ResourceType>>;
-    pub async fn list_cloud_mappings(&self) -> Result<Vec<ResourceTypeCloudMapping>>;
-    
-    // Cloud provider operations
-    pub async fn list_cloud_providers(&self) -> Result<Vec<CloudProvider>>;
+    pub async fn get_stack(&self, identifier: &str) -> Result<Stack, ApiError>;
 }
 ```
 
-**Error Handling:**
-```rust
-#[derive(Debug, thiserror::Error)]
-pub enum ApiError {
-    #[error("Authentication failed: {0}")]
-    Unauthorized(String),
-    
-    #[error("Resource not found: {0}")]
-    NotFound(String),
-    
-    #[error("API request failed: {status} - {message}")]
-    RequestFailed { status: u16, message: String },
-    
-    #[error("Network error: {0}")]
-    NetworkError(#[from] reqwest::Error),
-    
-    #[error("Invalid response format: {0}")]
-    ParseError(#[from] serde_json::Error),
-}
+**Error Handling**:
+- 401 Unauthorized → Authentication error
+- 404 Not Found → Resource not found error
+- 500 Internal Server Error → Server error
+- Network errors → Connection error
+
+**Request Format**:
+```
+GET /api/v1/blueprints/{id}
+Headers:
+  Authorization: Bearer {api_key}
+  Content-Type: application/json
 ```
 
-### 4. Data Models
+### 3. Data Models Module
 
-**Responsibility:** Represent API response data structures
+**Responsibility**: Define data structures matching API responses
 
-**Key Models:**
+**Dependencies**: `serde` for JSON deserialization, `uuid` for ID handling
+
+**Structures**:
 ```rust
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
+pub struct Blueprint {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub resources: Vec<BlueprintResource>,
+    pub supported_cloud_providers: Vec<CloudProvider>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BlueprintResource {
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub resource_type: ResourceType,
+    pub cloud_provider: CloudProvider,
+    pub configuration: serde_json::Value,
+    pub cloud_specific_properties: HashMap<String, serde_json::Value>,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Stack {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub cloud_name: String,
-    pub route_path: String,
-    pub repository_url: Option<String>,
-    pub stack_type: StackType,
-    pub programming_language: Option<ProgrammingLanguage>,
-    pub is_public: Option<bool>,
-    pub created_by: String,
-    pub team_id: Option<String>,
-    pub cloud_provider_id: Option<String>,
-    pub configuration: Option<serde_json::Value>,
-    pub created_at: String,
-    pub updated_at: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct StackDetail {
-    #[serde(flatten)]
-    pub stack: Stack,
+    pub stack_type: String,
     pub stack_resources: Vec<StackResource>,
-    pub cloud_provider: Option<CloudProvider>,
+    pub blueprint: Option<Blueprint>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct StackResource {
-    pub id: String,
-    pub resource_type_id: String,
-    pub configuration: serde_json::Value,
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub resource_type: ResourceType,
+    pub cloud_provider: CloudProvider,
+    pub configuration: HashMap<String, serde_json::Value>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct ResourceType {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
-    pub display_name: String,
-    pub description: Option<String>,
-    pub category: ResourceCategory,
-    pub enabled: bool,
+    pub category: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ResourceTypeCloudMapping {
-    pub id: String,
-    pub resource_type_id: String,
-    pub cloud_provider_id: String,
-    pub cloud_resource_type: String,
-    pub configuration_schema: Option<serde_json::Value>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct CloudProvider {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub display_name: String,
-    pub description: Option<String>,
-    pub enabled: bool,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum StackType {
-    Infrastructure,
-    RestfulServerless,
-    RestfulApi,
-    JavascriptWebApplication,
-    EventDrivenServerless,
-    EventDrivenApi,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ResourceCategory {
-    Compute,
-    Database,
-    Cache,
-    Queue,
-    Storage,
-    Networking,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum ProgrammingLanguage {
-    Java,
-    Nodejs,
-    Python,
-    Go,
 }
 ```
 
-### 5. Terraform Generator
+### 4. Code Generator Module
 
-**Responsibility:** Orchestrate Terraform configuration generation
+**Responsibility**: Transform API data into OpenTofu HCL code
 
-**Interface:**
+**Dependencies**: Custom HCL generation logic
+
+**Interface**:
 ```rust
-pub struct TerraformGenerator {
-    provider_mappers: HashMap<String, Box<dyn ProviderMapper>>,
+pub struct CodeGenerator {
+    resource_mapper: ResourceMapper,
 }
 
-impl TerraformGenerator {
+impl CodeGenerator {
     pub fn new() -> Self;
     
-    pub fn generate(
-        &self,
-        stack: &StackDetail,
-        mappings: &[ResourceTypeCloudMapping],
-        output_dir: &Path,
-        options: &GenerationOptions,
-    ) -> Result<GeneratedFiles>;
+    pub fn generate_from_blueprint(&self, blueprint: &Blueprint) -> GeneratedCode;
     
-    fn generate_provider_config(&self, stack: &StackDetail) -> Result<String>;
-    fn generate_variables(&self, stack: &StackDetail) -> Result<String>;
-    fn generate_outputs(&self, stack: &StackDetail) -> Result<String>;
-    fn generate_backend(&self, backend_config: &BackendConfig) -> Result<String>;
+    pub fn generate_from_stack(&self, stack: &Stack) -> GeneratedCode;
 }
 
-pub struct GenerationOptions {
-    pub include_backend: bool,
-    pub backend_config: Option<BackendConfig>,
-    pub dry_run: bool,
-    pub validate: bool,
-}
-
-pub struct GeneratedFiles {
-    pub files: HashMap<PathBuf, String>,
-    pub summary: GenerationSummary,
-}
-
-pub struct GenerationSummary {
-    pub total_resources: usize,
-    pub resources_by_type: HashMap<String, usize>,
-    pub warnings: Vec<String>,
+pub struct GeneratedCode {
+    pub main_tf: String,
+    pub variables_tf: String,
+    pub providers_tf: String,
+    pub outputs_tf: String,
 }
 ```
 
-### 6. Provider Mappers
+**HCL Generation Strategy**:
+- Use string templates for basic structure
+- Generate provider blocks based on cloud providers
+- Map resource types to Terraform resource types
+- Convert JSON configuration to HCL attributes
+- Generate variables for configurable properties
+- Create outputs for resource identifiers
 
-**Responsibility:** Map IDP resource types to cloud-specific Terraform resources
+### 5. Resource Mapper Module
 
-**Trait Definition:**
+**Responsibility**: Map IDP resource types to Terraform resource types
+
+**Interface**:
 ```rust
-pub trait ProviderMapper: Send + Sync {
-    fn provider_name(&self) -> &str;
-    
-    fn generate_provider_block(&self, config: &serde_json::Value) -> Result<String>;
-    
-    fn map_compute_resource(
-        &self,
-        stack: &Stack,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
-    
-    fn map_database_resource(
-        &self,
-        resource_type: &str,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
-    
-    fn map_cache_resource(
-        &self,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
-    
-    fn map_queue_resource(
-        &self,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
-    
-    fn map_storage_resource(
-        &self,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
-    
-    fn map_networking_resource(
-        &self,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>>;
+pub struct ResourceMapper {
+    mappings: HashMap<(String, String), TerraformResourceType>,
 }
 
-pub struct TerraformResource {
-    pub resource_type: String,  // e.g., "aws_lambda_function"
-    pub resource_name: String,  // e.g., "api_function"
-    pub attributes: HashMap<String, serde_json::Value>,
-    pub depends_on: Vec<String>,
-}
-```
-
-**AWS Mapper Example:**
-```rust
-pub struct AwsMapper;
-
-impl ProviderMapper for AwsMapper {
-    fn provider_name(&self) -> &str {
-        "aws"
-    }
-    
-    fn map_compute_resource(
-        &self,
-        stack: &Stack,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>> {
-        match stack.stack_type {
-            StackType::RestfulServerless | StackType::EventDrivenServerless => {
-                self.generate_lambda_resources(stack, config)
-            }
-            StackType::RestfulApi | StackType::EventDrivenApi => {
-                self.generate_ecs_fargate_resources(stack, config)
-            }
-            _ => Ok(vec![]),
-        }
-    }
-    
-    fn map_database_resource(
-        &self,
-        resource_type: &str,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>> {
-        match resource_type {
-            "postgresql" => self.generate_aurora_postgresql(config),
-            _ => Err(Error::UnsupportedResourceType(resource_type.to_string())),
-        }
-    }
-}
-
-impl AwsMapper {
-    fn generate_lambda_resources(
-        &self,
-        stack: &Stack,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>> {
-        let mut resources = vec![];
-        
-        // IAM role for Lambda
-        resources.push(TerraformResource {
-            resource_type: "aws_iam_role".to_string(),
-            resource_name: format!("{}_lambda_role", stack.cloud_name),
-            attributes: self.lambda_role_attributes(stack),
-            depends_on: vec![],
-        });
-        
-        // Lambda function
-        resources.push(TerraformResource {
-            resource_type: "aws_lambda_function".to_string(),
-            resource_name: stack.cloud_name.clone(),
-            attributes: self.lambda_function_attributes(stack, config),
-            depends_on: vec![format!("aws_iam_role.{}_lambda_role", stack.cloud_name)],
-        });
-        
-        Ok(resources)
-    }
-    
-    fn generate_aurora_postgresql(
-        &self,
-        config: &serde_json::Value,
-    ) -> Result<Vec<TerraformResource>> {
-        // Generate RDS Aurora PostgreSQL cluster and instances
-        // ...
-    }
-}
-```
-
-### 7. HCL Builder
-
-**Responsibility:** Generate valid Terraform HCL syntax
-
-**Interface:**
-```rust
-pub struct HclBuilder {
-    indent_level: usize,
-    buffer: String,
-}
-
-impl HclBuilder {
+impl ResourceMapper {
     pub fn new() -> Self;
     
-    pub fn add_provider(&mut self, name: &str, attributes: &HashMap<String, serde_json::Value>);
-    pub fn add_resource(&mut self, resource: &TerraformResource);
-    pub fn add_variable(&mut self, name: &str, var_type: &str, description: Option<&str>, default: Option<&serde_json::Value>);
-    pub fn add_output(&mut self, name: &str, value: &str, description: Option<&str>);
-    pub fn add_backend(&mut self, backend_type: &str, config: &HashMap<String, String>);
-    
-    pub fn build(self) -> String;
-    
-    fn write_block(&mut self, block_type: &str, labels: &[&str], body: &str);
-    fn write_attribute(&mut self, key: &str, value: &serde_json::Value);
-    fn indent(&mut self);
-    fn dedent(&mut self);
+    pub fn get_terraform_resource_type(
+        &self,
+        resource_type: &str,
+        cloud_provider: &str
+    ) -> Option<&TerraformResourceType>;
+}
+
+pub struct TerraformResourceType {
+    pub provider: String,
+    pub resource_type: String,
+    pub attribute_mappings: HashMap<String, String>,
 }
 ```
 
-**Example Usage:**
-```rust
-let mut builder = HclBuilder::new();
+**Example Mappings**:
+- (RelationalDatabaseServer, AWS) → `aws_db_instance`
+- (ContainerOrchestrator, AWS) → `aws_ecs_cluster`
+- (Storage, AWS) → `aws_s3_bucket`
+- (RelationalDatabaseServer, Azure) → `azurerm_mssql_server`
+- (ContainerOrchestrator, Azure) → `azurerm_kubernetes_cluster`
 
-builder.add_provider("aws", &hashmap! {
-    "region" => json!("us-east-1"),
-    "default_tags" => json!({
-        "tags" => {
-            "ManagedBy" => "IDP",
-            "Stack" => stack.name
-        }
-    })
-});
+### 6. File Writer Module
 
-builder.add_resource(&TerraformResource {
-    resource_type: "aws_lambda_function".to_string(),
-    resource_name: "api_function".to_string(),
-    attributes: hashmap! {
-        "function_name" => json!("my-api-function"),
-        "runtime" => json!("java21"),
-        "handler" => json!("com.example.Handler"),
-        "role" => json!("${aws_iam_role.api_function_role.arn}"),
-    },
-    depends_on: vec!["aws_iam_role.api_function_role".to_string()],
-});
+**Responsibility**: Write generated code to file system
 
-let hcl = builder.build();
-```
+**Dependencies**: Standard library `std::fs`
 
-### 8. File Writer
-
-**Responsibility:** Write generated Terraform files to disk
-
-**Interface:**
+**Interface**:
 ```rust
 pub struct FileWriter {
     output_dir: PathBuf,
-    force_overwrite: bool,
 }
 
 impl FileWriter {
-    pub fn new(output_dir: PathBuf, force_overwrite: bool) -> Self;
+    pub fn new(output_dir: PathBuf) -> Self;
     
-    pub fn write_files(&self, files: &HashMap<PathBuf, String>) -> Result<()>;
+    pub fn write_generated_code(&self, code: &GeneratedCode) -> Result<Vec<PathBuf>, IoError>;
     
-    pub fn validate_terraform(&self, terraform_binary: Option<&Path>) -> Result<ValidationResult>;
-    
-    fn check_existing_files(&self, files: &HashMap<PathBuf, String>) -> Result<Vec<PathBuf>>;
-    fn prompt_overwrite(&self, existing_files: &[PathBuf]) -> Result<bool>;
-}
-
-pub struct ValidationResult {
-    pub success: bool,
-    pub output: String,
-    pub errors: Vec<String>,
+    fn ensure_directory_exists(&self) -> Result<(), IoError>;
 }
 ```
 
-### 9. Output Formatter
+**Rust Source Code Organization** (idp-cli/src/):
+```
+idp-cli/src/
+├── main.rs              # CLI entry point
+├── cli.rs               # Command parser
+├── api_client.rs        # API communication
+├── models.rs            # Data structures
+├── generator.rs         # Code generation
+├── resource_mapper.rs   # Resource type mapping
+├── file_writer.rs       # File I/O
+└── error.rs             # Error types
+```
 
-**Responsibility:** Format CLI output with colors and structure
-
-**Key Dependencies:**
-- `colored` for terminal color output
-- `prettytable-rs` for table formatting
-
-**Interface:**
-```rust
-pub struct OutputFormatter {
-    use_colors: bool,
-}
-
-impl OutputFormatter {
-    pub fn new(use_colors: bool) -> Self;
-    
-    pub fn print_success(&self, message: &str);
-    pub fn print_error(&self, message: &str);
-    pub fn print_warning(&self, message: &str);
-    pub fn print_info(&self, message: &str);
-    
-    pub fn print_stack_list(&self, stacks: &[Stack]);
-    pub fn print_stack_detail(&self, stack: &StackDetail);
-    pub fn print_resource_types(&self, resource_types: &[ResourceType]);
-    pub fn print_generation_summary(&self, summary: &GenerationSummary);
-}
+**Generated OpenTofu Files** (user-defined output directory):
+```
+<output-dir>/
+├── main.tf          # Main resource definitions
+├── variables.tf     # Input variables
+├── providers.tf     # Provider configurations
+└── outputs.tf       # Output values
 ```
 
 ## Data Models
 
-### Resource Type to Terraform Mapping
+### Configuration Flow
 
-The CLI maintains mappings from IDP resource types to cloud-specific Terraform resources:
+```
+API JSON Response
+       ↓
+Rust Structs (serde deserialization)
+       ↓
+Internal Representation
+       ↓
+HCL Generation
+       ↓
+String Output
+       ↓
+File System
+```
 
-**AWS Mappings:**
-- PostgreSQL Database → `aws_rds_cluster` (Aurora PostgreSQL)
-- Cache → `aws_elasticache_cluster` (Redis)
-- Queue → `aws_sqs_queue`
-- Lambda Compute → `aws_lambda_function` + `aws_iam_role`
-- ECS Compute → `aws_ecs_task_definition` + `aws_ecs_service`
+### Example Blueprint JSON to HCL Transformation
 
-**Azure Mappings:**
-- PostgreSQL Database → `azurerm_postgresql_flexible_server`
-- Cache → `azurerm_redis_cache`
-- Queue → `azurerm_servicebus_queue`
-- Container Compute → `azurerm_container_app`
+**Input (API Response)**:
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "web-app-blueprint",
+  "resources": [
+    {
+      "name": "postgres-db",
+      "resource_type": {
+        "name": "RelationalDatabaseServer"
+      },
+      "cloud_provider": {
+        "name": "AWS"
+      },
+      "cloud_specific_properties": {
+        "engine": "postgres",
+        "engine_version": "14.7",
+        "instance_class": "db.t3.micro"
+      }
+    }
+  ]
+}
+```
 
-**GCP Mappings:**
-- PostgreSQL Database → `google_sql_database_instance`
-- Cache → `google_redis_instance`
-- Queue → `google_pubsub_topic` + `google_pubsub_subscription`
-- Cloud Run Compute → `google_cloud_run_service`
+**Output (main.tf)**:
+```hcl
+resource "aws_db_instance" "postgres_db" {
+  identifier     = var.postgres_db_identifier
+  engine         = "postgres"
+  engine_version = "14.7"
+  instance_class = "db.t3.micro"
+  
+  tags = {
+    Name        = "postgres-db"
+    ManagedBy   = "IDP"
+    Blueprint   = "web-app-blueprint"
+  }
+}
+```
 
-**Kubernetes Mappings:**
-- PostgreSQL Database → `kubernetes_stateful_set` (PostgreSQL)
-- Cache → `kubernetes_stateful_set` (Redis)
-- Queue → External RabbitMQ (documented, not provisioned)
-- Application Compute → `kubernetes_deployment` + `kubernetes_service`
+**Output (variables.tf)**:
+```hcl
+variable "postgres_db_identifier" {
+  description = "Identifier for postgres-db database instance"
+  type        = string
+  default     = "postgres-db"
+}
+```
+
+**Output (providers.tf)**:
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+```
 
 ## Error Handling
 
@@ -699,68 +401,120 @@ The CLI maintains mappings from IDP resource types to cloud-specific Terraform r
 ```rust
 #[derive(Debug, thiserror::Error)]
 pub enum CliError {
-    #[error("Configuration error: {0}")]
-    Config(String),
+    #[error("Authentication failed: {0}")]
+    AuthenticationError(String),
+    
+    #[error("Resource not found: {0}")]
+    NotFoundError(String),
     
     #[error("API error: {0}")]
-    Api(#[from] ApiError),
+    ApiError(String),
     
-    #[error("Terraform generation error: {0}")]
-    Generation(String),
+    #[error("Network error: {0}")]
+    NetworkError(#[from] reqwest::Error),
     
-    #[error("File I/O error: {0}")]
-    Io(#[from] std::io::Error),
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
     
-    #[error("Validation error: {0}")]
-    Validation(String),
+    #[error("Invalid configuration: {0}")]
+    ConfigurationError(String),
     
-    #[error("Unsupported resource type: {0}")]
-    UnsupportedResourceType(String),
-    
-    #[error("Unsupported cloud provider: {0}")]
-    UnsupportedCloudProvider(String),
+    #[error("Code generation error: {0}")]
+    GenerationError(String),
 }
 ```
 
-### Error Display Strategy
+### Error Handling Strategy
 
-- Use colored output to distinguish error types
-- Provide actionable error messages with suggestions
-- Include relevant context (stack ID, resource type, etc.)
-- In verbose mode, include full error chain and debug information
+1. **API Errors**: Map HTTP status codes to specific error types
+2. **Network Errors**: Provide clear messages about connectivity issues
+3. **File System Errors**: Handle permission and disk space issues
+4. **Validation Errors**: Validate inputs before making API calls
+5. **Graceful Degradation**: Continue processing when possible, report all errors at end
+
+### User-Facing Error Messages
+
+```rust
+impl CliError {
+    pub fn user_message(&self) -> String {
+        match self {
+            CliError::AuthenticationError(_) => {
+                "Authentication failed. Please check your API key.".to_string()
+            }
+            CliError::NotFoundError(resource) => {
+                format!("Resource '{}' not found. Please verify the identifier.", resource)
+            }
+            CliError::NetworkError(_) => {
+                "Network error. Please check your connection and API URL.".to_string()
+            }
+            _ => self.to_string()
+        }
+    }
+}
+```
 
 ## Testing Strategy
 
 ### Unit Tests
 
-- Test each provider mapper independently with mock data
-- Test HCL builder output for correctness
-- Test configuration loading from various sources
-- Test error handling and edge cases
+**Command Parser Tests**:
+- Test argument parsing with various flag combinations
+- Test environment variable precedence
+- Test validation of required arguments
+- Test help text generation
+
+**API Client Tests**:
+- Mock HTTP responses using `mockito`
+- Test successful blueprint/stack retrieval
+- Test error handling for various HTTP status codes
+- Test authentication header inclusion
+
+**Code Generator Tests**:
+- Test HCL generation from sample data structures
+- Test resource mapping for different cloud providers
+- Test variable generation
+- Test provider configuration generation
+- Verify generated HCL syntax validity
+
+**Resource Mapper Tests**:
+- Test mapping lookup for known resource types
+- Test handling of unknown resource types
+- Test attribute mapping transformations
 
 ### Integration Tests
 
-- Test API client with mock HTTP server (using `wiremock`)
-- Test end-to-end generation with sample API responses
-- Test file writing and validation
-- Test configuration precedence
+**End-to-End Blueprint Flow**:
+1. Mock API server returns blueprint JSON
+2. CLI fetches blueprint
+3. Code generator creates HCL
+4. Files written to temporary directory
+5. Verify file contents match expected output
 
-### Test Fixtures
+**End-to-End Stack Flow**:
+1. Mock API server returns stack JSON
+2. CLI fetches stack
+3. Code generator creates HCL
+4. Files written to temporary directory
+5. Verify file contents match expected output
 
-- Sample API responses for stacks, resources, and mappings
-- Expected Terraform output for various scenarios
-- Configuration file examples
+**Error Scenarios**:
+- Test authentication failure handling
+- Test 404 not found handling
+- Test network timeout handling
+- Test file write permission errors
 
-### Manual Testing Checklist
+### Manual Testing
 
-- Generate Terraform for each stack type
-- Generate Terraform for each cloud provider
-- Test with missing/invalid API keys
-- Test with unreachable API
-- Test dry-run mode
-- Test validation with and without Terraform installed
-- Test configuration file loading
-- Test overwrite prompts
+**Local API Testing**:
+- Run against local IDP API instance
+- Test with real blueprints and stacks
+- Verify generated code with `terraform validate`
+- Test with different cloud providers
+
+**HCL Validation**:
+- Use `terraform fmt` to verify formatting
+- Use `terraform validate` to verify syntax
+- Use `terraform plan` to verify resource definitions
 
 ## Dependencies
 
@@ -768,60 +522,158 @@ pub enum CliError {
 
 ```toml
 [dependencies]
-# CLI framework
-clap = { version = "4.5", features = ["derive", "env"] }
-clap_complete = "4.5"
+# CLI argument parsing
+clap = { version = "4.4", features = ["derive", "env"] }
 
 # HTTP client
-reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
-tokio = { version = "1.40", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
 
-# Serialization
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# JSON serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-toml = "0.8"
+
+# UUID handling
+uuid = { version = "1.6", features = ["serde"] }
 
 # Error handling
 thiserror = "1.0"
 anyhow = "1.0"
 
-# Output formatting
-colored = "2.1"
-prettytable-rs = "0.10"
-
-# Configuration
-config = "0.14"
-dirs = "5.0"
-
-[dev-dependencies]
-# Testing
-wiremock = "0.6"
-tempfile = "3.12"
-assert_cmd = "2.0"
-predicates = "3.1"
+# Logging
+env_logger = "0.11"
+log = "0.4"
 ```
 
-## Performance Considerations
+### Development Dependencies
 
-- Use async/await for API calls to enable concurrent requests
-- Cache resource type mappings to avoid repeated API calls
-- Stream large file writes instead of buffering entire content
-- Use connection pooling for HTTP client
+```toml
+[dev-dependencies]
+# HTTP mocking
+mockito = "1.2"
+
+# Temporary directories for testing
+tempfile = "3.8"
+
+# Assertions
+assert_cmd = "2.0"
+predicates = "3.0"
+```
+
+## Configuration
+
+### Environment Variables
+
+- `IDP_API_KEY`: API key for authentication (overridden by `--api-key` flag)
+- `IDP_API_URL`: Base URL for IDP API (overridden by `--api-url` flag)
+- `IDP_OUTPUT_DIR`: Output directory for generated files (overridden by `--output-dir` flag)
+- `RUST_LOG`: Logging level (debug, info, warn, error)
+
+### Default Values
+
+- API URL: `http://localhost:8082/api/v1`
+- Output Directory: `./terraform` (current working directory + terraform subdirectory)
+- Log Level: `info`
+
+### Configuration Precedence
+
+1. Command-line flags (highest priority)
+2. Environment variables
+3. Default values (lowest priority)
 
 ## Security Considerations
 
-- Never log or display API keys in output
-- Store API keys securely in configuration files with appropriate permissions
-- Validate all user input before using in API requests
-- Use HTTPS for all API communication
-- Support environment variables for sensitive configuration
+### API Key Handling
+
+- Never log API keys
+- Clear API key from memory after use
+- Warn users if API key is passed via command-line (visible in process list)
+- Recommend environment variable or config file usage
+
+### HTTPS Enforcement
+
+- Warn if API URL uses HTTP instead of HTTPS in production
+- Support certificate validation
+- Allow certificate validation bypass for local development (with warning)
+
+### File Permissions
+
+- Set restrictive permissions on generated files (0600)
+- Warn if output directory has overly permissive permissions
+- Never include sensitive data in generated code comments
+
+## Performance Considerations
+
+### API Calls
+
+- Single API call per blueprint/stack
+- Reuse HTTP client connection pool
+- Implement timeout (default: 30 seconds)
+- Support retry with exponential backoff for transient errors
+
+### Code Generation
+
+- Stream large HCL output instead of building in memory
+- Use efficient string building (avoid repeated concatenation)
+- Generate files in parallel when possible
+
+### File I/O
+
+- Buffer file writes
+- Use atomic file writes (write to temp, then rename)
+- Verify disk space before writing
 
 ## Future Enhancements
 
-- Support for Terraform modules and reusable components
-- Integration with Terraform Cloud/Enterprise
-- Support for generating Terragrunt configurations
-- Automatic Terraform plan execution
-- Interactive mode for guided generation
-- Support for custom resource type mappings
-- Plugin system for extending provider support
+### Phase 2 Features
+
+1. **Template Support**: Allow custom HCL templates
+2. **Multi-Environment**: Generate code for multiple environments
+3. **State Management**: Generate backend configuration for remote state
+4. **Module Generation**: Create reusable Terraform modules
+5. **Validation**: Validate generated code before writing
+6. **Dry Run**: Preview generated code without writing files
+7. **Interactive Mode**: Prompt for missing configuration
+8. **Diff Mode**: Show changes between existing and new code
+
+### Phase 3 Features
+
+1. **Plan Integration**: Execute `terraform plan` automatically
+2. **Apply Integration**: Execute `terraform apply` with approval
+3. **State Import**: Import existing infrastructure into state
+4. **Drift Detection**: Compare IDP state with Terraform state
+5. **Cost Estimation**: Integrate with cost estimation tools
+6. **Policy Validation**: Validate against organizational policies
+
+## Deployment
+
+### Binary Distribution
+
+- Build for multiple platforms: Linux (x86_64, ARM64), macOS (x86_64, ARM64), Windows (x86_64)
+- Distribute via GitHub Releases
+- Provide installation script for Unix-like systems
+- Support package managers: Homebrew, apt, yum
+
+### Installation
+
+```bash
+# Download and install
+curl -sSL https://github.com/angryss/idp-cli/install.sh | bash
+
+# Or using Cargo
+cargo install idp-cli
+
+# Or from source
+git clone https://github.com/angryss/idp-cli
+cd idp-cli
+cargo build --release
+```
+
+### Version Management
+
+- Semantic versioning (MAJOR.MINOR.PATCH)
+- Maintain compatibility with IDP API versions
+- Document breaking changes in CHANGELOG.md
+- Support version checking against API compatibility
