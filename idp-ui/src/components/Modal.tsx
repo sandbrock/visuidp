@@ -7,6 +7,7 @@ export interface ModalButton {
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'danger' | 'warning' | 'success';
   disabled?: boolean;
+  'data-testid'?: string;
 }
 
 export interface ModalProps {
@@ -170,6 +171,7 @@ export const Modal: React.FC<ModalProps> = ({
                 className={`modal-button modal-button-${button.variant || 'secondary'}`}
                 onClick={button.onClick}
                 disabled={button.disabled}
+                data-testid={button['data-testid']}
               >
                 {button.label}
               </button>

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { propertySchemaService } from './PropertySchemaService';
 import { apiService } from './api';
-import type { PropertySchema } from '../types/admin';
+import type { PropertySchema, PropertySchemaResponse } from '../types/admin';
 
 // Mock the apiService
 vi.mock('./api', () => ({
@@ -49,6 +49,14 @@ describe('PropertySchemaService', () => {
     },
   };
 
+  const mockSchemaResponse: PropertySchemaResponse = {
+    resourceTypeId: mockResourceTypeId,
+    resourceTypeName: 'Test Resource Type',
+    cloudProviderId: mockCloudProviderId,
+    cloudProviderName: 'Test Cloud Provider',
+    properties: Object.values(mockSchemaMap),
+  };
+
   beforeEach(() => {
     // Clear all mocks before each test
     vi.clearAllMocks();
@@ -58,7 +66,7 @@ describe('PropertySchemaService', () => {
 
   describe('getSchema', () => {
     it('should fetch schema from blueprint endpoint when context is blueprint', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       const result = await propertySchemaService.getSchema(
         mockResourceTypeId,
@@ -77,7 +85,7 @@ describe('PropertySchemaService', () => {
     });
 
     it('should fetch schema from stack endpoint when context is stack', async () => {
-      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaResponse);
 
       const result = await propertySchemaService.getSchema(
         mockResourceTypeId,
@@ -96,7 +104,7 @@ describe('PropertySchemaService', () => {
     });
 
     it('should sort properties by displayOrder', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       const result = await propertySchemaService.getSchema(
         mockResourceTypeId,
@@ -131,7 +139,15 @@ describe('PropertySchemaService', () => {
         },
       };
 
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(schemaWithoutOrder);
+      const schemaWithoutOrderResponse: PropertySchemaResponse = {
+        resourceTypeId: mockResourceTypeId,
+        resourceTypeName: 'Test Resource Type',
+        cloudProviderId: mockCloudProviderId,
+        cloudProviderName: 'Test Cloud Provider',
+        properties: Object.values(schemaWithoutOrder),
+      };
+
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(schemaWithoutOrderResponse);
 
       const result = await propertySchemaService.getSchema(
         mockResourceTypeId,
@@ -173,7 +189,7 @@ describe('PropertySchemaService', () => {
 
   describe('caching behavior', () => {
     it('should cache schema after first fetch', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       // First call
       await propertySchemaService.getSchema(
@@ -194,8 +210,8 @@ describe('PropertySchemaService', () => {
     });
 
     it('should use separate cache for different contexts', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
-      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
+      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaResponse);
 
       // Call with blueprint context
       await propertySchemaService.getSchema(
@@ -217,7 +233,7 @@ describe('PropertySchemaService', () => {
     });
 
     it('should use separate cache for different resource types', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       // Call with first resource type
       await propertySchemaService.getSchema(
@@ -238,7 +254,7 @@ describe('PropertySchemaService', () => {
     });
 
     it('should use separate cache for different cloud providers', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       // Call with first cloud provider
       await propertySchemaService.getSchema(
@@ -285,7 +301,7 @@ describe('PropertySchemaService', () => {
 
   describe('clearCache', () => {
     it('should clear all cached schemas', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       // First call - populates cache
       await propertySchemaService.getSchema(
@@ -311,8 +327,8 @@ describe('PropertySchemaService', () => {
 
   describe('clearSchemaCache', () => {
     it('should clear cache for specific schema', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
-      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
+      vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaResponse);
 
       // Populate cache for blueprint
       await propertySchemaService.getSchema(
@@ -357,7 +373,7 @@ describe('PropertySchemaService', () => {
 
   describe('cache key generation', () => {
     it('should generate unique cache keys for different combinations', async () => {
-      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaMap);
+      vi.mocked(apiService.getResourceSchemaForBlueprint).mockResolvedValue(mockSchemaResponse);
 
       // Different combinations that should all result in separate cache entries
       const combinations = [
@@ -375,7 +391,7 @@ describe('PropertySchemaService', () => {
             combo.context
           );
         } else {
-          vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaMap);
+          vi.mocked(apiService.getResourceSchemaForStack).mockResolvedValue(mockSchemaResponse);
           await propertySchemaService.getSchema(
             combo.resourceTypeId,
             combo.cloudProviderId,

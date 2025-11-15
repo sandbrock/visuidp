@@ -54,7 +54,7 @@ describe('ApiKeyEditNameModal', () => {
     );
 
     expect(screen.getByText('Edit API Key Name')).toBeInTheDocument();
-    expect(screen.getByText('Key Prefix:')).toBeInTheDocument();
+    expect(screen.getByText('Key Prefix')).toBeInTheDocument();
     expect(screen.getByText('idp_user_abc...')).toBeInTheDocument();
   });
 

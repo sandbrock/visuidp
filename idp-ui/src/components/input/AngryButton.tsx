@@ -1,6 +1,6 @@
 import './AngryButton.css';
 
-interface AngryButtonProps {
+export interface AngryButtonProps {
   children?: React.ReactNode;
   onClick?: React.MouseEventHandler | (() => void);
   type?: 'button' | 'submit' | 'reset';
@@ -10,6 +10,7 @@ interface AngryButtonProps {
   size?: 'small' | 'normal';
   style?: 'solid' | 'outline' | 'flat';
   className?: string;
+  'data-testid'?: string;
 }
 
 export const AngryButton = (props: AngryButtonProps) => {
@@ -22,7 +23,8 @@ export const AngryButton = (props: AngryButtonProps) => {
     variant,
     size,
     style,
-    className 
+    className,
+    'data-testid': dataTestId
   } = props;
   
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -50,6 +52,7 @@ export const AngryButton = (props: AngryButtonProps) => {
       onClick={handleClick}
       disabled={disabled}
       className={buttonClasses}
+      data-testid={dataTestId}
     >
       {children}
     </button>

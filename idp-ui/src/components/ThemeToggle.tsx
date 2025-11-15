@@ -16,7 +16,7 @@ export const ThemeToggle: React.FC = () => {
   const getThemeIcon = () => {
     if (theme === 'light') return '☀️';
     if (theme === 'dark') return '🌙';
-    return '⬢'; // frankenstein - bolt icon
+    return '⚡'; // frankenstein - bolt icon
   };
 
   // Get descriptive label for next theme

@@ -151,11 +151,10 @@ describe('ApiKeyCreateModal', () => {
 
     await waitFor(() => {
       expect(apiService.createUserApiKey).toHaveBeenCalledWith(
-        expect.objectContaining({
+        {
           keyName: 'Test Key',
           expirationDays: 90,
-          keyType: 'USER',
-        }),
+        },
         mockUser.email
       );
       expect(mockOnSuccess).toHaveBeenCalledWith(mockCreatedKey);
@@ -187,7 +186,7 @@ describe('ApiKeyCreateModal', () => {
     });
   });
 
-  it('shows key type selector for admin users in admin mode', () => {
+  it('shows admin notice for admin users in admin mode', () => {
     render(
       <ApiKeyCreateModal
         isOpen={true}
@@ -198,10 +197,10 @@ describe('ApiKeyCreateModal', () => {
       />
     );
 
-    expect(screen.getByTestId('keyType')).toBeInTheDocument();
+    expect(screen.getByText(/system-level API key/)).toBeInTheDocument();
   });
 
-  it('hides key type selector for non-admin users', () => {
+  it('hides admin notice for non-admin users', () => {
     render(
       <ApiKeyCreateModal
         isOpen={true}
@@ -211,11 +210,10 @@ describe('ApiKeyCreateModal', () => {
       />
     );
 
-    expect(screen.queryByTestId('keyType')).not.toBeInTheDocument();
+    expect(screen.queryByText(/system-level API key/)).not.toBeInTheDocument();
   });
 
-  it('validates that key name is required', async () => {
-    const user = userEvent.setup();
+  it('validates that key name is required', () => {
 
     render(
       <ApiKeyCreateModal
@@ -234,7 +232,7 @@ describe('ApiKeyCreateModal', () => {
   });
 
   describe('Mode-based behavior', () => {
-    it('hides key type selector in personal mode', () => {
+    it('hides admin notice in personal mode for admin users', () => {
       render(
         <ApiKeyCreateModal
           isOpen={true}
@@ -245,10 +243,10 @@ describe('ApiKeyCreateModal', () => {
         />
       );
 
-      expect(screen.queryByTestId('keyType')).not.toBeInTheDocument();
+      expect(screen.queryByText(/system-level API key/)).not.toBeInTheDocument();
     });
 
-    it('shows key type selector in admin mode for admin users', () => {
+    it('shows admin notice in admin mode for admin users', () => {
       render(
         <ApiKeyCreateModal
           isOpen={true}
@@ -259,10 +257,10 @@ describe('ApiKeyCreateModal', () => {
         />
       );
 
-      expect(screen.getByTestId('keyType')).toBeInTheDocument();
+      expect(screen.getByText(/system-level API key/)).toBeInTheDocument();
     });
 
-    it('hides key type selector in admin mode for non-admin users', () => {
+    it('shows admin notice in admin mode regardless of user role', () => {
       render(
         <ApiKeyCreateModal
           isOpen={true}
@@ -273,10 +271,10 @@ describe('ApiKeyCreateModal', () => {
         />
       );
 
-      expect(screen.queryByTestId('keyType')).not.toBeInTheDocument();
+      expect(screen.getByText(/system-level API key/)).toBeInTheDocument();
     });
 
-    it('forces keyType to USER in personal mode', async () => {
+    it('uses createUserApiKey in personal mode regardless of user role', async () => {
       vi.mocked(apiService.createUserApiKey).mockResolvedValue(mockCreatedKey);
       const user = userEvent.setup();
 
@@ -299,11 +297,10 @@ describe('ApiKeyCreateModal', () => {
 
       await waitFor(() => {
         expect(apiService.createUserApiKey).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             keyName: 'Test Key',
             expirationDays: 90,
-            keyType: 'USER',
-          }),
+          },
           mockAdminUser.email
         );
       });
@@ -339,7 +336,6 @@ describe('ApiKeyCreateModal', () => {
           {
             keyName: 'My Personal Key',
             expirationDays: 60,
-            keyType: 'USER',
           },
           mockUser.email
         );
@@ -352,7 +348,7 @@ describe('ApiKeyCreateModal', () => {
         ...mockCreatedKey,
         keyType: 'SYSTEM',
         keyPrefix: 'idp_system_xyz',
-        userEmail: null,
+        userEmail: undefined,
       };
       vi.mocked(apiService.createSystemApiKey).mockResolvedValue(mockSystemKey);
       const user = userEvent.setup();
@@ -371,20 +367,15 @@ describe('ApiKeyCreateModal', () => {
       await user.clear(keyNameInput);
       await user.type(keyNameInput, 'System Key');
 
-      // Select SYSTEM key type
-      const keyTypeSelect = screen.getByTestId('keyType');
-      await user.selectOptions(keyTypeSelect, 'SYSTEM');
-
       const createButton = screen.getByText(/create api key/i);
       await user.click(createButton);
 
       await waitFor(() => {
         expect(apiService.createSystemApiKey).toHaveBeenCalledWith(
-          expect.objectContaining({
+          {
             keyName: 'System Key',
             expirationDays: 90,
-            keyType: 'SYSTEM',
-          }),
+          },
           mockAdminUser.email
         );
         expect(mockOnSuccess).toHaveBeenCalledWith(mockSystemKey);
@@ -401,8 +392,21 @@ describe('ApiKeyCreateModal', () => {
         />
       );
 
-      // Should not show key type selector even for admin user when mode defaults to personal
-      expect(screen.queryByTestId('keyType')).not.toBeInTheDocument();
+      // Should not show admin notice when mode defaults to personal
+      expect(screen.queryByText(/system-level API key/)).not.toBeInTheDocument();
+      
+      // Should show the admin notice in admin mode
+      render(
+        <ApiKeyCreateModal
+          isOpen={true}
+          onClose={mockOnClose}
+          onSuccess={mockOnSuccess}
+          user={mockAdminUser}
+          mode="admin"
+        />
+      );
+      
+      expect(screen.getByText(/system-level API key/)).toBeInTheDocument();
     });
   });
 });

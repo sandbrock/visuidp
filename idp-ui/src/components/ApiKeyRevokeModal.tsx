@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal } from './Modal';
+import { ErrorMessage, WarningBox, MetadataDisplay } from './common';
 import type { ApiKeyResponse } from '../types/apiKey';
 import type { User } from '../types/auth';
 import { apiService } from '../services/api';
@@ -72,36 +73,24 @@ export const ApiKeyRevokeModal = ({ isOpen, onClose, onSuccess, apiKey, user }: 
         <div className="confirmation-content">
           <h3>Are you sure you want to revoke this API key?</h3>
           
-          <div className="key-info">
-            <div className="info-item">
-              <span className="info-label">Name:</span>
-              <span className="info-value">{apiKey?.keyName}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Key Prefix:</span>
-              <span className="info-value">
-                <code>{apiKey?.keyPrefix}...</code>
-              </span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Type:</span>
-              <span className="info-value">{apiKey?.keyType}</span>
-            </div>
-          </div>
+          <MetadataDisplay 
+            items={[
+              { label: "Name", value: apiKey?.keyName },
+              { label: "Key Prefix", value: <code>{apiKey?.keyPrefix}...</code> },
+              { label: "Type", value: apiKey?.keyType }
+            ]}
+          />
 
-          <div className="warning-box">
-            <div className="warning-icon">🛑</div>
-            <div className="warning-text">
-              <strong>This action cannot be undone!</strong>
-              <ul>
-                <li>The API key will be immediately invalidated</li>
-                <li>Any applications using this key will lose access</li>
-                <li>You will need to create a new key to restore access</li>
-              </ul>
-            </div>
-          </div>
+          <WarningBox>
+            <strong>This action cannot be undone!</strong>
+            <ul>
+              <li>The API key will be immediately invalidated</li>
+              <li>Any applications using this key will lose access</li>
+              <li>You will need to create a new key to restore access</li>
+            </ul>
+          </WarningBox>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <ErrorMessage message={error} />}
         </div>
       </div>
     </Modal>

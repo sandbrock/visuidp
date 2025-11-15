@@ -129,7 +129,7 @@ describe('Frankenstein Theme Consistency Tests', () => {
         </BrowserRouter>
       );
 
-      let root = document.documentElement;
+      const root = document.documentElement;
       expect(root.getAttribute('data-theme')).toBe('light');
 
       // Find and click theme toggle

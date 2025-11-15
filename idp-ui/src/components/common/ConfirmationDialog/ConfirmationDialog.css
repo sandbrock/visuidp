@@ -1,0 +1,28 @@
+.confirmation-dialog__content {
+  padding: 1rem 0;
+  color: var(--color-text-secondary, #666);
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* Variant-specific styling */
+.confirmation-dialog--danger .confirmation-dialog__content {
+  color: var(--color-text-danger, #d32f2f);
+}
+
+.confirmation-dialog--warning .confirmation-dialog__content {
+  color: var(--color-text-warning, #f57c00);
+}
+
+.confirmation-dialog--primary .confirmation-dialog__content {
+  color: var(--color-text-secondary, #666);
+}
+
+/* Processing state */
+.confirmation-dialog--processing {
+  opacity: 0.8;
+}
+
+.confirmation-dialog--processing .modal-button {
+  cursor: not-allowed;
+}
