@@ -11,7 +11,7 @@ describe('ThemeToggle Component', () => {
   beforeEach(() => {
     localStorageMock = {};
     
-    (globalThis as any).localStorage = {
+    (globalThis as Record<string, unknown>).localStorage = {
       getItem: vi.fn((key: string) => localStorageMock[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         localStorageMock[key] = value;
@@ -64,7 +64,7 @@ describe('ThemeToggle Component', () => {
       );
 
       const button = screen.getByRole('button');
-      expect(button.textContent).toContain('⬢');
+      expect(button.textContent).toContain('⚡');
     });
   });
 

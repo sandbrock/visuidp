@@ -2,6 +2,8 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import type { PropertySchema } from '../types/admin';
 import { propertySchemaService } from '../services/PropertySchemaService';
 import { PropertyInput } from './PropertyInput';
+import { ErrorMessage } from './common/Feedback/ErrorMessage';
+import { InfoBox } from './common/Feedback/InfoBox';
 import './DynamicResourceForm.css';
 
 /**
@@ -223,43 +225,45 @@ export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicRes
     const is404Error = error.includes('No property schema is configured');
     
     return (
-      <div className="dynamic-form-error" role="alert">
-        <div className="error-icon">{is404Error ? 'ℹ️' : '⚠️'}</div>
-        <div className="error-content">
-          <p className="error-message">{error}</p>
-          {!is404Error && (
-            <button 
-              className="retry-button"
-              onClick={() => {
-                // Trigger re-fetch by clearing and re-setting the error
-                setError(null);
-                setLoading(true);
-                propertySchemaService.getSchema(
-                  resourceTypeId,
-                  cloudProviderId,
-                  context,
-                  userEmail
-                ).then(setSchema)
-                  .catch(err => {
-                    let errorMessage = 'Failed to load property configuration';
-                    if (err instanceof Error) {
-                      if (err.message.includes('404')) {
-                        errorMessage = 'No property schema is configured for this resource type and cloud provider combination. Contact your administrator to configure the required properties.';
-                      } else {
-                        errorMessage = err.message;
+      <ErrorMessage 
+        message={
+          <div className="dynamic-form-error-content">
+            <p>{error}</p>
+            {!is404Error && (
+              <button 
+                className="retry-button"
+                onClick={() => {
+                  // Trigger re-fetch by clearing and re-setting the error
+                  setError(null);
+                  setLoading(true);
+                  propertySchemaService.getSchema(
+                    resourceTypeId,
+                    cloudProviderId,
+                    context,
+                    userEmail
+                  ).then(setSchema)
+                    .catch(err => {
+                      let errorMessage = 'Failed to load property configuration';
+                      if (err instanceof Error) {
+                        if (err.message.includes('404')) {
+                          errorMessage = 'No property schema is configured for this resource type and cloud provider combination. Contact your administrator to configure the required properties.';
+                        } else {
+                          errorMessage = err.message;
+                        }
                       }
-                    }
-                    setError(errorMessage);
-                  })
-                  .finally(() => setLoading(false));
-              }}
-              disabled={disabled}
-            >
-              Retry
-            </button>
-          )}
-        </div>
-      </div>
+                      setError(errorMessage);
+                    })
+                    .finally(() => setLoading(false));
+                }}
+                disabled={disabled}
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        } 
+        className="dynamic-form-error"
+      />
     );
   }
 
@@ -268,17 +272,14 @@ export const DynamicResourceForm = forwardRef<DynamicResourceFormRef, DynamicRes
    */
   if (schema && schema.length === 0) {
     return (
-      <div className="dynamic-form-empty" role="status">
-        <div className="empty-icon">ℹ️</div>
-        <div className="empty-content">
-          <p className="empty-message">
-            No cloud-specific properties are configured for this resource type and cloud provider.
-          </p>
-          <p className="empty-help-text">
-            Contact your administrator if you need to configure additional properties.
-          </p>
-        </div>
-      </div>
+      <InfoBox className="dynamic-form-empty">
+        <p>
+          No cloud-specific properties are configured for this resource type and cloud provider.
+        </p>
+        <p>
+          Contact your administrator if you need to configure additional properties.
+        </p>
+      </InfoBox>
     );
   }
 

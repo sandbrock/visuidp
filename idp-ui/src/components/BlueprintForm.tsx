@@ -5,7 +5,11 @@ import type { User } from '../types/auth';
 import type { CloudProvider, ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import { AngryComboBox, AngryTextBox, AngryButton, AngryCheckBoxGroup } from './input';
-import { Modal } from './Modal';
+import { FormField } from './common/FormField/FormField';
+import { ErrorMessage } from './common/Feedback/ErrorMessage';
+import { LoadingButton } from './common/LoadingButton/LoadingButton';
+import { InfoBox } from './common/Feedback/InfoBox';
+import { ConfirmationDialog } from './common/ConfirmationDialog/ConfirmationDialog';
 import CloudProviderLookupService from '../services/CloudProviderLookupService';
 import type { FocusableInputHandle } from '../types/focus';
 import './BlueprintForm.css';
@@ -416,75 +420,82 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
         <h2>{blueprint ? 'Edit Blueprint' : 'Create New Blueprint'}</h2>
         
         {error && (
-          <div className="error-message">
-            {error}
-          </div>
+          <ErrorMessage message={error} />
         )}
 
         {cloudProvidersLoadError && (
-          <div className="error-message">
-            <strong>Error loading cloud providers:</strong> {cloudProvidersLoadError}
-            <div style={{ marginTop: '10px' }}>
-              <AngryButton
-                onClick={handleRetryLoadCloudProviders}
-                disabled={loading}
-                style="outline"
-              >
-                {loading ? 'Retrying...' : 'Retry'}
-              </AngryButton>
-            </div>
-          </div>
+          <ErrorMessage message={
+            <>
+              <strong>Error loading cloud providers:</strong> {cloudProvidersLoadError}
+              <div style={{ marginTop: '10px' }}>
+                <AngryButton
+                  onClick={handleRetryLoadCloudProviders}
+                  disabled={loading}
+                  style="outline"
+                >
+                  {loading ? 'Retrying...' : 'Retry'}
+                </AngryButton>
+              </div>
+            </>
+          } />
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <FormField 
+            label="Blueprint Name" 
+            required
+            htmlFor="name"
+          >
             <AngryTextBox
               id="name"
               value={formData.name}
               onChange={(v) => handleChange('name', v)}
-              placeholder="Blueprint Name *"
               componentRef={nameInputRef}
+              placeholder="Blueprint Name"
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField 
+            label="Description" 
+            htmlFor="description"
+          >
             <AngryTextBox
               id="description"
               value={formData.description || ''}
               onChange={(v) => handleChange('description', v)}
-              placeholder="Description"
               multiline={true}
+              placeholder="Description"
             />
-          </div>
+          </FormField>
 
           {/* Cloud Provider Multi-Select */}
-          <div className="form-group">
+          <FormField 
+            label="Supported Cloud Providers" 
+            required
+            hint="Select at least one cloud provider"
+          >
             <AngryCheckBoxGroup
               id="cloudProviders"
-              label="Supported Cloud Providers *"
               items={cloudProviders.map(p => ({ value: p.id, label: p.displayName }))}
               selectedValues={selectedCloudProviderIds}
               onChange={handleCloudProviderChange}
               layout="vertical"
               disabled={!cloudProvidersLoaded || !!cloudProvidersLoadError}
             />
-            {selectedCloudProviderIds.length === 0 && !cloudProvidersLoadError && (
-              <small className="form-help-text">Select at least one cloud provider</small>
-            )}
-          </div>
+          </FormField>
 
           {/* Resources Section */}
           <div className="resources-section">
             <h3>Shared Infrastructure Resources</h3>
             
             {cloudProvidersLoadError ? (
-              <div className="info-message">
+              <InfoBox>
                 <p>Cloud providers must be loaded before you can add resources. Please retry loading cloud providers above.</p>
-              </div>
+              </InfoBox>
             ) : selectedCloudProviderIds.length === 0 ? (
-              <div className="info-message">
+              <InfoBox>
                 <p>Please select at least one cloud provider above before adding resources.</p>
-              </div>
+              </InfoBox>
             ) : (
               <>
                 {cloudProvidersLoaded && selectedCloudProviderIds.length > 0 && selectedResources.length > 0 && (
@@ -495,12 +506,18 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                   <div key={index} className="resource-item">
                     <div className="resource-header">
                       <div className="resource-header-row">
-                        <AngryTextBox
-                          id={`resource-name-${index}`}
-                          value={resource.name}
-                          onChange={(v) => handleResourceNameChange(index, v)}
-                          placeholder="Display Name *"
-                        />
+                        <FormField 
+                          label="Display Name" 
+                          required
+                          htmlFor={`resource-name-${index}`}
+                        >
+                          <AngryTextBox
+                            id={`resource-name-${index}`}
+                            value={resource.name}
+                            onChange={(v) => handleResourceNameChange(index, v)}
+                            placeholder="Display Name"
+                          />
+                        </FormField>
                         <button
                           type="button"
                           className="remove-resource-btn"
@@ -518,8 +535,11 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                           {cloudProviders.find(cp => cp.id === resource.cloudProviderId)?.displayName || 'Unknown Provider'}
                         </span>
                       </div>
-                      <div className="form-group">
-                        <label htmlFor={`resource-cloud-${index}`}>Cloud Provider *</label>
+                      <FormField 
+                        label="Cloud Provider" 
+                        required
+                        htmlFor={`resource-cloud-${index}`}
+                      >
                         <AngryComboBox
                           key={`resource-cloud-${index}-${selectedCloudProviderIds.join(',')}`}
                           id={`resource-cloud-${index}`}
@@ -530,7 +550,7 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
                             .map(cp => ({ text: cp.displayName, value: cp.id }))}
                           placeholder="Select cloud provider"
                         />
-                      </div>
+                      </FormField>
                     </div>
                     
                     <div className="resource-config">
@@ -591,52 +611,48 @@ export const BlueprintForm = ({ blueprint, onSave, onCancel, user }: BlueprintFo
             >
               Cancel
             </AngryButton>
-            <AngryButton
+            <LoadingButton
               type="submit"
-              disabled={loading || !cloudProvidersLoaded || !!cloudProvidersLoadError}
+              isLoading={loading}
+              loadingText="Saving..."
+              disabled={!cloudProvidersLoaded || !!cloudProvidersLoadError}
               isPrimary={true}
+              data-testid={blueprint ? "button-update-blueprint" : "button-create-blueprint"}
             >
-              {loading ? 'Saving...' : (blueprint ? 'Update Blueprint' : 'Create Blueprint')}
-            </AngryButton>
+              {blueprint ? 'Update Blueprint' : 'Create Blueprint'}
+            </LoadingButton>
           </div>
         </form>
       </div>
       
       {/* Confirmation Dialog for Cloud Provider Deselection */}
-      <Modal
+      <ConfirmationDialog
         isOpen={showConfirmDialog}
         onClose={handleCancelCloudProviderChange}
+        onConfirm={handleConfirmCloudProviderChange}
         title="Remove Cloud Provider?"
-        width="600px"
-        buttons={[
-          {
-            label: 'Cancel',
-            onClick: handleCancelCloudProviderChange,
-            variant: 'secondary'
-          },
-          {
-            label: 'Remove',
-            onClick: handleConfirmCloudProviderChange,
-            variant: 'danger'
-          }
-        ]}
-      >
-        <div className="confirmation-dialog-content">
-          <p>
-            Removing the selected cloud provider(s) will delete <strong>{affectedResources.length}</strong> resource(s):
-          </p>
-          <ul className="affected-resources-list">
-            {affectedResources.map((resource, index) => (
-              <li key={index}>
-                <strong>{resource.name}</strong> ({resource.cloudProviderName})
-              </li>
-            ))}
-          </ul>
-          <p>
-            This action cannot be undone. Do you want to continue?
-          </p>
-        </div>
-      </Modal>
+        message={
+          <div className="confirmation-dialog-content">
+            <p>
+              Removing the selected cloud provider(s) will delete <strong>{affectedResources.length}</strong> resource(s):
+            </p>
+            <ul className="affected-resources-list">
+              {affectedResources.map((resource, index) => (
+                <li key={index}>
+                  <strong>{resource.name}</strong> ({resource.cloudProviderName})
+                </li>
+              ))}
+            </ul>
+            <p>
+              This action cannot be undone. Do you want to continue?
+            </p>
+          </div>
+        }
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="danger"
+        isProcessing={false}
+      />
     </div>
   );
 };

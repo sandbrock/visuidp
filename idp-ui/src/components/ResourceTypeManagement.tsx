@@ -5,6 +5,9 @@ import type { User } from '../types/auth';
 import { AngryButton, AngryTextBox, AngryCheckBox, AngryComboBox } from './input';
 import { Modal } from './Modal';
 import { Breadcrumb } from './Breadcrumb';
+import { FormField } from './common';
+import { ErrorMessage } from './common';
+import { LoadingButton } from './common';
 import './ResourceTypeManagement.css';
 
 interface ResourceTypeManagementProps {
@@ -172,7 +175,7 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
         </AngryButton>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <ErrorMessage message={error} />}
 
       <div className="filter-bar">
         <label htmlFor="category-filter">Filter by Category:</label>
@@ -233,13 +236,14 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
                     >
                       Edit
                     </AngryButton>
-                    <AngryButton
+                    <LoadingButton
                       onClick={() => handleToggle(resourceType)}
                       size="small"
                       variant={resourceType.enabled ? 'warning' : 'success'}
+                      isLoading={false}
                     >
                       {resourceType.enabled ? 'Disable' : 'Enable'}
-                    </AngryButton>
+                    </LoadingButton>
                   </td>
                 </tr>
               ))
@@ -262,7 +266,7 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
             disabled: saving
           },
           {
-            label: saving ? 'Saving...' : editingResourceType ? 'Update' : 'Create',
+            label: editingResourceType ? 'Update' : 'Create',
             onClick: handleSave,
             variant: 'primary',
             disabled: saving
@@ -270,9 +274,13 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
         ]}
       >
         <div className="resource-type-form">
-          {error && <div className="error-message">{error}</div>}
+          {error && <ErrorMessage message={error} />}
 
-          <div className="form-group">
+          <FormField
+            label="Name"
+            hint="Unique identifier for the resource type (uppercase with underscores)"
+            required
+          >
             <AngryTextBox
               id="name"
               value={formData.name}
@@ -280,20 +288,24 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
               placeholder="Name (e.g., RELATIONAL_DATABASE) *"
               disabled={!!editingResourceType}
             />
-            <small className="form-hint">Unique identifier for the resource type (uppercase with underscores)</small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Display Name"
+            hint="User-friendly name shown in the UI"
+            required
+          >
             <AngryTextBox
               id="displayName"
               value={formData.displayName}
               onChange={(v) => setFormData({ ...formData, displayName: v })}
               placeholder="Display Name *"
             />
-            <small className="form-hint">User-friendly name shown in the UI</small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Description"
+          >
             <AngryTextBox
               id="description"
               value={formData.description || ''}
@@ -301,10 +313,13 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
               placeholder="Description"
               multiline={true}
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
-            <label htmlFor="category">Category *</label>
+          <FormField
+            label="Category"
+            hint="Shared: Only for blueprints (e.g., ECS Cluster)<br />Non-Shared: Only for stacks (e.g., RDS Database)<br />Both: Can be used in either context"
+            required
+          >
             <AngryComboBox
               id="category"
               items={CATEGORY_OPTIONS}
@@ -312,21 +327,18 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
               onChange={(value) => setFormData({ ...formData, category: value as ResourceCategory })}
               placeholder="Select category"
             />
-            <small className="form-hint">
-              Shared: Only for blueprints (e.g., ECS Cluster)<br />
-              Non-Shared: Only for stacks (e.g., RDS Database)<br />
-              Both: Can be used in either context
-            </small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Enable this resource type"
+            hint="Only enabled resource types are available to users"
+          >
             <AngryCheckBox
               label="Enable this resource type"
               checked={formData.enabled || false}
               onChange={(checked) => setFormData({ ...formData, enabled: checked })}
             />
-            <small className="form-hint">Only enabled resource types are available to users</small>
-          </div>
+          </FormField>
         </div>
       </Modal>
     </div>

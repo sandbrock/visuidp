@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, type ModalButton } from './Modal';
 import { AngryTextBox } from './input';
+import { FormField, MetadataDisplay } from './common';
 import type { ApiKeyResponse } from '../types/apiKey';
 import type { User } from '../types/auth';
 import { apiService } from '../services/api';
@@ -98,19 +99,20 @@ export const ApiKeyEditNameModal = ({
       className="api-key-edit-name-modal"
     >
       <div className="api-key-edit-name-form">
-        <div className="current-key-info">
-          <div className="info-item">
-            <span className="info-label">Key Prefix:</span>
-            <code className="info-value">{apiKey?.keyPrefix}...</code>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Type:</span>
-            <span className="info-value type-badge">{apiKey?.keyType}</span>
-          </div>
-        </div>
+        <MetadataDisplay 
+          items={[
+            { label: "Key Prefix", value: <code>{apiKey?.keyPrefix}...</code> },
+            { label: "Type", value: <span className="type-badge">{apiKey?.keyType}</span> }
+          ]}
+        />
 
-        <div className="form-field">
-          <label htmlFor="keyName">New Key Name *</label>
+        <FormField 
+          label="New Key Name" 
+          htmlFor="keyName"
+          required
+          hint="Choose a name that helps you identify the purpose of this key"
+          error={error || undefined}
+        >
           <AngryTextBox
             id="keyName"
             value={keyName}
@@ -119,12 +121,7 @@ export const ApiKeyEditNameModal = ({
             disabled={isUpdating}
             autoFocus={true}
           />
-          <div className="field-hint">
-            Choose a name that helps you identify the purpose of this key
-          </div>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
+        </FormField>
       </div>
     </Modal>
   );

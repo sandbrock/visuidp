@@ -5,6 +5,9 @@ import type { User } from '../types/auth';
 import { AngryButton, AngryTextBox, AngryCheckBox } from './input';
 import { Modal } from './Modal';
 import { Breadcrumb } from './Breadcrumb';
+import { FormField } from './common';
+import { ErrorMessage } from './common';
+import { LoadingButton } from './common';
 import './CloudProviderManagement.css';
 
 interface CloudProviderManagementProps {
@@ -126,7 +129,7 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
         </AngryButton>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <ErrorMessage message={error} />}
 
       <div className="providers-table">
         <table>
@@ -164,13 +167,14 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
                     >
                       Edit
                     </AngryButton>
-                    <AngryButton
+                    <LoadingButton
                       onClick={() => handleToggle(provider)}
                       size="small"
                       variant={provider.enabled ? 'warning' : 'success'}
+                      isLoading={false}
                     >
                       {provider.enabled ? 'Disable' : 'Enable'}
-                    </AngryButton>
+                    </LoadingButton>
                   </td>
                 </tr>
               ))
@@ -193,7 +197,7 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
             disabled: saving
           },
           {
-            label: saving ? 'Saving...' : editingProvider ? 'Update' : 'Create',
+            label: editingProvider ? 'Update' : 'Create',
             onClick: handleSave,
             variant: 'primary',
             disabled: saving
@@ -201,9 +205,13 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
         ]}
       >
         <div className="cloud-provider-form">
-          {error && <div className="error-message">{error}</div>}
+          {error && <ErrorMessage message={error} />}
 
-          <div className="form-group">
+          <FormField
+            label="Name"
+            hint="Unique identifier for the cloud provider"
+            required
+          >
             <AngryTextBox
               id="name"
               value={formData.name}
@@ -211,20 +219,24 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
               placeholder="Name (e.g., AWS, Azure, GCP) *"
               disabled={!!editingProvider}
             />
-            <small className="form-hint">Unique identifier for the cloud provider</small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Display Name"
+            hint="User-friendly name shown in the UI"
+            required
+          >
             <AngryTextBox
               id="displayName"
               value={formData.displayName}
               onChange={(v) => setFormData({ ...formData, displayName: v })}
               placeholder="Display Name *"
             />
-            <small className="form-hint">User-friendly name shown in the UI</small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Description"
+          >
             <AngryTextBox
               id="description"
               value={formData.description || ''}
@@ -232,16 +244,18 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
               placeholder="Description"
               multiline={true}
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Enable this cloud provider"
+            hint="Only enabled providers are available to users"
+          >
             <AngryCheckBox
               label="Enable this cloud provider"
               checked={formData.enabled || false}
               onChange={(checked) => setFormData({ ...formData, enabled: checked })}
             />
-            <small className="form-hint">Only enabled providers are available to users</small>
-          </div>
+          </FormField>
         </div>
       </Modal>
     </div>

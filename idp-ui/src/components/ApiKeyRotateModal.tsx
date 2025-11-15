@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, type ModalButton } from './Modal';
 import { AngryButton } from './input';
+import { ErrorMessage, WarningBox, SuccessMessage, MetadataDisplay } from './common';
 import type { ApiKeyResponse, ApiKeyCreated } from '../types/apiKey';
 import type { User } from '../types/auth';
 import { apiService } from '../services/api';
@@ -77,34 +78,24 @@ export const ApiKeyRotateModal = ({ isOpen, onClose, onSuccess, apiKey, user }: 
             After 24 hours, the old key will be automatically revoked and only the new key will work.
           </p>
         </div>
-        <div className="warning-box">
-          <div className="warning-icon">⚠</div>
-          <div className="warning-text">
-            <strong>Important:</strong> The new API key will be shown only once. 
-            Make sure to copy it to a secure location.
-          </div>
-        </div>
+        <WarningBox>
+          <strong>Important:</strong> The new API key will be shown only once. 
+          Make sure to copy it to a secure location.
+        </WarningBox>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <ErrorMessage message={error} />}
     </div>
   );
 
   const renderRotatedKey = () => (
     <div className="api-key-rotated">
-      <div className="success-icon">✓</div>
-      <h3>API Key Rotated Successfully</h3>
+      <SuccessMessage message="API Key Rotated Successfully" />
       
-      <div className="warning-box">
-        <div className="warning-icon">⚠</div>
-        <div className="warning-content">
-          <strong>Important: Save this key now!</strong>
-          <p>
-            This is the only time you'll see the new API key. 
-            Copy it to a secure location before closing this dialog.
-          </p>
-        </div>
-      </div>
+      <WarningBox title="Important: Save this key now!">
+        This is the only time you'll see the new API key. 
+        Copy it to a secure location before closing this dialog.
+      </WarningBox>
 
       <div className="key-display">
         <div className="key-label">Your New API Key:</div>
@@ -131,28 +122,22 @@ export const ApiKeyRotateModal = ({ isOpen, onClose, onSuccess, apiKey, user }: 
         </div>
       </div>
 
-      <div className="key-metadata">
-        <div className="metadata-item">
-          <span className="metadata-label">Name:</span>
-          <span className="metadata-value">{rotatedKey?.keyName}</span>
-        </div>
-        <div className="metadata-item">
-          <span className="metadata-label">Type:</span>
-          <span className="metadata-value">{rotatedKey?.keyType}</span>
-        </div>
-        <div className="metadata-item">
-          <span className="metadata-label">Expires:</span>
-          <span className="metadata-value">
-            {rotatedKey?.expiresAt
+      <MetadataDisplay 
+        items={[
+          { label: "Name", value: rotatedKey?.keyName },
+          { label: "Type", value: rotatedKey?.keyType },
+          { 
+            label: "Expires", 
+            value: rotatedKey?.expiresAt
               ? new Date(rotatedKey.expiresAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })
-              : 'Never'}
-          </span>
-        </div>
-      </div>
+              : 'Never'
+          }
+        ]}
+      />
     </div>
   );
 

@@ -21,6 +21,7 @@ describe('DynamicResourceForm - ECS Blueprint Properties', () => {
   const mockEcsClusterProperties: PropertySchema[] = [
     {
       id: '04010000-0000-0000-0000-000000000001',
+      mappingId: 'mapping-1',
       propertyName: 'capacityProvider',
       displayName: 'Capacity Provider',
       description: 'The capacity provider determines how the ECS cluster provisions compute resources. FARGATE is serverless and AWS manages all infrastructure. FARGATE_SPOT uses spare AWS capacity at reduced cost but tasks may be interrupted. EC2 gives you control over instance types and cluster scaling but requires managing the infrastructure. FARGATE is recommended for most use cases.',
@@ -38,6 +39,7 @@ describe('DynamicResourceForm - ECS Blueprint Properties', () => {
     },
     {
       id: '04010000-0000-0000-0000-000000000002',
+      mappingId: 'mapping-2',
       propertyName: 'instanceType',
       displayName: 'EC2 Instance Type',
       description: 'The EC2 instance type for the ECS cluster nodes. Only applies when capacity provider is EC2. t3 instances are burstable and cost-effective for variable workloads, m5 are general purpose for consistent workloads, c5 are compute-optimized for CPU-intensive applications. Ignored when using FARGATE or FARGATE_SPOT.',
@@ -62,6 +64,7 @@ describe('DynamicResourceForm - ECS Blueprint Properties', () => {
     },
     {
       id: '04010000-0000-0000-0000-000000000003',
+      mappingId: 'mapping-3',
       propertyName: 'minClusterSize',
       displayName: 'Minimum Cluster Size',
       description: 'The minimum number of EC2 instances to maintain in the cluster. The cluster will not scale below this number even under low load. Setting this to 0 allows the cluster to scale down completely when idle, reducing costs. Only applies when capacity provider is EC2.',
@@ -76,6 +79,7 @@ describe('DynamicResourceForm - ECS Blueprint Properties', () => {
     },
     {
       id: '04010000-0000-0000-0000-000000000004',
+      mappingId: 'mapping-4',
       propertyName: 'maxClusterSize',
       displayName: 'Maximum Cluster Size',
       description: 'The maximum number of EC2 instances allowed in the cluster. The cluster will not scale above this number even under high load. This setting controls cost and resource limits. Must be greater than or equal to minimum cluster size. Only applies when capacity provider is EC2.',
@@ -90,6 +94,7 @@ describe('DynamicResourceForm - ECS Blueprint Properties', () => {
     },
     {
       id: '04010000-0000-0000-0000-000000000005',
+      mappingId: 'mapping-5',
       propertyName: 'enableContainerInsights',
       displayName: 'Enable Container Insights',
       description: 'Enable CloudWatch Container Insights to collect, aggregate, and summarize metrics and logs from your containerized applications. Provides cluster-level, task-level, and service-level metrics including CPU, memory, disk, and network utilization. Additional CloudWatch charges apply.',

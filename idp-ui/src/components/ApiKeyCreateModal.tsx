@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, type ModalButton } from './Modal';
 import { AngryTextBox, AngryComboBox, AngryButton, type AngryComboItem } from './input';
+import { FormField, ErrorMessage, WarningBox, SuccessMessage, MetadataDisplay } from './common';
 import type { ApiKeyCreated } from '../types/apiKey';
 import type { User } from '../types/auth';
 import { apiService } from '../services/api';
@@ -92,8 +93,13 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
 
   const renderCreationForm = () => (
     <div className="api-key-create-form">
-      <div className="form-field">
-        <label htmlFor="keyName">Key Name *</label>
+      <FormField 
+        label="Key Name" 
+        htmlFor="keyName"
+        required
+        hint="Choose a name that helps you identify the purpose of this key"
+        error={error && !keyName.trim() ? 'Please enter a key name' : undefined}
+      >
         <AngryTextBox
           id="keyName"
           value={keyName}
@@ -102,13 +108,13 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
           disabled={isCreating}
           autoFocus={true}
         />
-        <div className="field-hint">
-          Choose a name that helps you identify the purpose of this key
-        </div>
-      </div>
+      </FormField>
 
-      <div className="form-field">
-        <label htmlFor="expirationDays">Expiration Period</label>
+      <FormField 
+        label="Expiration Period" 
+        htmlFor="expirationDays"
+        hint="The key will automatically expire after this period"
+      >
         <AngryComboBox
           id="expirationDays"
           items={EXPIRATION_OPTIONS}
@@ -117,38 +123,26 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
           placeholder="Select expiration period"
           disabled={isCreating}
         />
-        <div className="field-hint">
-          The key will automatically expire after this period
-        </div>
-      </div>
+      </FormField>
 
       {isAdminMode && (
-        <div className="form-field">
-          <div className="field-hint admin-key-notice">
-            <strong>Note:</strong> This will create a system-level API key that persists independently of any user account.
-          </div>
-        </div>
+        <WarningBox>
+          <strong>Note:</strong> This will create a system-level API key that persists independently of any user account.
+        </WarningBox>
       )}
 
-      {error && <div className="error-message">{error}</div>}
+      {error && keyName.trim() && <ErrorMessage message={error} />}
     </div>
   );
 
   const renderCreatedKey = () => (
     <div className="api-key-created">
-      <div className="success-icon">✓</div>
-      <h3>API Key Created Successfully</h3>
+      <SuccessMessage message="API Key Created Successfully" />
       
-      <div className="warning-box">
-        <div className="warning-icon">⚠</div>
-        <div className="warning-content">
-          <strong>Important: Save this key now!</strong>
-          <p>
-            This is the only time you'll see the full API key. 
-            Copy it to a secure location before closing this dialog.
-          </p>
-        </div>
-      </div>
+      <WarningBox title="Important: Save this key now!">
+        This is the only time you'll see the full API key. 
+        Copy it to a secure location before closing this dialog.
+      </WarningBox>
 
       <div className="key-display">
         <div className="key-label">Your API Key:</div>
@@ -164,28 +158,22 @@ export const ApiKeyCreateModal = ({ isOpen, onClose, onSuccess, user, mode = 'pe
         </AngryButton>
       </div>
 
-      <div className="key-metadata">
-        <div className="metadata-item">
-          <span className="metadata-label">Name:</span>
-          <span className="metadata-value">{createdKey?.keyName}</span>
-        </div>
-        <div className="metadata-item">
-          <span className="metadata-label">Type:</span>
-          <span className="metadata-value">{createdKey?.keyType}</span>
-        </div>
-        <div className="metadata-item">
-          <span className="metadata-label">Expires:</span>
-          <span className="metadata-value">
-            {createdKey?.expiresAt
+      <MetadataDisplay 
+        items={[
+          { label: "Name", value: createdKey?.keyName },
+          { label: "Type", value: createdKey?.keyType },
+          { 
+            label: "Expires", 
+            value: createdKey?.expiresAt
               ? new Date(createdKey.expiresAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })
-              : 'Never'}
-          </span>
-        </div>
-      </div>
+              : 'Never'
+          }
+        ]}
+      />
     </div>
   );
 

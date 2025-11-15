@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { act } from 'react';
 import userEvent from '@testing-library/user-event';
 import { StackForm } from './StackForm';
 import type { User } from '../types/auth';
@@ -73,17 +72,17 @@ describe('StackForm - Removed Fields Tests', () => {
       expect(screen.queryByText(/^Cloud Provider \*/i)).not.toBeInTheDocument();
       
       // Check that "Cloud Name" is present (this is different from "Cloud Provider")
-      expect(screen.getByText(/Cloud Name \*/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Cloud Name/i)).toBeInTheDocument();
     });
 
     it('should only display expected form fields', () => {
       renderStackForm();
 
-      // Verify expected fields are present
-      expect(screen.getByText(/Display Name \*/i)).toBeInTheDocument();
-      expect(screen.getByText(/Cloud Name \*/i)).toBeInTheDocument();
-      expect(screen.getByText(/Description/i)).toBeInTheDocument();
-      expect(screen.getByText(/Repository URL/i)).toBeInTheDocument();
+      // Verify expected fields are present (checking labels specifically)
+      expect(screen.getByLabelText(/Display Name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Cloud Name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Repository URL/i)).toBeInTheDocument();
 
       // Verify removed fields are not present
       expect(screen.queryByText(/^Domain$/i)).not.toBeInTheDocument();

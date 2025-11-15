@@ -16,6 +16,9 @@ import type { ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
 import type { FocusableInputHandle } from '../types/focus';
 import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input';
+import { FormField } from './common/FormField/FormField';
+import { ErrorMessage } from './common/Feedback/ErrorMessage';
+import { LoadingButton } from './common/LoadingButton/LoadingButton';
 
 type StackCreateForm = StackCreate;
 import './StackForm.css';
@@ -237,42 +240,54 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
         <h2>{stack ? 'Edit Stack' : 'Create New Stack'}</h2>
         
         {error && (
-          <div className="error-message">
-            {error}
-          </div>
+          <ErrorMessage message={error} />
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <FormField 
+            label="Display Name" 
+            required
+            htmlFor="name"
+          >
             <AngryTextBox
               id="name"
               value={formData.name}
               onChange={(v) => handleChange('name', v)}
-              placeholder="Display Name *"
               componentRef={nameInputRef}
+              placeholder="Display Name"
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField 
+            label="Cloud Name" 
+            required
+            htmlFor="cloudName"
+          >
             <AngryTextBox
               id="cloudName"
               value={formData.cloudName}
               onChange={(v) => handleChange('cloudName', v)}
-              placeholder="Cloud Name *"
+              placeholder="Cloud Name"
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField 
+            label="Description" 
+            htmlFor="description"
+          >
             <AngryTextBox
               id="description"
               value={formData.description || ''}
               onChange={(v) => handleChange('description', v)}
-              placeholder="Description"
               multiline={true}
+              placeholder="Description"
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField 
+            label="Stack Type" 
+            htmlFor="stackType"
+          >
             <AngryComboBox
               id="stackType"
               value={formData.stackType}
@@ -283,34 +298,44 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
               }))}
               placeholder="Select stack type"
             />
-          </div>
+          </FormField>
 
           {(formData.stackType === StackType.RESTFUL_SERVERLESS || 
             formData.stackType === StackType.RESTFUL_API || 
             formData.stackType === StackType.JAVASCRIPT_WEB_APPLICATION) && (
-            <div className="form-group">
+            <FormField 
+              label="Route Path" 
+              required
+              htmlFor="routePath"
+              hint="The route path must start and end with a forward slash (e.g., /my-route-path/)."
+            >
               <AngryTextBox
                 id="routePath"
                 value={formData.routePath}
                 onChange={(v) => handleChange('routePath', v)}
-                placeholder="Route Path *"
+                placeholder="Route Path"
               />
-              <small className="form-text text-muted">The route path must start and end with a forward slash (e.g., /my-route-path/).</small>
-            </div>
+            </FormField>
           )}
 
-          <div className="form-group">
+          <FormField 
+            label="Repository URL" 
+            htmlFor="repositoryURL"
+          >
             <AngryTextBox
               id="repositoryURL"
               value={formData.repositoryURL || ''}
               onChange={(v) => handleChange('repositoryURL', v)}
-              placeholder="Repository URL"
               type="url"
+              placeholder="Repository URL"
             />
-          </div>
+          </FormField>
 
           {supportedLanguages.length > 0 && (
-            <div className="form-group">
+            <FormField 
+              label="Framework" 
+              htmlFor="programmingLanguage"
+            >
               <AngryComboBox
                 id="programmingLanguage"
                 value={formData.programmingLanguage || ''}
@@ -321,11 +346,14 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
                 }))}
                 placeholder="Framework"
               />
-            </div>
+            </FormField>
           )}
 
           {supportedLanguages.length > 0 && supportedVersions.length > 0 && (
-            <div className="form-group">
+            <FormField 
+              label="Framework Version" 
+              htmlFor="frameworkVersion"
+            >
               <AngryComboBox
                 id="frameworkVersion"
                 value={formData.frameworkVersion || ''}
@@ -333,17 +361,17 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
                 items={supportedVersions.map(v => ({ text: v, value: v }))}
                 placeholder="Framework Version"
               />
-            </div>
+            </FormField>
           )}
 
           {(formData.stackType === StackType.RESTFUL_SERVERLESS || formData.stackType === StackType.RESTFUL_API) && (
-            <div className="form-group">
+            <FormField label="Public Stack">
               <AngryCheckBox
                 label="Make this stack public"
                 checked={formData.isPublic || false}
                 onChange={(checked) => handleChange('isPublic', checked)}
               />
-            </div>
+            </FormField>
           )}
 
           {/* Resources Section */}
@@ -353,12 +381,18 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
             {selectedResources.map((resource, index) => (
               <div key={index} className="resource-item">
                 <div className="resource-header">
-                  <AngryTextBox
-                    id={`resource-name-${index}`}
-                    value={resource.name}
-                    onChange={(v) => handleResourceNameChange(index, v)}
-                    placeholder="Resource Name *"
-                  />
+                  <FormField 
+                    label="Resource Name" 
+                    required
+                    htmlFor={`resource-name-${index}`}
+                  >
+                    <AngryTextBox
+                      id={`resource-name-${index}`}
+                      value={resource.name}
+                      onChange={(v) => handleResourceNameChange(index, v)}
+                      placeholder="Resource Name"
+                    />
+                  </FormField>
                   <button
                     type="button"
                     className="remove-resource-btn"
@@ -414,13 +448,14 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
             >
               Cancel
             </AngryButton>
-            <AngryButton
+            <LoadingButton
               type="submit"
-              disabled={loading}
+              isLoading={loading}
+              loadingText="Saving..."
               isPrimary={true}
             >
-              {loading ? 'Saving...' : (stack ? 'Update Stack' : 'Create Stack')}
-            </AngryButton>
+              {stack ? 'Update Stack' : 'Create Stack'}
+            </LoadingButton>
           </div>
         </form>
       </div>

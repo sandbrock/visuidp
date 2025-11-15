@@ -35,13 +35,6 @@
   margin-bottom: 1.5rem;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 14px;
-}
 
 .form-group input,
 .form-group textarea,
@@ -118,30 +111,7 @@
   border-color: var(--accent-primary-hover);
 }
 
-.error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  padding: 12px;
-  margin-bottom: 1.5rem;
-  color: #721c24;
-  font-size: 14px;
-}
 
-.info-message {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  border-radius: 4px;
-  padding: 12px;
-  margin-bottom: 1rem;
-  color: #0c5460;
-  font-size: 14px;
-}
-
-.info-message p {
-  margin: 0;
-  line-height: 1.5;
-}
 
 /* Resources Section */
 .resources-section {

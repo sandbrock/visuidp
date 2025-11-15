@@ -13,6 +13,9 @@ import { AngryTextBox, AngryComboBox, AngryCheckBox } from './input';
 import { Modal } from './Modal';
 import type { ModalButton } from './Modal';
 import { Breadcrumb } from './Breadcrumb';
+import { FormField } from './common';
+import { ErrorMessage } from './common';
+import { MetadataDisplay } from './common';
 import './ResourceTypeMappingManagement.css';
 
 interface ResourceTypeMappingManagementProps {
@@ -214,7 +217,7 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <ErrorMessage message={error} />}
 
       <div className="mapping-grid-container">
         <table className="mapping-grid">
@@ -317,7 +320,7 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
             } as ModalButton
           ] : []),
           {
-            label: saving ? 'Saving...' : selectedCell?.mapping ? 'Update' : 'Create',
+            label: selectedCell?.mapping ? 'Update' : 'Create',
             onClick: handleSave,
             variant: 'primary',
             disabled: saving
@@ -325,9 +328,9 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
         ]}
       >
         <div className="mapping-form">
-          {error && <div className="error-message">{error}</div>}
+          {error && <ErrorMessage message={error} />}
 
-          <div className="form-group">
+          <FormField label="Resource Type">
             <AngryTextBox
               id="resourceType"
               value={resourceTypes.find((rt) => rt.id === formData.resourceTypeId)?.displayName || ''}
@@ -336,9 +339,9 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
               disabled={true}
               multiline={false}
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField label="Cloud Provider">
             <AngryTextBox
               id="cloudProvider"
               value={providers.find((p) => p.id === formData.cloudProviderId)?.displayName || ''}
@@ -347,10 +350,15 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
               disabled={true}
               multiline={false}
             />
-          </div>
+          </FormField>
 
-          <div className="form-group">
-            <label>Module Location Type *</label>
+          <FormField
+            label="Module Location Type"
+            hint={formData.moduleLocationType === 'GIT' ? 'Git repository URL (e.g., https://github.com/org/repo.git)' :
+                 formData.moduleLocationType === 'FILE_SYSTEM' ? 'Local file system path (e.g., ./modules/resource)' :
+                 'Terraform registry reference (e.g., hashicorp/aws/vpc)'}
+            required
+          >
             <AngryComboBox
               id="moduleLocationType"
               items={MODULE_LOCATION_TYPES}
@@ -358,15 +366,13 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
               onChange={(value) => setFormData({ ...formData, moduleLocationType: value as ModuleLocationType })}
               placeholder="Select location type"
             />
-            <small className="form-hint">
-              {formData.moduleLocationType === 'GIT' && 'Git repository URL (e.g., https://github.com/org/repo.git)'}
-              {formData.moduleLocationType === 'FILE_SYSTEM' && 'Local file system path (e.g., ./modules/resource)'}
-              {formData.moduleLocationType === 'REGISTRY' && 'Terraform registry reference (e.g., hashicorp/aws/vpc)'}
-            </small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
-            <label>Terraform Module Location *</label>
+          <FormField
+            label="Terraform Module Location"
+            hint="The location where the Terraform module for this resource type and cloud provider can be found"
+            required
+          >
             <AngryTextBox
               id="terraformModuleLocation"
               value={formData.terraformModuleLocation}
@@ -374,40 +380,41 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
               placeholder="Enter module location"
               multiline={false}
             />
-            <small className="form-hint">
-              The location where the Terraform module for this resource type and cloud provider can be found
-            </small>
-          </div>
+          </FormField>
 
-          <div className="form-group">
+          <FormField
+            label="Enable this mapping"
+            hint="Only enabled mappings are available to users. Note: Mappings must be complete (have properties defined) to be enabled."
+          >
             <AngryCheckBox
               id="enabled"
               checked={formData.enabled}
               onChange={(checked) => setFormData({ ...formData, enabled: checked })}
               label="Enable this mapping"
             />
-            <small className="form-hint">
-              Only enabled mappings are available to users. Note: Mappings must be complete (have properties defined) to be enabled.
-            </small>
-          </div>
+          </FormField>
 
           {selectedCell?.mapping && (
-            <div className="mapping-info">
-              <div className="info-row">
-                <span className="info-label">Status:</span>
-                <span className={`status-badge ${getCellStatus(selectedCell.mapping)}`}>
-                  {getCellStatusText(selectedCell.mapping)}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Created:</span>
-                <span>{new Date(selectedCell.mapping.createdAt).toLocaleString()}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Updated:</span>
-                <span>{new Date(selectedCell.mapping.updatedAt).toLocaleString()}</span>
-              </div>
-            </div>
+            <MetadataDisplay
+              items={[
+                {
+                  label: 'Status',
+                  value: (
+                    <span className={`status-badge ${getCellStatus(selectedCell.mapping)}`}>
+                      {getCellStatusText(selectedCell.mapping)}
+                    </span>
+                  )
+                },
+                {
+                  label: 'Created',
+                  value: new Date(selectedCell.mapping.createdAt).toLocaleString()
+                },
+                {
+                  label: 'Updated',
+                  value: new Date(selectedCell.mapping.updatedAt).toLocaleString()
+                }
+              ]}
+            />
           )}
         </div>
       </Modal>

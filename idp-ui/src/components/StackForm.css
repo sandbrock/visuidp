@@ -41,13 +41,6 @@
   gap: 1rem;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 14px;
-}
 
 .form-group input,
 .form-group textarea,
@@ -119,15 +112,6 @@
   border-color: var(--accent-primary-hover);
 }
 
-.error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  padding: 12px;
-  margin-bottom: 1.5rem;
-  color: #721c24;
-  font-size: 14px;
-}
 
 /* Resources Section */
 .resources-section {
@@ -420,13 +404,6 @@
   opacity: 0.5;
 }
 
-/* Error message with danger styling */
-[data-theme="frankenstein"] .error-message {
-  background: var(--bg-secondary);
-  border: 3px solid var(--danger);
-  color: var(--text-primary);
-  box-shadow: 0 4px 12px var(--shadow);
-}
 
 /* Loading text */
 [data-theme="frankenstein"] .loading-text {
