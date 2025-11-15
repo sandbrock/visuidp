@@ -47,22 +47,24 @@ class PropertySchemaService {
           cloudProviderId,
           userEmail
         );
-        schemaArray = response.properties;
+        schemaArray = response.properties || [];
       } else {
         const response = await apiService.getResourceSchemaForStack(
           resourceTypeId,
           cloudProviderId,
           userEmail
         );
-        schemaArray = response.properties;
+        schemaArray = response.properties || [];
       }
 
-      // Sort by displayOrder
-      schemaArray.sort((a, b) => {
-        const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
-        return orderA - orderB;
-      });
+      // Sort by displayOrder (only if we have properties)
+      if (Array.isArray(schemaArray) && schemaArray.length > 0) {
+        schemaArray.sort((a, b) => {
+          const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+          const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+          return orderA - orderB;
+        });
+      }
 
       // Cache the result
       this.cache.set(cacheKey, schemaArray);

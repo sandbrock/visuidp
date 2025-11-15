@@ -4,6 +4,7 @@ import com.angryss.idp.application.dtos.BlueprintCreateDto;
 import com.angryss.idp.application.dtos.BlueprintResponseDto;
 import com.angryss.idp.application.dtos.CloudProviderDto;
 import com.angryss.idp.application.dtos.PropertySchemaDto;
+import com.angryss.idp.application.dtos.PropertySchemaResponseDto;
 import com.angryss.idp.application.dtos.ResourceTypeDto;
 import com.angryss.idp.application.usecases.BlueprintService;
 import com.angryss.idp.application.usecases.CloudProviderService;
@@ -137,9 +138,9 @@ public class BlueprintsController {
     @APIResponse(responseCode = "200", description = "Property schema retrieved successfully")
     @APIResponse(responseCode = "404", description = "Mapping not found")
     @APIResponse(responseCode = "401", description = "Unauthorized")
-    public Map<String, PropertySchemaDto> getResourceSchema(
+    public PropertySchemaResponseDto getResourceSchema(
             @Parameter(description = "Resource Type ID") @PathParam("resourceTypeId") UUID resourceTypeId,
             @Parameter(description = "Cloud Provider ID") @PathParam("cloudProviderId") UUID cloudProviderId) {
-        return propertySchemaService.getSchemaMap(resourceTypeId, cloudProviderId);
+        return propertySchemaService.getSchemaResponse(resourceTypeId, cloudProviderId);
     }
 }

@@ -2,6 +2,7 @@ package com.angryss.idp.presentation.controllers;
 
 import com.angryss.idp.application.dtos.CloudProviderDto;
 import com.angryss.idp.application.dtos.PropertySchemaDto;
+import com.angryss.idp.application.dtos.PropertySchemaResponseDto;
 import com.angryss.idp.application.dtos.ResourceTypeDto;
 import com.angryss.idp.application.dtos.StackCreateDto;
 import com.angryss.idp.application.dtos.StackResponseDto;
@@ -165,9 +166,9 @@ public class StackController {
     @APIResponse(responseCode = "200", description = "Property schema retrieved successfully")
     @APIResponse(responseCode = "404", description = "Mapping not found")
     @APIResponse(responseCode = "401", description = "Unauthorized")
-    public Map<String, PropertySchemaDto> getResourceSchema(
+    public PropertySchemaResponseDto getResourceSchema(
             @Parameter(description = "Resource Type ID") @PathParam("resourceTypeId") UUID resourceTypeId,
             @Parameter(description = "Cloud Provider ID") @PathParam("cloudProviderId") UUID cloudProviderId) {
-        return propertySchemaService.getSchemaMap(resourceTypeId, cloudProviderId);
+        return propertySchemaService.getSchemaResponse(resourceTypeId, cloudProviderId);
     }
 }
