@@ -2,13 +2,13 @@
    USER INFO COMPONENT
    ============================================ */
 
-.user-info {
+.profile-dropdown .user-info {
   padding: 0.75rem 1rem;
   position: relative;
   z-index: 2;
 }
 
-.user-info-email {
+.profile-dropdown .user-info-email {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
@@ -16,7 +16,7 @@
   line-height: 1.4;
 }
 
-.user-info-name {
+.profile-dropdown .user-info-name {
   font-size: 12px;
   color: var(--text-secondary);
   margin-top: 0.25rem;
@@ -27,7 +27,7 @@
    DARK THEME
    ============================================ */
 
-[data-theme="dark"] .user-info {
+[data-theme="dark"] .profile-dropdown .user-info {
   background: rgba(0, 0, 0, 0.1);
 }
 
@@ -35,12 +35,11 @@
    FRANKENSTEIN THEME
    ============================================ */
 
-[data-theme="frankenstein"] .user-info {
+[data-theme="frankenstein"] .profile-dropdown .user-info {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Frankenstein theme text styling */
-[data-theme="frankenstein"] .user-info-email {
+[data-theme="frankenstein"] .profile-dropdown .user-info-email {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 700;
@@ -48,7 +47,7 @@
   color: var(--frankenstein-skin);
 }
 
-[data-theme="frankenstein"] .user-info-name {
+[data-theme="frankenstein"] .profile-dropdown .user-info-name {
   font-style: italic;
   opacity: 0.9;
 }
@@ -58,15 +57,15 @@
    ============================================ */
 
 @media (max-width: 768px) {
-  .user-info {
+  .profile-dropdown .user-info {
     padding: 0.625rem 0.875rem;
   }
 
-  .user-info-email {
+  .profile-dropdown .user-info-email {
     font-size: 13px;
   }
 
-  .user-info-name {
+  .profile-dropdown .user-info-name {
     font-size: 11px;
   }
 }

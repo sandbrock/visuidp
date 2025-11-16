@@ -450,8 +450,8 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             />
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-end' }}>
-            <button className="btn btn-primary btn-small" onClick={() => { setMode('create'); setFormData({ name: '', description: '', configuration: {}, supportedCloudProviderIds: [] }); }}>New</button>
-            <button className="btn btn-outline btn-small" disabled={!selectedBlueprint} onClick={() => {
+            <AngryButton isPrimary size="small" onClick={() => { setMode('create'); setFormData({ name: '', description: '', configuration: {}, supportedCloudProviderIds: [] }); }}>New</AngryButton>
+            <AngryButton style="outline" size="small" disabled={!selectedBlueprint} onClick={() => {
               if (!selectedBlueprint) return;
               setMode('edit');
               setFormData({
@@ -460,8 +460,8 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                 configuration: selectedBlueprint.configuration ?? {},
                 supportedCloudProviderIds: selectedBlueprint.supportedCloudProviderIds || []
               });
-            }}>Edit</button>
-            <button className="btn btn-danger btn-small" disabled={!selectedBlueprint} onClick={async () => {
+            }}>Edit</AngryButton>
+            <AngryButton variant="danger" size="small" disabled={!selectedBlueprint} onClick={async () => {
               if (!selectedBlueprint) return;
               try {
                 setSaving(true);
@@ -477,7 +477,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
               } finally {
                 setSaving(false);
               }
-            }}>Delete</button>
+            }}>Delete</AngryButton>
           </div>
         </div>
       </div>
@@ -606,8 +606,9 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
             <div className="infrastructure-resources">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <h4 style={{ margin: 0 }}>Shared Infrastructure Resources</h4>
-                <button 
-                  className="btn btn-primary btn-small" 
+                <AngryButton 
+                  isPrimary
+                  size="small" 
                   disabled={!selectedBlueprintId || saving}
                   onClick={() => {
                     if (!selectedBlueprintId) return;
@@ -631,7 +632,7 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                   }}
                 >
                   Create New Resource
-                </button>
+                </AngryButton>
               </div>
               
               {resources.length === 0 ? (
@@ -701,22 +702,24 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button 
-                          className="btn btn-outline btn-small" 
+                        <AngryButton 
+                          style="outline"
+                          size="small" 
                           onClick={() => handleResourceUpdate(resource)}
                           disabled={saving}
                           title="Edit resource"
                         >
                           Edit
-                        </button>
-                        <button 
-                          className="btn btn-danger btn-small" 
+                        </AngryButton>
+                        <AngryButton 
+                          variant="danger"
+                          size="small" 
                           onClick={() => handleResourceDelete(resource)}
                           disabled={saving}
                           title="Delete resource"
                         >
                           Delete
-                        </button>
+                        </AngryButton>
                       </div>
                     </div>
                   ))}

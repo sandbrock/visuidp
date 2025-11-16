@@ -30,31 +30,40 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid var(--border-primary);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  border: 2px solid var(--border-primary, #e1e5e9);
+  background: var(--bg-tertiary, #f8f9fa);
+  color: var(--text-primary, #333333);
   font-weight: 600;
   font-size: 14px;
   transition: all 0.2s ease;
   padding: 0;
+  margin: 0;
   outline: none;
+  overflow: hidden;
+  /* Explicitly override any default button styles */
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .profile-icon:hover {
-  background: var(--accent-secondary);
-  border-color: var(--accent-primary);
+  background: var(--accent-secondary, #e3f2fd);
+  border-color: var(--accent-primary, #007bff);
   transform: scale(1.05);
 }
 
 .profile-icon:focus-visible {
-  outline: 3px solid var(--accent-primary);
+  outline: 3px solid var(--accent-primary, #007bff);
   outline-offset: 2px;
 }
 
 .profile-icon.active {
-  background: var(--accent-secondary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-secondary);
+  background: var(--accent-secondary, #e3f2fd);
+  border-color: var(--accent-primary, #007bff);
+  box-shadow: 0 0 0 3px var(--accent-secondary, #e3f2fd);
 }
 
 .profile-initials {
@@ -68,10 +77,10 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 240px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border-primary, #e1e5e9);
   border-radius: 8px;
-  box-shadow: 0 4px 12px var(--shadow);
+  box-shadow: 0 4px 12px var(--shadow, rgba(0, 0, 0, 0.1));
   z-index: 1000;
   overflow: hidden;
   animation: dropdown-fade-in 0.2s ease-out;
@@ -91,7 +100,7 @@
 /* Dropdown Divider */
 .dropdown-divider {
   height: 1px;
-  background: var(--border-secondary);
+  background: var(--border-secondary, #f0f0f0);
   margin: 0;
 }
 
@@ -100,30 +109,30 @@
    ============================================ */
 
 [data-theme="dark"] .profile-icon {
-  background: var(--bg-secondary);
-  border-color: var(--border-primary);
-  color: var(--text-primary);
+  background: var(--bg-primary, #1a1a1a);
+  border-color: var(--border-primary, #404040);
+  color: var(--text-primary, #ffffff);
 }
 
 [data-theme="dark"] .profile-icon:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
+  background: var(--bg-tertiary, #383838);
+  border-color: var(--accent-primary, #4dabf7);
 }
 
 [data-theme="dark"] .profile-icon.active {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+  background: var(--bg-tertiary, #383838);
+  border-color: var(--accent-primary, #4dabf7);
+  box-shadow: 0 0 0 3px var(--accent-secondary, rgba(77, 171, 247, 0.2));
 }
 
 [data-theme="dark"] .profile-dropdown {
-  background: var(--bg-secondary);
-  border-color: var(--border-primary);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  background: var(--bg-secondary, #2d2d2d);
+  border-color: var(--border-primary, #404040);
+  box-shadow: 0 8px 24px var(--shadow, rgba(0, 0, 0, 0.5));
 }
 
 [data-theme="dark"] .dropdown-divider {
-  background: var(--border-primary);
+  background: var(--border-primary, #404040);
 }
 
 /* ============================================
@@ -131,11 +140,11 @@
    ============================================ */
 
 [data-theme="frankenstein"] .profile-icon {
-  background: var(--bg-secondary);
-  border: 2px solid var(--frankenstein-stitch);
-  color: var(--frankenstein-skin);
+  background: var(--bg-secondary, #252b25);
+  border: 2px solid var(--frankenstein-stitch, var(--border-primary, #2d2520));
+  color: var(--frankenstein-skin, var(--text-primary, #8ba888));
   font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px var(--shadow, rgba(0, 0, 0, 0.5));
   position: relative;
   transition: all 0.3s ease;
 }
@@ -148,7 +157,7 @@
   left: 3px;
   right: 3px;
   bottom: 3px;
-  border: 1px dashed var(--frankenstein-stitch);
+  border: 1px dashed var(--frankenstein-stitch, var(--border-primary, #2d2520));
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -161,8 +170,8 @@
 
 /* Electrical glow on hover */
 [data-theme="frankenstein"] .profile-icon:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--frankenstein-skin);
+  background: var(--bg-tertiary, #2f362f);
+  border-color: var(--frankenstein-skin, var(--accent-primary, #8ba888));
   box-shadow: 0 0 15px rgba(122, 155, 122, 0.4),
               inset 0 0 10px rgba(122, 155, 122, 0.1);
   transform: scale(1.05);
@@ -174,8 +183,8 @@
 
 /* Active state with electrical glow */
 [data-theme="frankenstein"] .profile-icon.active {
-  background: var(--bg-tertiary);
-  border-color: var(--frankenstein-bolt);
+  background: var(--bg-tertiary, #2f362f);
+  border-color: var(--frankenstein-bolt, var(--border-primary, #7a7d7a));
   box-shadow: 0 0 20px rgba(122, 155, 122, 0.6),
               0 0 30px rgba(122, 155, 122, 0.3),
               inset 0 0 15px rgba(122, 155, 122, 0.2);
@@ -183,20 +192,20 @@
 
 /* Focus state with electrical glow */
 [data-theme="frankenstein"] .profile-icon:focus-visible {
-  outline: 3px solid var(--frankenstein-skin);
+  outline: 3px solid var(--frankenstein-skin, var(--accent-primary, #8ba888));
   outline-offset: 2px;
   box-shadow: 0 0 15px rgba(122, 155, 122, 0.5);
 }
 
 /* Profile Dropdown - Frankenstein Theme */
 [data-theme="frankenstein"] .profile-dropdown {
-  background: var(--bg-primary);
+  background: var(--bg-primary, #1a1d1a);
   background-image: var(--frankenstein-texture);
   background-repeat: repeat;
   background-size: 200px 200px;
-  border: 3px solid var(--frankenstein-stitch);
+  border: 3px solid var(--frankenstein-stitch, var(--border-primary, #2d2520));
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8),
+  box-shadow: 0 8px 24px var(--shadow, rgba(0, 0, 0, 0.8)),
               0 0 20px rgba(122, 155, 122, 0.3);
   position: relative;
   animation: frankenstein-dropdown-appear 0.3s ease-out;
@@ -206,12 +215,12 @@
   from {
     opacity: 0;
     transform: translateY(-8px);
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    box-shadow: 0 0 0 transparent;
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8),
+    box-shadow: 0 8px 24px var(--shadow, rgba(0, 0, 0, 0.8)),
                 0 0 20px rgba(122, 155, 122, 0.3);
   }
 }
@@ -224,7 +233,7 @@
   left: 8px;
   right: 8px;
   bottom: 8px;
-  border: 2px dashed var(--frankenstein-stitch);
+  border: 2px dashed var(--frankenstein-stitch, var(--border-primary, #2d2520));
   border-radius: 6px;
   pointer-events: none;
   opacity: 0.8;
@@ -238,8 +247,8 @@
   top: 8px;
   right: 8px;
   font-size: 14px;
-  color: var(--frankenstein-bolt);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--frankenstein-bolt, var(--border-primary));
+  text-shadow: 2px 2px 4px var(--shadow, rgba(0, 0, 0, 0.5));
   pointer-events: none;
   z-index: 2;
 }
@@ -247,7 +256,7 @@
 /* Dropdown divider with stitching effect */
 [data-theme="frankenstein"] .dropdown-divider {
   height: 2px;
-  background: var(--frankenstein-stitch);
+  background: var(--frankenstein-stitch, var(--border-primary, #2d2520));
   position: relative;
   margin: 0;
 }
@@ -261,8 +270,8 @@
   height: 2px;
   background: repeating-linear-gradient(
     90deg,
-    var(--frankenstein-stitch) 0px,
-    var(--frankenstein-stitch) 8px,
+    var(--frankenstein-stitch, var(--border-primary, #2d2520)) 0px,
+    var(--frankenstein-stitch, var(--border-primary, #2d2520)) 8px,
     transparent 8px,
     transparent 12px
   );
