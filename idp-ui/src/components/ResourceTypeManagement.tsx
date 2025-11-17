@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
 import type { ResourceType, ResourceTypeCreate, ResourceCategory } from '../types/admin';
 import type { User } from '../types/auth';
@@ -42,15 +42,7 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadResourceTypes();
-  }, []);
-
-  useEffect(() => {
-    filterResourceTypes();
-  }, [resourceTypes, categoryFilter]);
-
-  const loadResourceTypes = async () => {
+  const loadResourceTypes = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -62,15 +54,23 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
 
-  const filterResourceTypes = () => {
+  const filterResourceTypes = useCallback(() => {
     if (categoryFilter === 'ALL') {
       setFilteredResourceTypes(resourceTypes);
     } else {
       setFilteredResourceTypes(resourceTypes.filter(rt => rt.category === categoryFilter));
     }
-  };
+  }, [resourceTypes, categoryFilter]);
+
+  useEffect(() => {
+    loadResourceTypes();
+  }, [loadResourceTypes]);
+
+  useEffect(() => {
+    filterResourceTypes();
+  }, [filterResourceTypes]);
 
   const handleCreate = () => {
     setEditingResourceType(null);

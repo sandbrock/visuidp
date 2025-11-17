@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
 import type { ApiKeyAuditLog } from '../types/apiKey';
 import type { User } from '../types/auth';
@@ -31,15 +31,7 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
 
-  useEffect(() => {
-    loadAuditLogs();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [auditLogs, filterUserEmail, filterStartDate, filterEndDate, filterEventType]);
-
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -51,9 +43,9 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...auditLogs];
 
     // Filter by user email
@@ -85,7 +77,15 @@ export const ApiKeyAuditLogs = ({ user }: ApiKeyAuditLogsProps) => {
 
     setFilteredLogs(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, [auditLogs, filterUserEmail, filterStartDate, filterEndDate, filterEventType]);
+
+  useEffect(() => {
+    loadAuditLogs();
+  }, [loadAuditLogs]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const handleClearFilters = () => {
     setFilterUserEmail('');

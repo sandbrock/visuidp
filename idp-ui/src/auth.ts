@@ -8,6 +8,9 @@ const AUTH_CONFIG = {
 // LocalStorage key for API key
 const API_KEY_STORAGE_KEY = 'idp_api_key';
 
+// LocalStorage key for blueprint selection
+export const BLUEPRINT_STORAGE_KEY = 'selectedBlueprintId';
+
 export type { User };
 
 // API Key management functions
@@ -34,6 +37,12 @@ export const login = (): void => {
 };
 
 export const logout = (): void => {
+  // Clear API key from localStorage
+  clearApiKey();
+  
+  // Clear blueprint selection from localStorage
+  localStorage.removeItem(BLUEPRINT_STORAGE_KEY);
+  
   // For OAuth2-proxy, redirect to the logout endpoint
   window.location.href = '/oauth2/sign_out';
 };

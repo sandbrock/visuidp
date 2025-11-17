@@ -42,6 +42,7 @@ describe('StackForm - Removed Fields Tests', () => {
     return render(
       <StackForm
         stack={stack}
+        blueprintId="test-blueprint-id"
         onSave={mockOnSave}
         onCancel={mockOnCancel}
         user={mockUser}

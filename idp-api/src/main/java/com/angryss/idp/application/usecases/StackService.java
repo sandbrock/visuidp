@@ -167,6 +167,12 @@ public class StackService {
             .collect(Collectors.toList());
     }
 
+    public List<StackResponseDto> getStacksByBlueprint(UUID blueprintId) {
+        return stackRepository.findByBlueprintId(blueprintId).stream()
+            .map(stackMapper::toResponseDto)
+            .collect(Collectors.toList());
+    }
+
     // Environment-based retrieval removed
 
     @Transactional

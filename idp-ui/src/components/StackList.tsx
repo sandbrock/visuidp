@@ -3,40 +3,36 @@ import type { Stack } from '../types/stack';
 import type { User } from '../types/auth';
 import { getStackTypeDisplayName } from '../types/stack';
 import { apiService } from '../services/api';
-import type { StackCollection } from '../services/api';
 import { Loading } from './Loading';
-import { Tabs } from './Tabs';
 import { AngryButton } from './input';
 import './StackList.css';
 
 interface StackListProps {
+  selectedBlueprintId: string | null;
   onStackSelect: (stack: Stack) => void;
   onCreateNew: () => void;
   user: User;
 }
 
-export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) => {
+export const StackList = ({ selectedBlueprintId, onStackSelect, onCreateNew, user }: StackListProps) => {
   const [stacks, setStacks] = useState<Stack[]>([]);
-  const [collections, setCollections] = useState<StackCollection[]>([]);
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-  const [collectionStacks, setCollectionStacks] = useState<Record<string, Stack[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'collection'>(
-    (localStorage.getItem('stackListTab') as 'all' | 'collection') || 'all'
-  );
+  const [blueprintsExist, setBlueprintsExist] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchStacks = async () => {
+      // Don't fetch if no blueprint is selected
+      if (!selectedBlueprintId) {
+        setStacks([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        if (activeTab === 'all') {
-          const stacksData = await apiService.getStacks(user.email);
-          setStacks(stacksData);
-        } else if (activeTab === 'collection') {
-          const cols = await apiService.getCollections(user.email);
-          setCollections(cols);
-        }
+        const stacksData = await apiService.getStacksByBlueprint(selectedBlueprintId, user.email);
+        setStacks(stacksData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch stacks:', err);
@@ -52,23 +48,23 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
     };
 
     fetchStacks();
-  }, [user.email, activeTab]);
+  }, [selectedBlueprintId, user.email]);
 
+  // Check if blueprints exist
   useEffect(() => {
-    localStorage.setItem('stackListTab', activeTab);
-  }, [activeTab]);
-
-  const handleSelectCollection = async (id: string) => {
-    setSelectedCollection(id);
-    if (!collectionStacks[id]) {
+    const checkBlueprints = async () => {
       try {
-        const stacks = await apiService.getCollectionStacks(id, user.email);
-        setCollectionStacks(prev => ({ ...prev, [id]: stacks }));
-      } catch (e) {
-        console.error('Failed to load collection stacks', e);
+        const blueprints = await apiService.getBlueprints(user.email);
+        setBlueprintsExist(blueprints.length > 0);
+      } catch (err) {
+        console.error('Failed to check blueprints:', err);
+        // Assume blueprints exist if we can't check
+        setBlueprintsExist(true);
       }
-    }
-  };
+    };
+
+    checkBlueprints();
+  }, [user.email]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -86,33 +82,30 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
 
   if (error) {
     return (
-      <div className="stack-list">
+      <div className="stack-list" role="region" aria-label="Stack list">
         <div className="stack-list-header">
-          <h2>Your Stacks</h2>
+          <h2>Stacks</h2>
           <AngryButton
             isPrimary={true}
             className="create-stack-btn"
             onClick={onCreateNew}
+            disabled={!selectedBlueprintId}
+            aria-label={selectedBlueprintId ? "Create a new stack in the selected blueprint" : "Create new stack - disabled because no blueprint is selected"}
+            aria-disabled={!selectedBlueprintId}
           >
             Create New Stack
           </AngryButton>
         </div>
-        <div className="error-message">
+        <div className="error-message" role="alert" aria-live="assertive">
           <h3>Unable to load stacks</h3>
           <p>{error}</p>
           <div className="error-actions">
             <AngryButton
               style="outline"
               onClick={() => window.location.reload()}
+              aria-label="Retry loading stacks"
             >
               Retry
-            </AngryButton>
-            <AngryButton
-              isPrimary={true}
-              className="create-stack-btn"
-              onClick={onCreateNew}
-            >
-              Create New Stack
             </AngryButton>
           </div>
         </div>
@@ -120,30 +113,124 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
     );
   }
 
-  const renderAllStacksTab = () => {
-    if (stacks.length === 0) {
-      return (
-        <div className="empty-state">
-          <h3>No stacks yet</h3>
-          <p>Create your first stack to get started with the IDP Portal.</p>
+  // Empty State 1: No blueprints available
+  if (!blueprintsExist) {
+    return (
+      <div className="stack-list" role="region" aria-label="Stack list">
+        <div className="stack-list-header">
+          <h2>Stacks</h2>
           <AngryButton
             isPrimary={true}
             className="create-stack-btn"
             onClick={onCreateNew}
+            disabled={true}
+            aria-label="Create new stack - disabled because no blueprints are available"
+            aria-disabled="true"
+          >
+            Create New Stack
+          </AngryButton>
+        </div>
+        <div className="empty-state" role="status" aria-live="polite">
+          <h3>No blueprints available</h3>
+          <p>Create a blueprint in the Infrastructure page first.</p>
+          <AngryButton
+            isPrimary={true}
+            onClick={() => window.location.href = '/ui/infrastructure'}
+            aria-label="Navigate to Infrastructure page to create a blueprint"
+          >
+            Go to Infrastructure
+          </AngryButton>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty State 2: No blueprint selected
+  if (!selectedBlueprintId) {
+    return (
+      <div className="stack-list" role="region" aria-label="Stack list">
+        <div className="stack-list-header">
+          <h2>Stacks</h2>
+          <AngryButton
+            isPrimary={true}
+            className="create-stack-btn"
+            onClick={onCreateNew}
+            disabled={true}
+            aria-label="Create new stack - disabled because no blueprint is selected"
+            aria-disabled="true"
+          >
+            Create New Stack
+          </AngryButton>
+        </div>
+        <div className="empty-state" role="status" aria-live="polite">
+          <h3>Select a blueprint to view stacks</h3>
+          <p>Choose a blueprint from the selector above to see its stacks.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty State 3: Blueprint selected but no stacks
+  if (stacks.length === 0) {
+    return (
+      <div className="stack-list" role="region" aria-label="Stack list">
+        <div className="stack-list-header">
+          <h2>Stacks</h2>
+          <AngryButton
+            isPrimary={true}
+            className="create-stack-btn"
+            onClick={onCreateNew}
+            aria-label="Create a new stack in the selected blueprint"
+          >
+            Create New Stack
+          </AngryButton>
+        </div>
+        <div className="empty-state" role="status" aria-live="polite">
+          <h3>No stacks in this blueprint</h3>
+          <p>Create your first stack to get started.</p>
+          <AngryButton
+            isPrimary={true}
+            className="create-stack-btn"
+            onClick={onCreateNew}
+            aria-label="Create your first stack in this blueprint"
           >
             Create Your First Stack
           </AngryButton>
         </div>
-      );
-    }
-    
-    return (
-      <div className="stack-grid">
+      </div>
+    );
+  }
+
+  // Normal state: Display stacks
+  return (
+    <div className="stack-list" role="region" aria-label="Stack list">
+      <div className="stack-list-header">
+        <h2>Stacks</h2>
+        <AngryButton
+          isPrimary={true}
+          className="create-stack-btn"
+          onClick={onCreateNew}
+          aria-label="Create a new stack in the selected blueprint"
+        >
+          Create New Stack
+        </AngryButton>
+      </div>
+
+      <div className="stack-grid" role="list" aria-label={`${stacks.length} stack${stacks.length !== 1 ? 's' : ''} in this blueprint`}>
         {stacks.map((stack) => (
           <div
             key={stack.id}
             className="stack-card"
             onClick={() => onStackSelect(stack)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onStackSelect(stack);
+              }
+            }}
+            role="listitem"
+            tabIndex={0}
+            aria-label={`Stack: ${stack.name}. Type: ${getStackTypeDisplayName(stack.stackType)}. Updated: ${formatDate(stack.updatedAt)}`}
           >
             <div className="stack-card-header">
               <h3>{stack.name}</h3>
@@ -162,121 +249,6 @@ export const StackList = ({ onStackSelect, onCreateNew, user }: StackListProps) 
           </div>
         ))}
       </div>
-    );
-  };
-
-
-
-  const renderCollectionTab = () => {
-    if (collections.length === 0) {
-      return (
-        <div className="empty-state">
-          <h3>No collections available</h3>
-          <p>Create a collection to organize your stacks by groups.</p>
-          <AngryButton
-            isPrimary={true}
-            className="create-stack-btn"
-            onClick={onCreateNew}
-          >
-            Create New Stack
-          </AngryButton>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="collections">
-        <div className="collection-list">
-          {collections.map(col => (
-            <AngryButton
-              key={col.id}
-              isPrimary={selectedCollection === col.id}
-              style={selectedCollection === col.id ? undefined : 'outline'}
-              className="collection-btn"
-              onClick={() => handleSelectCollection(col.id)}
-            >
-              {col.name}
-            </AngryButton>
-          ))}
-        </div>
-        {selectedCollection ? (
-          (collectionStacks[selectedCollection] || []).length === 0 ? (
-            <div className="empty-state">
-              <h3>No stacks in this collection</h3>
-              <p>Add stacks to this collection to see them here.</p>
-              <AngryButton
-                isPrimary={true}
-                className="create-stack-btn"
-                onClick={onCreateNew}
-              >
-                Create New Stack
-              </AngryButton>
-            </div>
-          ) : (
-            <div className="stack-grid">
-              {(collectionStacks[selectedCollection] || []).map((stack) => (
-                <div
-                  key={stack.id}
-                  className="stack-card"
-                  onClick={() => onStackSelect(stack)}
-                >
-                  <div className="stack-card-header">
-                    <h3>{stack.name}</h3>
-                  </div>
-                  <p className="stack-description">
-                    {stack.description || 'No description provided'}
-                  </p>
-                  <div className="stack-meta">
-                    <div className="stack-type">
-                      <strong>Type:</strong> {getStackTypeDisplayName(stack.stackType)}
-                    </div>
-                    <div className="stack-updated">
-                      <strong>Updated:</strong> {formatDate(stack.updatedAt)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        ) : (
-          <div className="empty-state">
-            <h3>Select a collection</h3>
-            <p>Choose a collection from the list above to view its stacks.</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const tabs = [
-    { label: 'All', content: renderAllStacksTab() },
-    { label: 'By Collection', content: renderCollectionTab() }
-  ];
-
-  return (
-    <div className="stack-list">
-      <div className="stack-list-header">
-        <div className="stack-list-title-row">
-          <h2>Stacks</h2>
-        </div>
-        <AngryButton
-          isPrimary={true}
-          className="create-stack-btn"
-          onClick={onCreateNew}
-        >
-          Create New Stack
-        </AngryButton>
-      </div>
-
-      <Tabs
-        tabs={tabs}
-        defaultTab={activeTab === 'all' ? 0 : 1}
-        onTabChange={(index) => {
-          const tabNames = ['all', 'collection'] as const;
-          setActiveTab(tabNames[index]);
-        }}
-      />
-
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import type { 
@@ -52,11 +52,7 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -74,7 +70,11 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const getMappingForCell = (resourceTypeId: string, cloudProviderId: string): ResourceTypeCloudMapping | undefined => {
     return mappings.find(

@@ -334,6 +334,59 @@ public class DynamoStackRepository implements StackRepository {
     }
 
     @Override
+    public List<Stack> findByBlueprintId(UUID blueprintId) {
+        if (blueprintId == null) {
+            return Collections.emptyList();
+        }
+
+        // Use scan with filter since we don't have a GSI for blueprintId yet
+        // TODO: Consider adding a GSI for blueprintId if this query becomes frequent
+        ScanRequest request = ScanRequest.builder()
+                .tableName(TABLE_NAME)
+                .filterExpression("blueprintId = :blueprintId")
+                .expressionAttributeValues(Map.of(
+                        ":blueprintId", AttributeValue.builder().s(blueprintId.toString()).build()
+                ))
+                .build();
+
+        try {
+            List<Stack> stacks = new ArrayList<>();
+            ScanResponse response;
+            Map<String, AttributeValue> lastEvaluatedKey = null;
+
+            do {
+                if (lastEvaluatedKey != null) {
+                    request = ScanRequest.builder()
+                            .tableName(TABLE_NAME)
+                            .filterExpression("blueprintId = :blueprintId")
+                            .expressionAttributeValues(Map.of(
+                                    ":blueprintId", AttributeValue.builder().s(blueprintId.toString()).build()
+                            ))
+                            .exclusiveStartKey(lastEvaluatedKey)
+                            .build();
+                }
+
+                response = dynamoDbClient.scan(request);
+
+                List<Stack> pageStacks = response.items().stream()
+                        .map(entityMapper::itemToStack)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+                stacks.addAll(pageStacks);
+                lastEvaluatedKey = response.lastEvaluatedKey();
+
+            } while (lastEvaluatedKey != null && !lastEvaluatedKey.isEmpty());
+
+            LOG.debugf("Found %d stacks for blueprintId: %s", stacks.size(), blueprintId);
+            return stacks;
+        } catch (DynamoDbException e) {
+            LOG.errorf(e, "Failed to find stacks by blueprintId: %s", blueprintId);
+            throw new RuntimeException("Failed to find stacks by blueprintId", e);
+        }
+    }
+
+    @Override
     public void delete(Stack stack) {
         if (stack == null || stack.getId() == null) {
             return;

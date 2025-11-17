@@ -93,4 +93,12 @@ public interface StackRepository extends Repository<Stack, UUID> {
      * @return List of stacks matching both criteria
      */
     List<Stack> findByCloudProviderAndCreatedBy(UUID cloudProviderId, String createdBy);
+    
+    /**
+     * Finds all stacks associated with a specific blueprint.
+     *
+     * @param blueprintId The blueprint identifier
+     * @return List of stacks associated with the blueprint
+     */
+    List<Stack> findByBlueprintId(UUID blueprintId);
 }

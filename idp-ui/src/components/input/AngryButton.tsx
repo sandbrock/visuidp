@@ -11,6 +11,9 @@ export interface AngryButtonProps {
   style?: 'solid' | 'outline' | 'flat';
   className?: string;
   'data-testid'?: string;
+  'aria-label'?: string;
+  'aria-disabled'?: boolean | 'true' | 'false';
+  'aria-describedby'?: string;
 }
 
 export const AngryButton = (props: AngryButtonProps) => {
@@ -24,7 +27,10 @@ export const AngryButton = (props: AngryButtonProps) => {
     size,
     style,
     className,
-    'data-testid': dataTestId
+    'data-testid': dataTestId,
+    'aria-label': ariaLabel,
+    'aria-disabled': ariaDisabled,
+    'aria-describedby': ariaDescribedby,
   } = props;
   
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -53,6 +59,9 @@ export const AngryButton = (props: AngryButtonProps) => {
       disabled={disabled}
       className={buttonClasses}
       data-testid={dataTestId}
+      aria-label={ariaLabel}
+      aria-disabled={ariaDisabled}
+      aria-describedby={ariaDescribedby}
     >
       {children}
     </button>

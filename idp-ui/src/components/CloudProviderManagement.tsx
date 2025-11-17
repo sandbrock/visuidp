@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
 import type { CloudProvider, CloudProviderCreate } from '../types/admin';
 import type { User } from '../types/auth';
@@ -33,11 +33,7 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadProviders();
-  }, []);
-
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -49,7 +45,11 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.email]);
+
+  useEffect(() => {
+    loadProviders();
+  }, [loadProviders]);
 
   const handleCreate = () => {
     setEditingProvider(null);

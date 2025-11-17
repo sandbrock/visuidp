@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
 import type { ApiKeyResponse, ApiKeyStatus, ApiKeyCreated } from '../types/apiKey';
 import type { User } from '../types/auth';
@@ -34,11 +34,7 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKeyResponse | null>(null);
 
-  useEffect(() => {
-    loadApiKeys();
-  }, [isAdminMode]);
-
-  const loadApiKeys = async () => {
+  const loadApiKeys = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -52,7 +48,11 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdminMode, user.email]);
+
+  useEffect(() => {
+    loadApiKeys();
+  }, [loadApiKeys]);
 
   const handleCreateKey = () => {
     setIsCreateModalOpen(true);

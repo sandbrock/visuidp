@@ -14,6 +14,9 @@ interface AngryComboBoxProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  'aria-label'?: string;
+  'aria-required'?: boolean | 'true' | 'false';
+  'aria-describedby'?: string;
 }
 
 export const AngryComboBox = ({
@@ -24,6 +27,9 @@ export const AngryComboBox = ({
   placeholder,
   disabled,
   className,
+  'aria-label': ariaLabel,
+  'aria-required': ariaRequired,
+  'aria-describedby': ariaDescribedby,
 }: AngryComboBoxProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -189,6 +195,13 @@ export const AngryComboBox = ({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
+          role="combobox"
+          aria-label={ariaLabel}
+          aria-required={ariaRequired}
+          aria-describedby={ariaDescribedby}
+          aria-expanded={isOpen}
+          aria-controls={`${id}-listbox`}
+          aria-activedescendant={highlightedIndex >= 0 ? `${id}-option-${highlightedIndex}` : undefined}
         />
         {showClearButton && (
           <button
@@ -221,22 +234,31 @@ export const AngryComboBox = ({
         </button>
       </div>
       {isOpen && !disabled && (
-        <div className="angry-combobox-dropdown" ref={dropdownRef}>
+        <div 
+          className="angry-combobox-dropdown" 
+          ref={dropdownRef}
+          role="listbox"
+          id={`${id}-listbox`}
+          aria-label="Available options"
+        >
           {filteredItems.length > 0 ? (
             filteredItems.map((item, index) => (
               <div
                 key={item.value}
+                id={`${id}-option-${index}`}
                 className={`angry-combobox-item ${
                   highlightedIndex === index ? 'highlighted' : ''
                 } ${item.value === value ? 'selected' : ''}`}
                 onClick={() => handleItemClick(item)}
                 onMouseEnter={() => setHighlightedIndex(index)}
+                role="option"
+                aria-selected={item.value === value}
               >
                 {item.text}
               </div>
             ))
           ) : (
-            <div className="angry-combobox-no-data">No matches found</div>
+            <div className="angry-combobox-no-data" role="status">No matches found</div>
           )}
         </div>
       )}

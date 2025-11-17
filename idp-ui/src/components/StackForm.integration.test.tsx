@@ -168,6 +168,7 @@ describe('StackForm - Task 7.2 Integration Tests', () => {
   it('verifies component loads and renders without errors for new stack', async () => {
     render(
       <StackForm
+        blueprintId="test-blueprint-id"
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
@@ -187,6 +188,7 @@ describe('StackForm - Task 7.2 Integration Tests', () => {
     render(
       <StackForm
         stack={mockExistingStack}
+        blueprintId="test-blueprint-id"
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}
@@ -509,6 +511,7 @@ describe('StackForm - Task 7.2 Integration Tests', () => {
     render(
       <StackForm
         stack={mockExistingStack}
+        blueprintId="test-blueprint-id"
         user={mockUser}
         onSave={mockOnSave}
         onCancel={mockOnCancel}

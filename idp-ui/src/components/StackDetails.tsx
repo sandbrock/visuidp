@@ -16,9 +16,10 @@ interface StackDetailsProps {
   onEdit: (stack: Stack) => void;
   onDelete: (stackId: string) => void;
   onBack: () => void;
+  blueprintName?: string;
 }
 
-export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDetailsProps) => {
+export const StackDetails = ({ stack, user, onEdit, onDelete, onBack, blueprintName }: StackDetailsProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -87,6 +88,17 @@ export const StackDetails = ({ stack, user, onEdit, onDelete, onBack }: StackDet
         )}
 
         <div className="stack-info-grid">
+          {blueprintName && (
+            <div className="stack-info-item">
+              <label>Blueprint</label>
+              <span>
+                <a href="/ui/infrastructure" className="blueprint-link">
+                  {blueprintName}
+                </a>
+              </span>
+            </div>
+          )}
+
           <div className="stack-info-item">
             <label>Stack Type</label>
             <span>{getStackTypeDisplayName(stack.stackType)}</span>

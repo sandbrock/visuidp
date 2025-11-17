@@ -94,6 +94,11 @@ public class PostgresStackRepository implements StackRepository {
     }
 
     @Override
+    public List<Stack> findByBlueprintId(UUID blueprintId) {
+        return Stack.findByBlueprintId(blueprintId);
+    }
+
+    @Override
     public boolean exists(UUID id) {
         return Stack.count("id", id) > 0;
     }

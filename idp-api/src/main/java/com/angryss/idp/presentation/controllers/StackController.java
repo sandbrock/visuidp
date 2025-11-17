@@ -67,16 +67,24 @@ public class StackController {
     }
 
     @GET
-    @Operation(summary = "Get all stacks", description = "Retrieves all stacks accessible to the user")
+    @Operation(summary = "Get all stacks", description = "Retrieves all stacks accessible to the user, optionally filtered by blueprint")
     @APIResponse(responseCode = "200", description = "Stacks retrieved successfully")
     @APIResponse(responseCode = "401", description = "Unauthorized")
-    public List<StackResponseDto> getAllStacks(@Context SecurityContext securityContext) {
+    public List<StackResponseDto> getAllStacks(
+            @Parameter(description = "Optional blueprint ID to filter stacks") @QueryParam("blueprintId") UUID blueprintId,
+            @Context SecurityContext securityContext) {
         String effectiveUser = securityContext != null && securityContext.getUserPrincipal() != null
             ? securityContext.getUserPrincipal().getName() : null;
         if (effectiveUser == null || effectiveUser.trim().isEmpty()) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-        // All authenticated users can access all stacks
+        
+        // If blueprintId is provided, filter by blueprint
+        if (blueprintId != null) {
+            return stackService.getStacksByBlueprint(blueprintId);
+        }
+        
+        // Otherwise, return all stacks
         return stackService.getAllStacks();
     }
 

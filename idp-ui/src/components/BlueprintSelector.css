@@ -1,0 +1,170 @@
+.blueprint-selector {
+  padding: 1.5rem;
+  background-color: var(--bg-primary);
+  border-bottom: 2px solid var(--border-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.blueprint-selector-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.blueprint-selector-dropdown {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.blueprint-selector-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.blueprint-selector-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.blueprint-selector-loading,
+.blueprint-selector-error,
+.blueprint-selector-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.blueprint-selector-loading {
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+}
+
+.blueprint-selector-error {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--danger);
+}
+
+.blueprint-selector-error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+}
+
+.blueprint-selector-error-message {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.blueprint-selector-error-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.blueprint-selector-empty {
+  background-color: var(--bg-secondary);
+  border: 2px dashed var(--border-primary);
+  min-height: 150px;
+}
+
+.blueprint-selector-empty-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+  max-width: 500px;
+}
+
+.blueprint-selector-empty-content h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.blueprint-selector-empty-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .blueprint-selector-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .blueprint-selector-dropdown {
+    min-width: 100%;
+  }
+
+  .blueprint-selector-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Frankenstein Theme Styles */
+[data-theme="frankenstein"] .blueprint-selector {
+  background-color: var(--bg-secondary);
+  border-bottom: 3px solid var(--frankenstein-stitch);
+  position: relative;
+}
+
+/* Add laboratory texture to blueprint selector */
+[data-theme="frankenstein"] .blueprint-selector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--frankenstein-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content is above texture */
+[data-theme="frankenstein"] .blueprint-selector-content {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="frankenstein"] .blueprint-selector-label {
+  color: var(--text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="frankenstein"] .blueprint-selector-loading {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 2px solid var(--frankenstein-stitch);
+  border-radius: 6px;
+}
+
+[data-theme="frankenstein"] .blueprint-selector-error {
+  background-color: var(--bg-tertiary);
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.3);
+}

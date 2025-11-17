@@ -10,7 +10,7 @@ import {
   getSupportedFrameworkVersions,
   getDefaultFrameworkVersion
 } from '../types/stack';
-import { apiService, type Blueprint, type BlueprintResource } from '../services/api';
+import { apiService } from '../services/api';
 import type { User } from '../types/auth';
 import type { ResourceType } from '../types/admin';
 import { DynamicResourceForm } from './DynamicResourceForm';
@@ -19,104 +19,22 @@ import { AngryComboBox, AngryTextBox, AngryCheckBox, AngryButton } from './input
 import { FormField } from './common/FormField/FormField';
 import { ErrorMessage } from './common/Feedback/ErrorMessage';
 import { LoadingButton } from './common/LoadingButton/LoadingButton';
-import { InfoBox } from './common/Feedback/InfoBox';
+import { validateBlueprintCompatibility } from '../services/blueprintValidation';
 
 type StackCreateForm = StackCreate;
 import './StackForm.css';
 
 interface StackFormProps {
   stack?: Stack;
+  blueprintId: string;
   onSave: (stack: Stack) => void;
   onCancel: () => void;
   user: User;
 }
 
-/**
- * Filters blueprints based on stack type requirements.
- * - RESTful API and Event-driven API require "Managed Container Orchestrator"
- * - JavaScript Web Application requires "Storage"
- * - Infrastructure-only shows all blueprints
- * - Serverless stacks show all blueprints (no specific requirements)
- */
-const filterBlueprintsForStackType = (
-  blueprints: Blueprint[],
-  stackType: StackType
-): Blueprint[] => {
-  if (stackType === StackType.INFRASTRUCTURE) {
-    return blueprints; // No filtering for infrastructure stacks
-  }
-  
-  return blueprints.filter(blueprint => {
-    const resourceTypes = blueprint.resources?.map(r => r.resourceTypeName) || [];
-    
-    if (stackType === StackType.RESTFUL_API || stackType === StackType.EVENT_DRIVEN_API) {
-      return resourceTypes.includes('Managed Container Orchestrator');
-    }
-    
-    if (stackType === StackType.JAVASCRIPT_WEB_APPLICATION) {
-      return resourceTypes.includes('Storage');
-    }
-    
-    // Serverless stacks don't require specific resources
-    return true;
-  });
-};
 
-/**
- * Returns helper text explaining blueprint requirements for the selected stack type.
- */
-const getStackTypeRequirementText = (stackType: StackType): string | null => {
-  switch (stackType) {
-    case StackType.RESTFUL_API:
-    case StackType.EVENT_DRIVEN_API:
-      return 'This stack type requires a blueprint with a Container Orchestrator';
-    case StackType.JAVASCRIPT_WEB_APPLICATION:
-      return 'This stack type requires a blueprint with a Storage resource';
-    default:
-      return null;
-  }
-};
 
-/**
- * Gets available resources of a specific type from the selected blueprint.
- */
-const getAvailableResourcesOfType = (
-  blueprint: Blueprint | null,
-  resourceTypeName: string
-): BlueprintResource[] => {
-  if (!blueprint?.resources) return [];
-  
-  return blueprint.resources.filter(
-    r => r.resourceTypeName === resourceTypeName
-  );
-};
-
-/**
- * Determines if resource selection dropdown should be shown.
- * Shows dropdown only when there are multiple resources of the required type.
- */
-const shouldShowResourceSelection = (
-  _stackType: StackType,
-  blueprint: Blueprint | null,
-  resourceTypeName: string
-): boolean => {
-  const resources = getAvailableResourcesOfType(blueprint, resourceTypeName);
-  return resources.length > 1;
-};
-
-/**
- * Auto-selects resource if only one is available.
- * Returns the resource ID if exactly one resource of the type exists, null otherwise.
- */
-const autoSelectResourceIfSingle = (
-  blueprint: Blueprint | null,
-  resourceTypeName: string
-): string | null => {
-  const resources = getAvailableResourcesOfType(blueprint, resourceTypeName);
-  return resources.length === 1 ? resources[0].id || null : null;
-};
-
-export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => {
+export const StackForm = ({ stack, blueprintId, onSave, onCancel, user }: StackFormProps) => {
    
   const nameInputRef = useRef<FocusableInputHandle>(null);
   const [formData, setFormData] = useState<StackCreateForm>({
@@ -130,7 +48,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     frameworkVersion: undefined,
     isPublic: false,
     resources: [],
-    blueprintId: null,
+    blueprintId: blueprintId,
     blueprintResourceId: null,
   });
   const [loading, setLoading] = useState(false);
@@ -146,9 +64,12 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     configuration: Record<string, unknown>;
   }>>([]);
   
-  // State for blueprints
-  const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
-  const [filteredBlueprints, setFilteredBlueprints] = useState<Blueprint[]>([]);
+  // State for blueprint migration (edit mode only)
+  const [availableBlueprints, setAvailableBlueprints] = useState<Array<{ id: string; name: string }>>([]);
+  const [targetBlueprintId, setTargetBlueprintId] = useState<string | null>(null);
+  const [migrationWarnings, setMigrationWarnings] = useState<string[]>([]);
+  
+
 
   // Focus the name input when the form mounts
   useEffect(() => {
@@ -185,7 +106,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
         frameworkVersion: stack.frameworkVersion,
         isPublic: stack.isPublic || false,
         resources: stack.resources || [],
-        blueprintId: stack.blueprintId || null,
+        blueprintId: blueprintId, // Use blueprintId from props
         blueprintResourceId: null, // Will be set by auto-selection effect if needed
       });
       
@@ -199,7 +120,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
         setSelectedResources(resourcesData);
       }
     }
-  }, [stack]);
+  }, [stack, blueprintId]);
 
   useEffect(() => {
     const languages = getSupportedLanguages(formData.stackType);
@@ -231,7 +152,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     }
   }, [formData.programmingLanguage, formData.frameworkVersion]);
 
-  // Load resource types and blueprints on mount
+  // Load resource types on mount
   useEffect(() => {
     (async () => {
       try {
@@ -240,62 +161,26 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       } catch (e) {
         console.error('Failed to load resource types', e);
       }
-      
-      try {
-        const loadedBlueprints = await apiService.getBlueprints(user.email);
-        setBlueprints(loadedBlueprints);
-      } catch (e) {
-        console.error('Failed to load blueprints', e);
-      }
     })();
   }, [user.email]);
-  
-  // Filter blueprints based on stack type
-  useEffect(() => {
-    const filtered = filterBlueprintsForStackType(blueprints, formData.stackType);
-    setFilteredBlueprints(filtered);
-    
-    // Clear blueprint selection if current selection is not in filtered list
-    if (formData.blueprintId && !filtered.find(b => b.id === formData.blueprintId)) {
-      setFormData(prev => ({ ...prev, blueprintId: null }));
-    }
-    
-    // Clear error when stack type changes
-    setError(null);
-  }, [blueprints, formData.stackType, formData.blueprintId]);
 
-  // Clear error when blueprint selection changes
+  // Load available blueprints for migration (edit mode only)
   useEffect(() => {
-    setError(null);
-  }, [formData.blueprintId]);
-
-  // Handle auto-selection of blueprint resource when blueprint or stack type changes
-  useEffect(() => {
-    const selectedBlueprint = blueprints.find(b => b.id === formData.blueprintId);
-    
-    if (selectedBlueprint && formData.stackType) {
-      let resourceTypeName: string | null = null;
-      
-      // Determine required resource type based on stack type
-      if (formData.stackType === StackType.RESTFUL_API || formData.stackType === StackType.EVENT_DRIVEN_API) {
-        resourceTypeName = 'Managed Container Orchestrator';
-      } else if (formData.stackType === StackType.JAVASCRIPT_WEB_APPLICATION) {
-        resourceTypeName = 'Storage';
-      }
-      
-      // Auto-select if only one resource of the required type exists
-      if (resourceTypeName) {
-        const autoSelectedId = autoSelectResourceIfSingle(selectedBlueprint, resourceTypeName);
-        setFormData(prev => ({ ...prev, blueprintResourceId: autoSelectedId }));
-      } else {
-        // Clear selection if stack type doesn't require a specific resource
-        setFormData(prev => ({ ...prev, blueprintResourceId: null }));
-      }
-    } else {
-      // Clear selection if no blueprint is selected
-      setFormData(prev => ({ ...prev, blueprintResourceId: null }));
+    if (stack) {
+      (async () => {
+        try {
+          const blueprints = await apiService.getBlueprints(user.email);
+          // Exclude the current blueprint from the list
+          const otherBlueprints = blueprints
+            .filter(b => b.id !== blueprintId)
+            .map(b => ({ id: b.id, name: b.name }));
+          setAvailableBlueprints(otherBlueprints);
+        } catch (e) {
+          console.error('Failed to load blueprints for migration', e);
+        }
+      })();
     }
-  }, [formData.blueprintId, formData.stackType, blueprints]);
+  }, [stack, blueprintId, user.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,28 +198,17 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       return;
     }
 
-    // Validate blueprint resource selection for applicable stack types
-    if (formData.blueprintId) {
-      const selectedBlueprint = blueprints.find(b => b.id === formData.blueprintId);
+    // Validate blueprint migration if attempting to migrate
+    if (targetBlueprintId && migrationWarnings.length > 0) {
+      const confirmMigration = window.confirm(
+        'This stack migration has compatibility warnings:\n\n' +
+        migrationWarnings.join('\n') +
+        '\n\nDo you want to proceed with the migration anyway?'
+      );
       
-      // Check if Container Orchestrator selection is required
-      if ((formData.stackType === StackType.RESTFUL_API || formData.stackType === StackType.EVENT_DRIVEN_API) &&
-          shouldShowResourceSelection(formData.stackType, selectedBlueprint || null, 'Managed Container Orchestrator')) {
-        if (!formData.blueprintResourceId) {
-          setError('Please select a Container Orchestrator');
-          setLoading(false);
-          return;
-        }
-      }
-      
-      // Check if Storage Resource selection is required
-      if (formData.stackType === StackType.JAVASCRIPT_WEB_APPLICATION &&
-          shouldShowResourceSelection(formData.stackType, selectedBlueprint || null, 'Storage')) {
-        if (!formData.blueprintResourceId) {
-          setError('Please select a Storage Resource');
-          setLoading(false);
-          return;
-        }
+      if (!confirmMigration) {
+        setLoading(false);
+        return;
       }
     }
 
@@ -352,6 +226,8 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       const payload: StackCreate = {
         ...formData,
         resources,
+        // If migrating to a different blueprint, use the target blueprint ID
+        blueprintId: targetBlueprintId || formData.blueprintId,
       };
       
       if (stack) {
@@ -362,7 +238,20 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
       onSave(savedStack);
     } catch (err) {
       console.error('Failed to save stack:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save stack');
+      
+      // Handle migration-specific errors
+      if (err instanceof Error) {
+        if (err.message.includes('blueprint') || err.message.includes('migration')) {
+          setError(`Migration failed: ${err.message}`);
+          // Revert to original blueprint on migration failure
+          setTargetBlueprintId(null);
+          setMigrationWarnings([]);
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('Failed to save stack');
+      }
     } finally {
       setLoading(false);
     }
@@ -405,12 +294,44 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
     });
   };
 
+  const handleBlueprintMigration = async (newBlueprintId: string) => {
+    setTargetBlueprintId(newBlueprintId);
+    setMigrationWarnings([]);
+
+    if (!newBlueprintId) {
+      return;
+    }
+
+    try {
+      // Fetch the target blueprint to validate compatibility
+      const blueprints = await apiService.getBlueprints(user.email);
+      const targetBlueprint = blueprints.find(b => b.id === newBlueprintId);
+
+      if (!targetBlueprint) {
+        setMigrationWarnings(['Selected blueprint not found']);
+        return;
+      }
+
+      // Validate blueprint compatibility using the validation service
+      const validationResult = validateBlueprintCompatibility(
+        formData.stackType,
+        targetBlueprint,
+        formData.blueprintResourceId
+      );
+
+      setMigrationWarnings(validationResult.warnings);
+    } catch (e) {
+      console.error('Failed to validate blueprint migration', e);
+      setMigrationWarnings(['Failed to validate target blueprint']);
+    }
+  };
+
   return (
     <div className="stack-form-container">
-      <div className="stack-form">
+      <div className="stack-form" role="main" aria-label={stack ? 'Edit stack form' : 'Create new stack form'}>
         <h2>{stack ? 'Edit Stack' : 'Create New Stack'}</h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} aria-label={stack ? 'Edit stack' : 'Create new stack'}>
           <FormField 
             label="Display Name" 
             required
@@ -466,94 +387,6 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
               placeholder="Select stack type"
             />
           </FormField>
-
-          {getStackTypeRequirementText(formData.stackType) && (
-            <InfoBox>{getStackTypeRequirementText(formData.stackType)}</InfoBox>
-          )}
-
-          <FormField 
-            label="Blueprint" 
-            htmlFor="blueprint"
-            hint="Optional: Select a blueprint to use predefined infrastructure resources"
-          >
-            <AngryComboBox
-              id="blueprint"
-              value={formData.blueprintId || ''}
-              onChange={(val: string) => handleChange('blueprintId', val || null)}
-              items={[
-                { text: 'None', value: '' },
-                ...filteredBlueprints.map(bp => ({
-                  text: bp.name,
-                  value: bp.id
-                }))
-              ]}
-              placeholder="Select blueprint (optional)"
-            />
-          </FormField>
-
-          {/* Container Orchestrator Selection */}
-          {formData.blueprintId && 
-           (formData.stackType === StackType.RESTFUL_API || formData.stackType === StackType.EVENT_DRIVEN_API) &&
-           shouldShowResourceSelection(
-             formData.stackType,
-             blueprints.find(b => b.id === formData.blueprintId) || null,
-             'Managed Container Orchestrator'
-           ) && (
-            <FormField 
-              label="Container Orchestrator" 
-              required
-              htmlFor="blueprintResource"
-              hint="Select the container orchestrator to use for this stack"
-            >
-              <AngryComboBox
-                id="blueprintResource"
-                value={formData.blueprintResourceId || ''}
-                onChange={(val: string) => handleChange('blueprintResourceId', val || null)}
-                items={
-                  getAvailableResourcesOfType(
-                    blueprints.find(b => b.id === formData.blueprintId) || null,
-                    'Managed Container Orchestrator'
-                  ).map(resource => ({
-                    text: resource.name,
-                    value: resource.id || ''
-                  }))
-                }
-                placeholder="Select container orchestrator"
-              />
-            </FormField>
-          )}
-
-          {/* Storage Resource Selection */}
-          {formData.blueprintId && 
-           formData.stackType === StackType.JAVASCRIPT_WEB_APPLICATION &&
-           shouldShowResourceSelection(
-             formData.stackType,
-             blueprints.find(b => b.id === formData.blueprintId) || null,
-             'Storage'
-           ) && (
-            <FormField 
-              label="Storage Resource" 
-              required
-              htmlFor="blueprintResourceStorage"
-              hint="Select the storage resource to use for this web application"
-            >
-              <AngryComboBox
-                id="blueprintResourceStorage"
-                value={formData.blueprintResourceId || ''}
-                onChange={(val: string) => handleChange('blueprintResourceId', val || null)}
-                items={
-                  getAvailableResourcesOfType(
-                    blueprints.find(b => b.id === formData.blueprintId) || null,
-                    'Storage'
-                  ).map(resource => ({
-                    text: resource.name,
-                    value: resource.id || ''
-                  }))
-                }
-                placeholder="Select storage resource"
-              />
-            </FormField>
-          )}
 
           {error && (
             <ErrorMessage message={error} />
@@ -699,11 +532,68 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
             </div>
           </div>
 
-          <div className="form-actions">
+          {/* Blueprint Migration Section (Edit Mode Only) */}
+          {stack && availableBlueprints.length > 0 && (
+            <div className="migration-section" role="region" aria-label="Blueprint migration">
+              <h3>Move to Different Blueprint</h3>
+              <p className="migration-description">
+                You can move this stack to a different blueprint. The target blueprint must support the resources required by this stack type.
+              </p>
+              
+              <FormField 
+                label="Target Blueprint" 
+                htmlFor="target-blueprint"
+                hint="Select a blueprint to move this stack to"
+              >
+                <AngryComboBox
+                  id="target-blueprint"
+                  value={targetBlueprintId || ''}
+                  onChange={(val: string) => handleBlueprintMigration(val)}
+                  items={[
+                    { text: 'Keep current blueprint', value: '' },
+                    ...availableBlueprints.map(bp => ({
+                      text: bp.name,
+                      value: bp.id
+                    }))
+                  ]}
+                  placeholder="Select target blueprint"
+                  disabled={loading}
+                  aria-label="Select a target blueprint to move this stack to"
+                  aria-describedby={migrationWarnings.length > 0 ? "migration-warnings" : undefined}
+                />
+              </FormField>
+
+              {migrationWarnings.length > 0 && (
+                <div 
+                  id="migration-warnings" 
+                  className="migration-warnings" 
+                  role="alert" 
+                  aria-live="assertive"
+                  aria-atomic="true"
+                >
+                  <h4>Migration Warnings:</h4>
+                  <ul aria-label="List of migration compatibility warnings">
+                    {migrationWarnings.map((warning, index) => (
+                      <li key={index} className="migration-warning-item">
+                        {warning}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="migration-warning-note">
+                    Please review these warnings before saving. The stack may not function correctly in the target blueprint.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="form-actions" role="group" aria-label="Form actions">
             <AngryButton
               onClick={onCancel}
               disabled={loading}
               style="outline"
+              aria-label="Cancel and return to previous view"
+              aria-disabled={loading}
             >
               Cancel
             </AngryButton>
@@ -712,6 +602,7 @@ export const StackForm = ({ stack, onSave, onCancel, user }: StackFormProps) => 
               isLoading={loading}
               loadingText="Saving..."
               isPrimary={true}
+              aria-label={stack ? 'Update stack with changes' : 'Create new stack'}
             >
               {stack ? 'Update Stack' : 'Create Stack'}
             </LoadingButton>

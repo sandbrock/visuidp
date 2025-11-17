@@ -144,6 +144,18 @@
   text-decoration: underline;
 }
 
+.blueprint-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.blueprint-link:hover {
+  color: var(--accent-primary-hover);
+  text-decoration: underline;
+}
+
 .configuration-display {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);

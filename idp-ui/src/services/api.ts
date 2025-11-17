@@ -566,6 +566,19 @@ export const apiService = {
     }
   },
 
+  async getStacksByBlueprint(blueprintId: string, userEmail?: string): Promise<Stack[]> {
+    try {
+      const response = await apiCall(`/stacks?blueprintId=${blueprintId}`, {}, userEmail);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error(`Failed to fetch stacks by blueprint: ${response.status}`);
+    } catch (error) {
+      console.error('Error fetching stacks by blueprint:', error);
+      throw error;
+    }
+  },
+
   // Collections
   async getCollections(userEmail?: string): Promise<StackCollection[]> {
     const response = await apiCall('/stack-collections', {}, userEmail);
@@ -643,7 +656,7 @@ export const apiService = {
           const errorData = await response.json();
           const errorMessage = errorData.error || errorData.message || `Failed to create stack: ${response.status}`;
           throw new Error(errorMessage);
-        } catch (parseError) {
+        } catch {
           // If JSON parsing fails, use default error message
           throw new Error(`Failed to create stack: ${response.status}`);
         }
@@ -674,7 +687,7 @@ export const apiService = {
           const errorData = await response.json();
           const errorMessage = errorData.error || errorData.message || `Failed to update stack: ${response.status}`;
           throw new Error(errorMessage);
-        } catch (parseError) {
+        } catch {
           // If JSON parsing fails, use default error message
           throw new Error(`Failed to update stack: ${response.status}`);
         }

@@ -311,6 +311,10 @@ public class Stack extends PanacheEntityBase {
         return List.of();
     }
 
+    public static List<Stack> findByBlueprintId(UUID blueprintId) {
+        return find("blueprint.id", blueprintId).list();
+    }
+
     public Blueprint getBlueprint() {
         return blueprint;
     }
