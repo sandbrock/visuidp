@@ -48,6 +48,7 @@ public class StackCreateDto {
     private java.util.UUID teamId;
     private java.util.UUID stackCollectionId;
     private java.util.UUID blueprintId;
+    private java.util.UUID blueprintResourceId;
 
     public StackCreateDto() {
     }
@@ -140,4 +141,6 @@ public class StackCreateDto {
     public void setStackCollectionId(java.util.UUID stackCollectionId) { this.stackCollectionId = stackCollectionId; }
     public java.util.UUID getBlueprintId() { return blueprintId; }
     public void setBlueprintId(java.util.UUID blueprintId) { this.blueprintId = blueprintId; }
+    public java.util.UUID getBlueprintResourceId() { return blueprintResourceId; }
+    public void setBlueprintResourceId(java.util.UUID blueprintResourceId) { this.blueprintResourceId = blueprintResourceId; }
 }

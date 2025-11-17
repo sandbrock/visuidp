@@ -1,5 +1,6 @@
 package com.angryss.idp.presentation.controllers;
 
+import com.angryss.idp.domain.entities.Blueprint;
 import com.angryss.idp.domain.entities.BlueprintResource;
 import com.angryss.idp.domain.entities.CloudProvider;
 import com.angryss.idp.domain.entities.EnvironmentEntity;
@@ -7,15 +8,20 @@ import com.angryss.idp.domain.entities.EnvironmentConfig;
 import com.angryss.idp.domain.entities.PropertySchema;
 import com.angryss.idp.domain.entities.ResourceType;
 import com.angryss.idp.domain.entities.ResourceTypeCloudMapping;
+import com.angryss.idp.domain.entities.Stack;
 import com.angryss.idp.domain.entities.StackResource;
 import com.angryss.idp.domain.valueobjects.ModuleLocationType;
 import com.angryss.idp.domain.valueobjects.PropertyDataType;
 import com.angryss.idp.domain.valueobjects.ResourceCategory;
+import com.angryss.idp.domain.valueobjects.StackType;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,6 +30,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 public class StackControllerTest {
@@ -282,5 +289,301 @@ public class StackControllerTest {
         schemaWithRules.validationRules = Map.of("min", 1, "max", 1000);
         schemaWithRules.displayOrder = 3;
         schemaWithRules.persist();
+    }
+
+    // ========== Blueprint Resource Validation Tests ==========
+
+    @Test
+    public void testCreateRestfulApiStackWithInvalidBlueprint_Returns400() {
+        // Create test data in a separate transaction
+        UUID blueprintId = createBlueprintWithoutContainerOrchestrator();
+
+        // Create stack request DTO
+        Map<String, Object> stackDto = new HashMap<>();
+        stackDto.put("name", "Test RESTful API Stack");
+        stackDto.put("cloudName", "test-restful-api");
+        stackDto.put("routePath", "/test-api/");
+        stackDto.put("stackType", "RESTFUL_API");
+        stackDto.put("programmingLanguage", "QUARKUS");
+        stackDto.put("blueprintId", blueprintId.toString());
+
+        String response = given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(stackDto)
+            .when().post("/v1/stacks")
+            .then()
+                .statusCode(400)
+                .extract().asString();
+        
+        // Verify error message contains expected text
+        assertTrue(response.contains("RESTful API") || response.contains("Container Orchestrator"),
+            "Response should mention RESTful API or Container Orchestrator requirement. Got: " + response);
+    }
+
+    @Test
+    public void testCreateRestfulApiStackWithValidBlueprint_Returns201() {
+        // Create test data in a separate transaction
+        UUID blueprintId = createBlueprintWithContainerOrchestrator();
+
+        // Create stack request DTO
+        Map<String, Object> stackDto = new HashMap<>();
+        stackDto.put("name", "Test RESTful API Stack Valid");
+        stackDto.put("cloudName", "test-restful-valid");
+        stackDto.put("routePath", "/test-valid/");
+        stackDto.put("stackType", "RESTFUL_API");
+        stackDto.put("programmingLanguage", "QUARKUS");
+        stackDto.put("blueprintId", blueprintId.toString());
+
+        given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(stackDto)
+            .when().post("/v1/stacks")
+            .then()
+                .statusCode(201)
+                .body("name", equalTo("Test RESTful API Stack Valid"))
+                .body("stackType", equalTo("RESTFUL_API"));
+    }
+
+    @Test
+    public void testCreateJavaScriptWebAppWithInvalidBlueprint_Returns400() {
+        // Create test data in a separate transaction
+        UUID blueprintId = createBlueprintWithoutStorage();
+
+        // Create stack request DTO
+        Map<String, Object> stackDto = new HashMap<>();
+        stackDto.put("name", "Test JS Web App");
+        stackDto.put("cloudName", "test-js-webapp");
+        stackDto.put("routePath", "/test-js/");
+        stackDto.put("stackType", "JAVASCRIPT_WEB_APPLICATION");
+        stackDto.put("blueprintId", blueprintId.toString());
+
+        String response = given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(stackDto)
+            .when().post("/v1/stacks")
+            .then()
+                .statusCode(400)
+                .extract().asString();
+        
+        // Verify error message contains expected text
+        assertTrue(response.contains("JavaScript Web Application") || response.contains("Storage"),
+            "Response should mention JavaScript Web Application or Storage requirement. Got: " + response);
+    }
+
+    @Test
+    public void testUpdateStackWithInvalidBlueprint_Returns400() {
+        // Create test data in a separate transaction
+        UUID validBlueprintId = createBlueprintWithContainerOrchestrator();
+        UUID invalidBlueprintId = createBlueprintWithoutContainerOrchestrator();
+        UUID stackId = createTestStack(validBlueprintId);
+
+        // Update stack to use invalid blueprint
+        Map<String, Object> updateDto = new HashMap<>();
+        updateDto.put("name", "Updated Stack Name");
+        updateDto.put("cloudName", "updated-stack");
+        updateDto.put("routePath", "/updated/");
+        updateDto.put("stackType", "RESTFUL_API");
+        updateDto.put("programmingLanguage", "QUARKUS");
+        updateDto.put("blueprintId", invalidBlueprintId.toString());
+
+        String response = given()
+            .header("X-Auth-Request-Email", TEST_USER)
+            .header("X-Auth-Request-Groups", TEST_GROUPS)
+            .contentType(ContentType.JSON)
+            .body(updateDto)
+            .when().put("/v1/stacks/" + stackId)
+            .then()
+                .statusCode(400)
+                .extract().asString();
+        
+        // Verify error message contains expected text
+        assertTrue(response.contains("RESTful API") || response.contains("Container Orchestrator"),
+            "Response should mention RESTful API or Container Orchestrator requirement. Got: " + response);
+    }
+
+    // Helper methods for creating test data
+
+    @Transactional
+    UUID createBlueprintWithContainerOrchestrator() {
+        // Create Container Orchestrator resource type
+        ResourceType orchestratorType = new ResourceType();
+        orchestratorType.name = "Managed Container Orchestrator";
+        orchestratorType.displayName = "Managed Container Orchestrator";
+        orchestratorType.description = "Container orchestration platform";
+        orchestratorType.category = ResourceCategory.SHARED;
+        orchestratorType.enabled = true;
+        orchestratorType.persist();
+
+        // Get or create cloud provider
+        CloudProvider cloudProvider = CloudProvider.find("name", "TEST_AWS").firstResult();
+        if (cloudProvider == null) {
+            cloudProvider = new CloudProvider();
+            cloudProvider.name = "TEST_AWS";
+            cloudProvider.displayName = "Test AWS";
+            cloudProvider.description = "Test AWS provider";
+            cloudProvider.enabled = true;
+            cloudProvider.persist();
+        }
+
+        // Create blueprint
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("Blueprint with Orchestrator " + UUID.randomUUID().toString().substring(0, 8));
+        blueprint.setDescription("Test blueprint with container orchestrator");
+        blueprint.setIsActive(true);
+        blueprint.setCreatedAt(LocalDateTime.now());
+        blueprint.setUpdatedAt(LocalDateTime.now());
+        blueprint.persist();
+
+        // Create blueprint resource with all required fields
+        BlueprintResource resource = new BlueprintResource();
+        resource.setName("Test Orchestrator " + UUID.randomUUID().toString().substring(0, 8));
+        resource.setDescription("Test container orchestrator resource");
+        resource.setBlueprint(blueprint);
+        resource.setResourceType(orchestratorType);
+        resource.setCloudProvider(cloudProvider);
+        
+        // Create a proper configuration object
+        com.angryss.idp.domain.valueobjects.sharedinfra.ContainerOrchestratorConfiguration config = 
+            new com.angryss.idp.domain.valueobjects.sharedinfra.ContainerOrchestratorConfiguration();
+        config.setCloudServiceName("test-cluster");
+        resource.setConfiguration(config);
+        
+        resource.setCloudSpecificProperties(Map.of());
+        resource.setIsActive(true);
+        resource.setCreatedAt(LocalDateTime.now());
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.persist();
+
+        return blueprint.getId();
+    }
+
+    @Transactional
+    UUID createBlueprintWithoutContainerOrchestrator() {
+        // Create a different resource type (not Container Orchestrator)
+        ResourceType databaseType = new ResourceType();
+        databaseType.name = "Relational Database Server";
+        databaseType.displayName = "Relational Database Server";
+        databaseType.description = "Database server";
+        databaseType.category = ResourceCategory.SHARED;
+        databaseType.enabled = true;
+        databaseType.persist();
+
+        // Get or create cloud provider
+        CloudProvider cloudProvider = CloudProvider.find("name", "TEST_AWS").firstResult();
+        if (cloudProvider == null) {
+            cloudProvider = new CloudProvider();
+            cloudProvider.name = "TEST_AWS";
+            cloudProvider.displayName = "Test AWS";
+            cloudProvider.description = "Test AWS provider";
+            cloudProvider.enabled = true;
+            cloudProvider.persist();
+        }
+
+        // Create blueprint
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("Blueprint without Orchestrator " + UUID.randomUUID().toString().substring(0, 8));
+        blueprint.setDescription("Test blueprint without container orchestrator");
+        blueprint.setIsActive(true);
+        blueprint.setCreatedAt(LocalDateTime.now());
+        blueprint.setUpdatedAt(LocalDateTime.now());
+        blueprint.persist();
+
+        // Create blueprint resource (database, not orchestrator) with all required fields
+        BlueprintResource resource = new BlueprintResource();
+        resource.setName("Test Database " + UUID.randomUUID().toString().substring(0, 8));
+        resource.setDescription("Test database resource");
+        resource.setBlueprint(blueprint);
+        resource.setResourceType(databaseType);
+        resource.setCloudProvider(cloudProvider);
+        
+        // Create a proper configuration object
+        com.angryss.idp.domain.valueobjects.sharedinfra.RelationalDatabaseServerConfiguration config = 
+            new com.angryss.idp.domain.valueobjects.sharedinfra.RelationalDatabaseServerConfiguration();
+        config.setCloudServiceName("test-database");
+        resource.setConfiguration(config);
+        
+        resource.setCloudSpecificProperties(Map.of());
+        resource.setIsActive(true);
+        resource.setCreatedAt(LocalDateTime.now());
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.persist();
+
+        return blueprint.getId();
+    }
+
+    @Transactional
+    UUID createBlueprintWithoutStorage() {
+        // Create a different resource type (not Storage)
+        ResourceType databaseType = new ResourceType();
+        databaseType.name = "Relational Database Server";
+        databaseType.displayName = "Relational Database Server";
+        databaseType.description = "Database server";
+        databaseType.category = ResourceCategory.SHARED;
+        databaseType.enabled = true;
+        databaseType.persist();
+
+        // Get or create cloud provider
+        CloudProvider cloudProvider = CloudProvider.find("name", "TEST_AWS").firstResult();
+        if (cloudProvider == null) {
+            cloudProvider = new CloudProvider();
+            cloudProvider.name = "TEST_AWS";
+            cloudProvider.displayName = "Test AWS";
+            cloudProvider.description = "Test AWS provider";
+            cloudProvider.enabled = true;
+            cloudProvider.persist();
+        }
+
+        // Create blueprint
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("Blueprint without Storage " + UUID.randomUUID().toString().substring(0, 8));
+        blueprint.setDescription("Test blueprint without storage");
+        blueprint.setIsActive(true);
+        blueprint.setCreatedAt(LocalDateTime.now());
+        blueprint.setUpdatedAt(LocalDateTime.now());
+        blueprint.persist();
+
+        // Create blueprint resource (database, not storage) with all required fields
+        BlueprintResource resource = new BlueprintResource();
+        resource.setName("Test Database " + UUID.randomUUID().toString().substring(0, 8));
+        resource.setDescription("Test database resource");
+        resource.setBlueprint(blueprint);
+        resource.setResourceType(databaseType);
+        resource.setCloudProvider(cloudProvider);
+        
+        // Create a proper configuration object
+        com.angryss.idp.domain.valueobjects.sharedinfra.RelationalDatabaseServerConfiguration config = 
+            new com.angryss.idp.domain.valueobjects.sharedinfra.RelationalDatabaseServerConfiguration();
+        config.setCloudServiceName("test-database");
+        resource.setConfiguration(config);
+        
+        resource.setCloudSpecificProperties(Map.of());
+        resource.setIsActive(true);
+        resource.setCreatedAt(LocalDateTime.now());
+        resource.setUpdatedAt(LocalDateTime.now());
+        resource.persist();
+
+        return blueprint.getId();
+    }
+
+    @Transactional
+    UUID createTestStack(UUID blueprintId) {
+        Blueprint blueprint = Blueprint.findById(blueprintId);
+        
+        Stack stack = new Stack();
+        stack.setName("Test Stack " + UUID.randomUUID().toString().substring(0, 8));
+        stack.setCloudName("test-stack-" + UUID.randomUUID().toString().substring(0, 8));
+        stack.setRoutePath("/test-" + UUID.randomUUID().toString().substring(0, 8) + "/");
+        stack.setStackType(StackType.RESTFUL_API);
+        stack.setBlueprint(blueprint);
+        stack.setCreatedBy(TEST_USER);
+        stack.persist();
+
+        return stack.getId();
     }
 }

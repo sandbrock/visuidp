@@ -636,6 +636,19 @@ export const apiService = {
       if (response.ok) {
         return await response.json();
       }
+      
+      // Extract error message from response body for 400 validation errors
+      if (response.status === 400) {
+        try {
+          const errorData = await response.json();
+          const errorMessage = errorData.error || errorData.message || `Failed to create stack: ${response.status}`;
+          throw new Error(errorMessage);
+        } catch (parseError) {
+          // If JSON parsing fails, use default error message
+          throw new Error(`Failed to create stack: ${response.status}`);
+        }
+      }
+      
       throw new Error(`Failed to create stack: ${response.status}`);
     } catch (error) {
       console.error('Error creating stack:', error);
@@ -654,6 +667,19 @@ export const apiService = {
       if (response.ok) {
         return await response.json();
       }
+      
+      // Extract error message from response body for 400 validation errors
+      if (response.status === 400) {
+        try {
+          const errorData = await response.json();
+          const errorMessage = errorData.error || errorData.message || `Failed to update stack: ${response.status}`;
+          throw new Error(errorMessage);
+        } catch (parseError) {
+          // If JSON parsing fails, use default error message
+          throw new Error(`Failed to update stack: ${response.status}`);
+        }
+      }
+      
       throw new Error(`Failed to update stack: ${response.status}`);
     } catch (error) {
       console.error('Error updating stack:', error);

@@ -2,6 +2,7 @@ package com.angryss.idp.application.usecases;
 
 import com.angryss.idp.application.dtos.PropertySchemaCreateDto;
 import com.angryss.idp.application.dtos.PropertySchemaDto;
+import com.angryss.idp.application.dtos.PropertySchemaResponseDto;
 import com.angryss.idp.application.dtos.PropertySchemaUpdateDto;
 import com.angryss.idp.domain.entities.CloudProvider;
 import com.angryss.idp.domain.entities.BlueprintResource;
@@ -448,7 +449,9 @@ public class PropertySchemaServiceTest {
         createTestPropertySchema(mapping, "multiAZ", "Multi-AZ Deployment", PropertyDataType.BOOLEAN, false, 3);
 
         // When
-        Map<String, PropertySchemaDto> result = propertySchemaService.getSchemaMap(resourceType.id, cloudProvider.id);
+        PropertySchemaResponseDto response = propertySchemaService.getSchemaResponse(resourceType.id, cloudProvider.id);
+        Map<String, PropertySchemaDto> result = response.getProperties().stream()
+            .collect(java.util.stream.Collectors.toMap(PropertySchemaDto::getPropertyName, p -> p));
 
         // Then
         assertEquals(3, result.size());
@@ -477,7 +480,7 @@ public class PropertySchemaServiceTest {
 
         // When/Then
         assertThrows(NotFoundException.class, () -> {
-            propertySchemaService.getSchemaMap(nonExistentResourceTypeId, nonExistentCloudProviderId);
+            propertySchemaService.getSchemaResponse(nonExistentResourceTypeId, nonExistentCloudProviderId);
         });
     }
 
@@ -491,7 +494,9 @@ public class PropertySchemaServiceTest {
         // No properties created
 
         // When
-        Map<String, PropertySchemaDto> result = propertySchemaService.getSchemaMap(resourceType.id, cloudProvider.id);
+        PropertySchemaResponseDto response = propertySchemaService.getSchemaResponse(resourceType.id, cloudProvider.id);
+        Map<String, PropertySchemaDto> result = response.getProperties().stream()
+            .collect(java.util.stream.Collectors.toMap(PropertySchemaDto::getPropertyName, p -> p));
 
         // Then
         assertNotNull(result);

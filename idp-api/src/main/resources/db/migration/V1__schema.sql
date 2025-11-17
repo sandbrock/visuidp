@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS stacks (
     team_id UUID,
     stack_collection_id UUID,
     blueprint_id UUID,
+    blueprint_resource_id UUID,
     configuration JSONB,
     ephemeral_prefix VARCHAR(50),
     created_at TIMESTAMP NOT NULL,
@@ -114,7 +115,8 @@ CREATE TABLE IF NOT EXISTS stacks (
     CONSTRAINT route_path_validation CHECK (LENGTH(route_path) >= 5 AND LENGTH(route_path) <= 22 AND route_path ~ '^/[a-zA-Z][a-zA-Z0-9_-]*/$' AND route_path NOT LIKE '%\_%\_%' ESCAPE '\' AND route_path NOT LIKE '%--%'),
     CONSTRAINT fk_stacks_team FOREIGN KEY (team_id) REFERENCES teams(id),
     CONSTRAINT fk_stacks_collection FOREIGN KEY (stack_collection_id) REFERENCES stack_collections(id),
-    CONSTRAINT fk_stacks_blueprint FOREIGN KEY (blueprint_id) REFERENCES blueprints(id)
+    CONSTRAINT fk_stacks_blueprint FOREIGN KEY (blueprint_id) REFERENCES blueprints(id),
+    CONSTRAINT fk_stacks_blueprint_resource FOREIGN KEY (blueprint_resource_id) REFERENCES blueprint_resources(id)
 );
 
 CREATE TABLE IF NOT EXISTS environments (
@@ -233,6 +235,7 @@ CREATE INDEX IF NOT EXISTS idx_stack_resources_stack_id ON stack_resources(stack
 CREATE INDEX IF NOT EXISTS idx_stacks_team_id ON stacks(team_id);
 CREATE INDEX IF NOT EXISTS idx_stacks_collection_id ON stacks(stack_collection_id);
 CREATE INDEX IF NOT EXISTS idx_stacks_blueprint_id ON stacks(blueprint_id);
+CREATE INDEX IF NOT EXISTS idx_stacks_blueprint_resource_id ON stacks(blueprint_resource_id);
 CREATE INDEX IF NOT EXISTS idx_environments_cloud_provider_id ON environments(cloud_provider_id);
 CREATE INDEX IF NOT EXISTS idx_environments_blueprint_id ON environments(blueprint_id);
 CREATE INDEX IF NOT EXISTS idx_stack_configs_environment_id ON stack_configs(environment_id);

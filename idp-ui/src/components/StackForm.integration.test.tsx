@@ -30,6 +30,7 @@ vi.mock('../services/api', () => ({
     getDomainCategories: vi.fn(),
     getAvailableCloudProvidersForStacks: vi.fn(),
     getAvailableResourceTypesForStacks: vi.fn(),
+    getBlueprints: vi.fn(),
     createStack: vi.fn(),
     updateStack: vi.fn(),
   },
@@ -159,6 +160,7 @@ describe('StackForm - Task 7.2 Integration Tests', () => {
     vi.mocked(apiService.getDomainCategories).mockResolvedValue(mockCategories);
     vi.mocked(apiService.getAvailableCloudProvidersForStacks).mockResolvedValue(mockCloudProviders);
     vi.mocked(apiService.getAvailableResourceTypesForStacks).mockResolvedValue(mockResourceTypes);
+    vi.mocked(apiService.getBlueprints).mockResolvedValue([]);
     vi.mocked(apiService.createStack).mockResolvedValue(mockExistingStack);
     vi.mocked(apiService.updateStack).mockResolvedValue(mockExistingStack);
   });

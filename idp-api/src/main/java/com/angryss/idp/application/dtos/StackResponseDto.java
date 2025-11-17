@@ -26,6 +26,7 @@ public class StackResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private java.util.UUID blueprintId;
+    private BlueprintResourceDto blueprintResource;
 
     public StackResponseDto() {
     }
@@ -135,4 +136,7 @@ public class StackResponseDto {
 
     public java.util.UUID getBlueprintId() { return blueprintId; }
     public void setBlueprintId(java.util.UUID blueprintId) { this.blueprintId = blueprintId; }
+
+    public BlueprintResourceDto getBlueprintResource() { return blueprintResource; }
+    public void setBlueprintResource(BlueprintResourceDto blueprintResource) { this.blueprintResource = blueprintResource; }
 }

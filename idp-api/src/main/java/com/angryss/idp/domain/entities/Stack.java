@@ -92,6 +92,10 @@ public class Stack extends PanacheEntityBase {
     @JoinColumn(name = "blueprint_id")
     private Blueprint blueprint;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blueprint_resource_id")
+    private BlueprintResource blueprintResource;
+
     public Stack() {
     }
 
@@ -313,5 +317,13 @@ public class Stack extends PanacheEntityBase {
 
     public void setBlueprint(Blueprint blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public BlueprintResource getBlueprintResource() {
+        return blueprintResource;
+    }
+
+    public void setBlueprintResource(BlueprintResource blueprintResource) {
+        this.blueprintResource = blueprintResource;
     }
 }

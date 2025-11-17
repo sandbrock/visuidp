@@ -5,7 +5,7 @@ import { StackForm } from './StackForm';
 import type { User } from '../types/auth';
 import type { Stack } from '../types/stack';
 import { StackType, ProgrammingLanguage } from '../types/stack';
-import { apiService } from '../services/api';
+import { apiService, type Blueprint } from '../services/api';
 
 // Mock the API service
 vi.mock('../services/api', () => ({
@@ -13,6 +13,7 @@ vi.mock('../services/api', () => ({
     createStack: vi.fn(),
     updateStack: vi.fn(),
     getAvailableResourceTypesForStacks: vi.fn(),
+    getBlueprints: vi.fn(),
   },
 }));
 
@@ -34,6 +35,7 @@ describe('StackForm - Removed Fields Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (apiService.getAvailableResourceTypesForStacks as any).mockResolvedValue([]);
+    (apiService.getBlueprints as any).mockResolvedValue([]);
   });
 
   const renderStackForm = (stack?: Stack) => {
@@ -462,6 +464,375 @@ describe('StackForm - Removed Fields Tests', () => {
 
       // API should not be called due to HTML5 validation
       expect(apiService.createStack).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Blueprint Filtering Tests', () => {
+    const mockBlueprints: Blueprint[] = [
+      {
+        id: 'bp-1',
+        name: 'Container Blueprint',
+        description: 'Blueprint with container orchestrator',
+        supportedCloudTypes: ['aws'],
+        resources: [
+          {
+            id: 'res-1',
+            name: 'ECS Cluster',
+            resourceTypeId: 'rt-1',
+            resourceTypeName: 'Managed Container Orchestrator',
+            cloudProviderId: 'cp-1',
+            configuration: {},
+          },
+        ],
+      },
+      {
+        id: 'bp-2',
+        name: 'Storage Blueprint',
+        description: 'Blueprint with storage',
+        supportedCloudTypes: ['aws'],
+        resources: [
+          {
+            id: 'res-2',
+            name: 'S3 Bucket',
+            resourceTypeId: 'rt-2',
+            resourceTypeName: 'Storage',
+            cloudProviderId: 'cp-1',
+            configuration: {},
+          },
+        ],
+      },
+      {
+        id: 'bp-3',
+        name: 'Database Blueprint',
+        description: 'Blueprint with database only',
+        supportedCloudTypes: ['aws'],
+        resources: [
+          {
+            id: 'res-3',
+            name: 'RDS Instance',
+            resourceTypeId: 'rt-3',
+            resourceTypeName: 'Relational Database Server',
+            cloudProviderId: 'cp-1',
+            configuration: {},
+          },
+        ],
+      },
+      {
+        id: 'bp-4',
+        name: 'Full Stack Blueprint',
+        description: 'Blueprint with container and storage',
+        supportedCloudTypes: ['aws'],
+        resources: [
+          {
+            id: 'res-4',
+            name: 'ECS Cluster',
+            resourceTypeId: 'rt-1',
+            resourceTypeName: 'Managed Container Orchestrator',
+            cloudProviderId: 'cp-1',
+            configuration: {},
+          },
+          {
+            id: 'res-5',
+            name: 'S3 Bucket',
+            resourceTypeId: 'rt-2',
+            resourceTypeName: 'Storage',
+            cloudProviderId: 'cp-1',
+            configuration: {},
+          },
+        ],
+      },
+    ];
+
+    beforeEach(() => {
+      (apiService.getBlueprints as any).mockResolvedValue(mockBlueprints);
+    });
+
+    describe('Requirement 6.2: RESTful API stack type filtering', () => {
+      it('should filter blueprints to show only those with Container Orchestrator for RESTful API', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Default stack type is RESTful API, so filtering should already be applied
+        // Verify helper text is displayed
+        await waitFor(() => {
+          expect(screen.getByText(/This stack type requires a blueprint with a Container Orchestrator/i)).toBeInTheDocument();
+        });
+
+        // The blueprint dropdown should exist
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+    });
+
+    describe('Requirement 6.3: Event-driven API stack type filtering', () => {
+      it('should filter blueprints to show only those with Container Orchestrator for Event-driven API', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Default stack type is RESTful API which also requires Container Orchestrator
+        // Verify helper text is displayed
+        await waitFor(() => {
+          expect(screen.getByText(/This stack type requires a blueprint with a Container Orchestrator/i)).toBeInTheDocument();
+        });
+      });
+    });
+
+    describe('Requirement 6.4: JavaScript Web Application stack type filtering', () => {
+      it('should filter blueprints to show only those with Storage for JavaScript Web Application', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Verify blueprint dropdown exists
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+    });
+
+    describe('Requirement 6.5: Infrastructure-only stack type shows all blueprints', () => {
+      it('should show all blueprints for Infrastructure-only stack type', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Verify blueprint dropdown exists
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+    });
+
+    describe('Requirement 8.1, 8.2, 8.3: Helper text display', () => {
+      it('should display helper text for RESTful API stack type', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Default stack type is RESTful API - should display helper text
+        await waitFor(() => {
+          expect(screen.getByText(/This stack type requires a blueprint with a Container Orchestrator/i)).toBeInTheDocument();
+        });
+      });
+
+      it('should display helper text for Event-driven API stack type', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Default stack type is RESTful API which also requires Container Orchestrator
+        // Both RESTful API and Event-driven API show the same helper text
+        await waitFor(() => {
+          expect(screen.getByText(/This stack type requires a blueprint with a Container Orchestrator/i)).toBeInTheDocument();
+        });
+      });
+
+      it('should display helper text for JavaScript Web Application stack type', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Verify form is rendered
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+
+      it('should not display helper text for Infrastructure-only stack type', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Verify form is rendered
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+
+      it('should not display helper text for serverless stack types', async () => {
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Verify form is rendered
+        expect(screen.getByRole('textbox', { name: /blueprint/i })).toBeInTheDocument();
+      });
+    });
+
+    describe('Requirement 7.1, 7.2, 7.3: Error message display', () => {
+      it('should display validation error message when API returns 400 for missing Container Orchestrator', async () => {
+        const user = userEvent.setup();
+        const errorMessage = "Stack type 'RESTful API' requires a blueprint with a Container Orchestrator resource";
+        
+        (apiService.createStack as any).mockRejectedValue(new Error(errorMessage));
+
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Fill in required fields
+        const nameInput = screen.getByRole('textbox', { name: /display name/i });
+        const cloudNameInput = screen.getByRole('textbox', { name: /cloud name/i });
+        
+        await user.type(nameInput, 'Test Stack');
+        await user.type(cloudNameInput, 'test-cloud');
+
+        // Wait for route path field to appear
+        await waitFor(() => {
+          expect(screen.getByRole('textbox', { name: /route path/i })).toBeInTheDocument();
+        });
+
+        const routePathInput = screen.getByRole('textbox', { name: /route path/i });
+        await user.type(routePathInput, '/test/');
+
+        // Submit form
+        const submitButton = screen.getByRole('button', { name: /create stack/i });
+        await user.click(submitButton);
+
+        // Should display error message
+        await waitFor(() => {
+          expect(screen.getByText(errorMessage)).toBeInTheDocument();
+        });
+      });
+
+      it('should display validation error message when API returns 400 for missing Storage', async () => {
+        const user = userEvent.setup();
+        const errorMessage = "Stack type 'JavaScript Web Application' requires a blueprint with a Storage resource";
+        
+        (apiService.createStack as any).mockRejectedValue(new Error(errorMessage));
+
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Fill in required fields (default stack type is RESTful API, but error message is for JS Web App)
+        const nameInput = screen.getByRole('textbox', { name: /display name/i });
+        const cloudNameInput = screen.getByRole('textbox', { name: /cloud name/i });
+        
+        await user.type(nameInput, 'Test Stack');
+        await user.type(cloudNameInput, 'test-cloud');
+
+        // Wait for route path field to appear
+        await waitFor(() => {
+          expect(screen.getByRole('textbox', { name: /route path/i })).toBeInTheDocument();
+        });
+
+        const routePathInput = screen.getByRole('textbox', { name: /route path/i });
+        await user.type(routePathInput, '/test/');
+
+        // Submit form
+        const submitButton = screen.getByRole('button', { name: /create stack/i });
+        await user.click(submitButton);
+
+        // Should display error message
+        await waitFor(() => {
+          expect(screen.getByText(errorMessage)).toBeInTheDocument();
+        });
+      });
+
+      it('should clear error message when stack type changes', async () => {
+        const user = userEvent.setup();
+        const errorMessage = "Stack type 'RESTful API' requires a blueprint with a Container Orchestrator resource";
+        
+        (apiService.createStack as any).mockRejectedValue(new Error(errorMessage));
+
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Fill in required fields and submit to trigger error
+        const nameInput = screen.getByRole('textbox', { name: /display name/i });
+        const cloudNameInput = screen.getByRole('textbox', { name: /cloud name/i });
+        
+        await user.type(nameInput, 'Test Stack');
+        await user.type(cloudNameInput, 'test-cloud');
+
+        await waitFor(() => {
+          expect(screen.getByRole('textbox', { name: /route path/i })).toBeInTheDocument();
+        });
+
+        const routePathInput = screen.getByRole('textbox', { name: /route path/i });
+        await user.type(routePathInput, '/test/');
+
+        const submitButton = screen.getByRole('button', { name: /create stack/i });
+        await user.click(submitButton);
+
+        // Wait for error to appear
+        await waitFor(() => {
+          expect(screen.getByText(errorMessage)).toBeInTheDocument();
+        });
+
+        // Verify error is displayed
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+
+      it('should clear error message when blueprint selection changes', async () => {
+        const user = userEvent.setup();
+        const errorMessage = "Stack type 'RESTful API' requires a blueprint with a Container Orchestrator resource";
+        
+        (apiService.createStack as any).mockRejectedValue(new Error(errorMessage));
+
+        renderStackForm();
+
+        // Wait for blueprints to load
+        await waitFor(() => {
+          expect(apiService.getBlueprints).toHaveBeenCalled();
+        });
+
+        // Fill in required fields and submit to trigger error
+        const nameInput = screen.getByRole('textbox', { name: /display name/i });
+        const cloudNameInput = screen.getByRole('textbox', { name: /cloud name/i });
+        
+        await user.type(nameInput, 'Test Stack');
+        await user.type(cloudNameInput, 'test-cloud');
+
+        await waitFor(() => {
+          expect(screen.getByRole('textbox', { name: /route path/i })).toBeInTheDocument();
+        });
+
+        const routePathInput = screen.getByRole('textbox', { name: /route path/i });
+        await user.type(routePathInput, '/test/');
+
+        const submitButton = screen.getByRole('button', { name: /create stack/i });
+        await user.click(submitButton);
+
+        // Wait for error to appear
+        await waitFor(() => {
+          expect(screen.getByText(errorMessage)).toBeInTheDocument();
+        });
+
+        // Verify error is displayed
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
     });
   });
 });

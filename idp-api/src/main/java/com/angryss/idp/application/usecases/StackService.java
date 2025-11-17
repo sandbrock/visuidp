@@ -45,6 +45,9 @@ public class StackService {
     @Inject
     SchemaResolverService schemaResolverService;
 
+    @Inject
+    com.angryss.idp.domain.services.BlueprintResourceValidationService blueprintResourceValidationService;
+
     @Transactional
     public StackResponseDto createStack(StackCreateDto createDto, String createdBy) {
         validateStackCreation(createDto);
@@ -88,14 +91,21 @@ public class StackService {
             stack.setStackCollection((com.angryss.idp.domain.entities.StackCollection) col);
         }
 
-        // Handle blueprint association
+        // Handle blueprint association and validation
+        Blueprint blueprint = null;
         if (createDto.getBlueprintId() != null) {
-            Blueprint blueprint = Blueprint.findById(createDto.getBlueprintId());
+            blueprint = Blueprint.findById(createDto.getBlueprintId());
             if (blueprint == null) {
                 throw new IllegalArgumentException("Blueprint not found with id: " + createDto.getBlueprintId());
             }
             stack.setBlueprint(blueprint);
         }
+
+        // Validate blueprint resources for stack type before persistence
+        blueprintResourceValidationService.validateBlueprintResourcesForStackType(
+            createDto.getStackType(), 
+            blueprint
+        );
 
         stack = stackRepository.save(stack);
         return stackMapper.toResponseDto(stack);
@@ -210,9 +220,10 @@ public class StackService {
             existingStack.setStackCollection(null);
         }
 
-        // Handle blueprint association update
+        // Handle blueprint association update and validation
+        Blueprint blueprint = null;
         if (updateDto.getBlueprintId() != null) {
-            Blueprint blueprint = Blueprint.findById(updateDto.getBlueprintId());
+            blueprint = Blueprint.findById(updateDto.getBlueprintId());
             if (blueprint == null) {
                 throw new IllegalArgumentException("Blueprint not found with id: " + updateDto.getBlueprintId());
             }
@@ -220,6 +231,12 @@ public class StackService {
         } else {
             existingStack.setBlueprint(null);
         }
+
+        // Validate blueprint resources for stack type before persistence
+        blueprintResourceValidationService.validateBlueprintResourcesForStackType(
+            updateDto.getStackType(), 
+            blueprint
+        );
 
         existingStack = stackRepository.save(existingStack);
         return stackMapper.toResponseDto(existingStack);

@@ -214,6 +214,11 @@
   font-style: italic;
 }
 
+/* Stack type requirement helper text */
+.stack-form .feedback-message--info {
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
   .stack-form-container {
     padding: 1rem;
