@@ -1,0 +1,30 @@
+# Multi-stage build for AWS Lambda deployment
+# Stage 1: Build the Rust binary
+FROM rust:1.75-slim as builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a new empty project
+WORKDIR /app
+
+# Copy manifests
+COPY Cargo.toml Cargo.lock ./
+
+# Copy source code
+COPY src ./src
+
+# Build for release with lambda feature
+RUN cargo build --release --bin idp-cli-lambda --features lambda
+
+# Stage 2: Create the Lambda runtime image
+FROM public.ecr.aws/lambda/provided:al2023
+
+# Copy the binary from builder
+COPY --from=builder /app/target/release/idp-cli-lambda ${LAMBDA_RUNTIME_DIR}/bootstrap
+
+# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+CMD [ "bootstrap" ]

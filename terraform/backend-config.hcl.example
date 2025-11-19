@@ -1,0 +1,18 @@
+# Example Backend Configuration
+# Copy this file to backend-config.hcl and update with your values
+# DO NOT commit backend-config.hcl to version control
+
+bucket         = "your-terraform-state-bucket"
+key            = "visuidp/aws-deployment/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "your-terraform-locks-table"
+encrypt        = true
+
+# Optional: Use a specific AWS profile
+# profile        = "your-aws-profile"
+
+# Optional: Add additional tags to the state file
+# tags = {
+#   Project = "VisuIDP"
+#   Team    = "Platform"
+# }

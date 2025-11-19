@@ -6,13 +6,20 @@
   "scripts": {
     "dev": "vite --port 8083 --host",
     "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && vite build --mode production",
+    "build:analyze": "tsc -b && vite build --mode production && npx vite-bundle-visualizer",
     "lint": "eslint .",
     "preview": "vite preview --port 8083 --host",
     "serve": "vite preview --port 8083 --host",
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy": "./deploy-to-s3.sh",
+    "deploy:dev": "./deploy-to-s3.sh --bucket ${S3_BUCKET_DEV} --distribution ${CLOUDFRONT_DIST_DEV}",
+    "deploy:prod": "./deploy-to-s3.sh --bucket ${S3_BUCKET_PROD} --distribution ${CLOUDFRONT_DIST_PROD}"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.26.1",
+    "@azure/msal-react": "^3.0.21",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.1.1"
@@ -28,11 +35,14 @@
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "fast-check": "^4.3.0",
     "globals": "^16.3.0",
     "jsdom": "^27.1.0",
+    "terser": "^5.44.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
+    "vite-plugin-compression": "^0.5.1",
     "vitest": "^4.0.8"
   }
 }

@@ -31,3 +31,6 @@ export const Development = ({ user }: DevelopmentProps) => {
     </div>
   );
 };
+
+// Default export for lazy loading
+export default Development;

@@ -344,3 +344,6 @@ export const ResourceTypeManagement = ({ user }: ResourceTypeManagementProps) =>
     </div>
   );
 };
+
+// Default export for lazy loading
+export default ResourceTypeManagement;

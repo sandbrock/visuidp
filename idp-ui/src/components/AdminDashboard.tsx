@@ -265,3 +265,6 @@ export const AdminDashboard = ({ user }: AdminDashboardProps) => {
     </div>
   );
 };
+
+// Default export for lazy loading
+export default AdminDashboard;

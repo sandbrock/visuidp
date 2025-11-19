@@ -261,3 +261,6 @@ export const CloudProviderManagement = ({ user }: CloudProviderManagementProps) 
     </div>
   );
 };
+
+// Default export for lazy loading
+export default CloudProviderManagement;

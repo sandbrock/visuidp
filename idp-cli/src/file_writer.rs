@@ -74,10 +74,7 @@ impl FileWriter {
         
         // Write content to temporary file
         fs::write(&temp_path, content).map_err(|e| {
-            CliError::IoError(std::io::Error::new(
-                e.kind(),
-                format!("Failed to write temporary file {}: {}", temp_path.display(), e),
-            ))
+            CliError::IoError(format!("Failed to write temporary file {}: {}", temp_path.display(), e))
         })?;
 
         // Set restrictive file permissions (0600) on Unix systems before rename
@@ -93,10 +90,7 @@ impl FileWriter {
         fs::rename(&temp_path, path).map_err(|e| {
             // Clean up temp file if rename fails
             let _ = fs::remove_file(&temp_path);
-            CliError::IoError(std::io::Error::new(
-                e.kind(),
-                format!("Failed to rename {} to {}: {}", temp_path.display(), path.display(), e),
-            ))
+            CliError::IoError(format!("Failed to rename {} to {}: {}", temp_path.display(), path.display(), e))
         })?;
 
         Ok(())
@@ -113,14 +107,7 @@ impl FileWriter {
     fn ensure_directory_exists(&self, path: &Path) -> Result<(), CliError> {
         if !path.exists() {
             fs::create_dir_all(path).map_err(|e| {
-                CliError::IoError(std::io::Error::new(
-                    e.kind(),
-                    format!(
-                        "Failed to create directory {}: {}",
-                        path.display(),
-                        e
-                    ),
-                ))
+                CliError::IoError(format!("Failed to create directory {}: {}", path.display(), e))
             })?;
         }
         Ok(())

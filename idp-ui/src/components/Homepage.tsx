@@ -188,3 +188,6 @@ export const Homepage = ({ user }: HomepageProps) => {
     </div>
   );
 };
+
+// Default export for lazy loading
+export default Homepage;

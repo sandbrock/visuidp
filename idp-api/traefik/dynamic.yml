@@ -58,6 +58,15 @@ http:
           - "X-Forwarded-Host"
           - "X-Forwarded-Proto"
           - "X-Forwarded-Method"
+
+    # When forward auth returns 401/403, send browser to OAuth2 login
+    oauth2-login-redirect:
+      errors:
+        status:
+          - "401"
+          - "403"
+        service: oauth2-proxy-service
+        query: "/oauth2/start?rd=https://localhost:8443{path}"
     
     # Redirect root to /ui
     redirectToUI:
@@ -94,10 +103,11 @@ http:
     # API routes - route through OAuth2-proxy for authentication
     api:
       rule: "PathPrefix(`/api`)"
-      service: oauth2-proxy-service
+      service: api-service
       middlewares:
         - cors-headers
         - forwarded-headers
+        - oauth2-auth
       entryPoints:
         - websecure
       priority: 100
@@ -137,7 +147,7 @@ http:
           path: "/api/q/health"
           interval: 30s
           timeout: 5s
-    
+
     # OAuth2-proxy for authentication
     oauth2-proxy-service:
       loadBalancer:

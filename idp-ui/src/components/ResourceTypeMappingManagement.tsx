@@ -421,3 +421,6 @@ export const ResourceTypeMappingManagement = ({ user }: ResourceTypeMappingManag
     </div>
   );
 };
+
+// Default export for lazy loading
+export default ResourceTypeMappingManagement;

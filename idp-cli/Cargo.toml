@@ -15,6 +15,11 @@ path = "src/lib.rs"
 name = "idp-cli"
 path = "src/main.rs"
 
+[[bin]]
+name = "idp-cli-lambda"
+path = "src/lambda_main.rs"
+required-features = ["lambda"]
+
 [dependencies]
 # CLI argument parsing
 clap = { version = "4.4", features = ["derive", "env"] }
@@ -47,16 +52,31 @@ anyhow = "1.0"
 env_logger = "0.11"
 log = "0.4"
 
+# AWS Lambda runtime
+lambda_runtime = "0.13"
+lambda_http = "0.13"
+
+# Temporary directories (also used in Lambda handler)
+tempfile = "3.8"
+
+# AWS SDK for S3
+aws-config = "1.1"
+aws-sdk-s3 = "1.13"
+
 [dev-dependencies]
 # HTTP mocking
 mockito = "1.2"
 
-# Temporary directories for testing
-tempfile = "3.8"
-
 # Command testing
 assert_cmd = "2.0"
 predicates = "3.0"
+
+# Property-based testing
+proptest = "1.4"
+
+[features]
+default = []
+lambda = []
 
 [profile.release]
 opt-level = 3

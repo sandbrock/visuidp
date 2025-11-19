@@ -210,10 +210,7 @@ async fn handle_generate(
     
     let written_files = file_writer.write_processed_files(&processed_files)
         .map_err(|e| {
-            CliError::IoError(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Failed to write processed files: {}", e)
-            ))
+            CliError::IoError(format!("Failed to write processed files: {}", e))
         })?;
     
     info!("Successfully wrote {} file(s)", written_files.len());

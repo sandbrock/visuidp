@@ -342,3 +342,6 @@ export const ApiKeysManagement = ({ user, mode = 'personal' }: ApiKeysManagement
     </div>
   );
 };
+
+// Default export for lazy loading
+export default ApiKeysManagement;

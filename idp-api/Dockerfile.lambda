@@ -1,0 +1,66 @@
+####
+# Multi-stage Dockerfile for AWS Lambda deployment with GraalVM native image
+# 
+# This Dockerfile creates an optimized native image for AWS Lambda with:
+# - Fast cold start times (<1 second)
+# - Minimal memory footprint
+# - ARM64 architecture support for cost savings
+# - Reflection configuration for JPA entities and JAX-RS resources
+#
+# Build: docker build -f Dockerfile.lambda -t idp-api-lambda:latest .
+# Run locally: docker run -p 9000:8080 idp-api-lambda:latest
+# Test locally: curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+####
+
+## Stage 1: Build the native image with GraalVM
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+
+# Set working directory
+USER quarkus
+WORKDIR /code
+
+# Copy Maven wrapper and pom.xml for dependency caching
+COPY --chown=quarkus:quarkus mvnw /code/mvnw
+COPY --chown=quarkus:quarkus .mvn /code/.mvn
+COPY --chown=quarkus:quarkus pom.xml /code/
+
+# Download dependencies (cached layer)
+RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
+
+# Copy source code and resources
+COPY --chown=quarkus:quarkus src /code/src
+
+# Build native image with Lambda profile
+# - Uses GraalVM native-image for fast cold starts
+# - Includes reflection configuration for JPA entities and JAX-RS resources
+# - Optimizes for size and startup time
+# - Skips tests for faster builds (tests should run in CI pipeline)
+RUN ./mvnw package -Pnative -DskipTests \
+    -Dquarkus.profile=lambda \
+    -Dquarkus.native.additional-build-args=\
+"-H:ReflectionConfigurationFiles=reflection-config.json,\
+-H:+ReportExceptionStackTraces,\
+-H:+PrintClassInitialization,\
+--initialize-at-build-time=org.jboss.logmanager.LogContext,\
+--initialize-at-build-time=org.jboss.logmanager.Level,\
+--initialize-at-build-time=org.jboss.logmanager.Logger,\
+--initialize-at-run-time=io.netty.handler.ssl.ReferenceCountedOpenSslEngine"
+
+## Stage 2: Create the Lambda runtime image
+# Using Amazon Linux 2023 base image for Lambda
+FROM public.ecr.aws/lambda/provided:al2023
+
+# Copy the native executable from the build stage
+# The executable is renamed to 'bootstrap' which is the Lambda runtime entry point
+COPY --from=build /code/target/*-runner ${LAMBDA_TASK_ROOT}/bootstrap
+
+# Ensure the bootstrap file is executable
+RUN chmod 755 ${LAMBDA_TASK_ROOT}/bootstrap
+
+# Set Lambda handler (can be overridden at deployment time)
+CMD [ "io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest" ]
+
+# Labels for image metadata
+LABEL maintainer="VisuIDP Team"
+LABEL description="VisuIDP API Lambda function with GraalVM native image"
+LABEL version="1.0.0"

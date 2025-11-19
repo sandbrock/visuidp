@@ -765,3 +765,6 @@ export const PropertySchemaEditor = ({ user }: PropertySchemaEditorProps) => {
     </div>
   );
 };
+
+// Default export for lazy loading
+export default PropertySchemaEditor;

@@ -560,6 +560,7 @@ impl Default for VariableContextBuilder {
 
 /// Context containing variables extracted from blueprints or stacks
 /// Variables are stored in a flattened HashMap for easy template access
+#[derive(Debug, Clone)]
 pub struct VariableContext {
     variables: HashMap<String, Value>,
 }

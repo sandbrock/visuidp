@@ -883,3 +883,6 @@ export const Infrastructure = ({ user }: InfrastructureProps) => {
     </div>
   );
 };
+
+// Default export for lazy loading
+export default Infrastructure;
