@@ -99,6 +99,28 @@ variable "alias_version" {
   default     = ""
 }
 
+variable "provisioned_concurrent_executions" {
+  description = "Number of provisioned concurrent executions (0 = disabled, use for critical endpoints)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.provisioned_concurrent_executions >= 0
+    error_message = "Provisioned concurrent executions must be >= 0."
+  }
+}
+
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions limit (-1 = unreserved, use to prevent runaway costs)"
+  type        = number
+  default     = -1
+
+  validation {
+    condition     = var.reserved_concurrent_executions >= -1
+    error_message = "Reserved concurrent executions must be >= -1."
+  }
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

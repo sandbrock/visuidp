@@ -104,6 +104,9 @@ resource "aws_lambda_function" "main" {
   timeout       = var.timeout
   architectures = [var.architecture]
 
+  # Reserved concurrent executions (limit to prevent runaway costs)
+  reserved_concurrent_executions = var.reserved_concurrent_executions
+
   # Enable versioning for rollback capability
   publish = var.enable_versioning
 
@@ -149,6 +152,16 @@ resource "aws_lambda_permission" "api_gateway_alias" {
   function_name = aws_lambda_function.main.function_name
   principal     = "apigateway.amazonaws.com"
   qualifier     = aws_lambda_alias.live[0].name
+}
+
+# Provisioned concurrency for critical endpoints (reduces cold starts)
+resource "aws_lambda_provisioned_concurrency_config" "main" {
+  count                             = var.provisioned_concurrent_executions > 0 && var.enable_versioning ? 1 : 0
+  function_name                     = aws_lambda_function.main.function_name
+  provisioned_concurrent_executions = var.provisioned_concurrent_executions
+  qualifier                         = aws_lambda_alias.live[0].name
+
+  depends_on = [aws_lambda_alias.live]
 }
 
 # Lambda function URL (optional, for direct invocation)

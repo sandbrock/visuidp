@@ -1,12 +1,15 @@
 # Multi-stage build for AWS Lambda deployment
 # Stage 1: Build the Rust binary
-FROM rust:1.75-slim as builder
+FROM rust:1.83-slim as builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install nightly toolchain for edition2024 support
+RUN rustup toolchain install nightly && rustup default nightly
 
 # Create a new empty project
 WORKDIR /app

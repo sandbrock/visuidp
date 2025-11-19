@@ -153,12 +153,39 @@ cd ../idp-cli && cargo clean  # Rust
 ./deploy.sh --environment dev
 ```
 
+## Load Testing
+
+Comprehensive load and performance testing tools for AWS deployment.
+
+**Quick Start**:
+```bash
+# Set environment variables
+export API_URL=$(cd ../terraform && terraform output -raw api_gateway_url)
+export JWT_TOKEN=your-jwt-token
+
+# Run load test
+./run-load-test.sh
+```
+
+**Documentation**:
+- [Load Testing README](LOAD_TESTING_README.md) - Complete guide
+- [Quick Start Guide](QUICK_START.md) - Fast setup
+- [Performance Test Results](../docs/PERFORMANCE_TEST_RESULTS.md) - Test results
+
+**Test Scripts**:
+- `run-load-test.sh` - Comprehensive load test
+- `measure-cold-starts.sh` - Lambda cold start measurement
+- `monitor-dynamodb.sh` - DynamoDB performance monitoring
+- `load-test-aws.js` - K6 load test script
+
 ## Documentation
 
 For more detailed information, see:
 - [Deployment Pipeline Documentation](../docs/DEPLOYMENT_PIPELINE.md)
 - [Quick Reference Guide](../docs/DEPLOYMENT_QUICK_REFERENCE.md)
 - [Implementation Summary](../DEPLOYMENT_PIPELINE_SUMMARY.md)
+- [Load Testing Documentation](LOAD_TESTING_README.md)
+- [Performance Test Results](../docs/PERFORMANCE_TEST_RESULTS.md)
 
 ## Support
 

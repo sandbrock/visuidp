@@ -191,6 +191,100 @@ variable "lambda_alias_name" {
   default     = "live"
 }
 
+# Lambda Performance Optimization
+variable "lambda_provisioned_concurrency" {
+  description = "Number of provisioned concurrent executions for API Lambda (0 = disabled, use for critical endpoints to eliminate cold starts)"
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.lambda_provisioned_concurrency >= 0
+    error_message = "Provisioned concurrency must be >= 0."
+  }
+}
+
+variable "lambda_reserved_concurrency" {
+  description = "Reserved concurrent executions limit for API Lambda (-1 = unreserved, use to prevent runaway costs)"
+  type        = number
+  default     = -1
+  validation {
+    condition     = var.lambda_reserved_concurrency >= -1
+    error_message = "Reserved concurrency must be >= -1."
+  }
+}
+
+# Cost Management Configuration
+variable "cost_alert_emails" {
+  description = "Email addresses to receive cost alerts and budget notifications"
+  type        = list(string)
+  default     = []
+}
+
+variable "monthly_budget_limit" {
+  description = "Monthly budget limit in USD"
+  type        = number
+  default     = 50
+  validation {
+    condition     = var.monthly_budget_limit > 0
+    error_message = "Monthly budget limit must be greater than 0."
+  }
+}
+
+variable "daily_budget_limit" {
+  description = "Daily budget limit in USD (for production environment)"
+  type        = number
+  default     = 5
+  validation {
+    condition     = var.daily_budget_limit > 0
+    error_message = "Daily budget limit must be greater than 0."
+  }
+}
+
+variable "billing_alarm_threshold" {
+  description = "Threshold for total estimated charges alarm in USD"
+  type        = number
+  default     = 40
+  validation {
+    condition     = var.billing_alarm_threshold > 0
+    error_message = "Billing alarm threshold must be greater than 0."
+  }
+}
+
+variable "enable_service_cost_alarms" {
+  description = "Enable per-service cost alarms (Lambda, DynamoDB, CloudFront)"
+  type        = bool
+  default     = true
+}
+
+variable "lambda_cost_threshold" {
+  description = "Threshold for Lambda cost alarm in USD"
+  type        = number
+  default     = 15
+}
+
+variable "dynamodb_cost_threshold" {
+  description = "Threshold for DynamoDB cost alarm in USD"
+  type        = number
+  default     = 10
+}
+
+variable "cloudfront_cost_threshold" {
+  description = "Threshold for CloudFront cost alarm in USD"
+  type        = number
+  default     = 10
+}
+
+variable "enable_anomaly_detection" {
+  description = "Enable AWS Cost Anomaly Detection for unusual spending patterns"
+  type        = bool
+  default     = false
+}
+
+variable "anomaly_threshold" {
+  description = "Threshold for cost anomaly alerts in USD"
+  type        = number
+  default     = 10
+}
+
 # Tags
 variable "additional_tags" {
   description = "Additional tags to apply to all resources"

@@ -1,0 +1,97 @@
+.demo-mode-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.demo-mode-banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.demo-mode-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.demo-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-mode-text strong {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.demo-mode-description {
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 400;
+}
+
+/* Adjust main content to account for banner */
+body.demo-mode-active {
+  padding-top: 60px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .demo-mode-banner {
+    padding: 10px 16px;
+  }
+
+  .demo-mode-icon {
+    font-size: 20px;
+  }
+
+  .demo-mode-text strong {
+    font-size: 14px;
+  }
+
+  .demo-mode-description {
+    font-size: 12px;
+  }
+
+  body.demo-mode-active {
+    padding-top: 55px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .demo-mode-banner {
+    background: #5a3d8a;
+    border-bottom: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .demo-mode-banner {
+    animation: none;
+  }
+}

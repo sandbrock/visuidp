@@ -390,52 +390,50 @@ public class DatabaseOperationParityPropertyTest {
         return switch (type) {
             case STACK -> {
                 Stack stack = new Stack();
-                stack.name = "test-stack-" + testId;
-                stack.routePath = "/test-" + testId + "/";
-                stack.cloudName = "test-cloud-" + testId;
-                stack.stackType = StackType.INFRASTRUCTURE_ONLY;
-                stack.createdBy = "test-user@example.com";
-                stack.createdAt = LocalDateTime.now();
+                stack.setName("test-stack-" + testId);
+                stack.setRoutePath("/test-" + testId + "/");
+                stack.setCloudName("test-cloud-" + testId);
+                stack.setStackType(StackType.INFRASTRUCTURE);
+                stack.setCreatedBy("test-user@example.com");
+                stack.setCreatedAt(LocalDateTime.now());
                 yield stack;
             }
             case TEAM -> {
                 Team team = new Team();
-                team.name = "test-team-" + testId;
-                team.description = "Test team " + testId;
-                team.createdBy = "test-user@example.com";
-                team.createdAt = LocalDateTime.now();
+                team.setName("test-team-" + testId);
+                team.setDescription("Test team " + testId);
+                team.setCreatedAt(LocalDateTime.now());
                 yield team;
             }
             case BLUEPRINT -> {
                 Blueprint blueprint = new Blueprint();
-                blueprint.name = "test-blueprint-" + testId;
-                blueprint.description = "Test blueprint " + testId;
-                blueprint.createdBy = "test-user@example.com";
-                blueprint.createdAt = LocalDateTime.now();
+                blueprint.setName("test-blueprint-" + testId);
+                blueprint.setDescription("Test blueprint " + testId);
+                blueprint.setCreatedAt(LocalDateTime.now());
                 yield blueprint;
             }
             case CLOUD_PROVIDER -> {
                 CloudProvider provider = new CloudProvider();
-                provider.name = "test-provider-" + testId;
-                provider.displayName = "Test Provider " + testId;
+                provider.setName("test-provider-" + testId);
+                provider.setDisplayName("Test Provider " + testId);
                 yield provider;
             }
             case API_KEY -> {
                 ApiKey apiKey = new ApiKey();
-                apiKey.name = "test-key-" + testId;
-                apiKey.keyHash = "hash-" + testId;
-                apiKey.type = ApiKeyType.PERSONAL;
-                apiKey.createdBy = "test-user@example.com";
-                apiKey.createdAt = LocalDateTime.now();
-                apiKey.expiresAt = LocalDateTime.now().plusDays(30);
-                apiKey.isActive = true;
+                apiKey.setName("test-key-" + testId);
+                apiKey.setKeyHash("hash-" + testId);
+                apiKey.setType(ApiKeyType.PERSONAL);
+                apiKey.setCreatedBy("test-user@example.com");
+                apiKey.setCreatedAt(LocalDateTime.now());
+                apiKey.setExpiresAt(LocalDateTime.now().plusDays(30));
+                apiKey.setActive(true);
                 yield apiKey;
             }
             case PROPERTY_SCHEMA -> {
                 PropertySchema schema = new PropertySchema();
-                schema.name = "test-schema-" + testId;
-                schema.dataType = PropertyDataType.STRING;
-                schema.isRequired = false;
+                schema.setName("test-schema-" + testId);
+                schema.setDataType(PropertyDataType.STRING);
+                schema.setRequired(false);
                 yield schema;
             }
         };
@@ -445,22 +443,22 @@ public class DatabaseOperationParityPropertyTest {
         Object saved = switch (type) {
             case STACK -> {
                 Stack s = stackRepository.save((Stack) entity);
-                createdStackIds.add(s.id);
+                createdStackIds.add(s.getId());
                 yield s;
             }
             case TEAM -> {
                 Team t = teamRepository.save((Team) entity);
-                createdTeamIds.add(t.id);
+                createdTeamIds.add(t.getId());
                 yield t;
             }
             case BLUEPRINT -> {
                 Blueprint b = blueprintRepository.save((Blueprint) entity);
-                createdBlueprintIds.add(b.id);
+                createdBlueprintIds.add(b.getId());
                 yield b;
             }
             case CLOUD_PROVIDER -> {
                 CloudProvider cp = cloudProviderRepository.save((CloudProvider) entity);
-                createdCloudProviderIds.add(cp.id);
+                createdCloudProviderIds.add(cp.getId());
                 yield cp;
             }
             case API_KEY -> {
@@ -536,32 +534,32 @@ public class DatabaseOperationParityPropertyTest {
         return switch (type) {
             case STACK -> {
                 Stack s = (Stack) entity;
-                s.name = s.name + "-updated";
+                s.setName(s.getName() + "-updated");
                 yield s;
             }
             case TEAM -> {
                 Team t = (Team) entity;
-                t.description = t.description + " (updated)";
+                t.setDescription(t.getDescription() + " (updated)");
                 yield t;
             }
             case BLUEPRINT -> {
                 Blueprint b = (Blueprint) entity;
-                b.description = b.description + " (updated)";
+                b.setDescription(b.getDescription() + " (updated)");
                 yield b;
             }
             case CLOUD_PROVIDER -> {
                 CloudProvider cp = (CloudProvider) entity;
-                cp.displayName = cp.displayName + " (updated)";
+                cp.setDisplayName(cp.getDisplayName() + " (updated)");
                 yield cp;
             }
             case API_KEY -> {
                 ApiKey ak = (ApiKey) entity;
-                ak.isActive = !ak.isActive;
+                ak.setActive(!ak.isActive());
                 yield ak;
             }
             case PROPERTY_SCHEMA -> {
                 PropertySchema ps = (PropertySchema) entity;
-                ps.isRequired = !ps.isRequired;
+                ps.setRequired(!ps.isRequired());
                 yield ps;
             }
         };
@@ -569,10 +567,10 @@ public class DatabaseOperationParityPropertyTest {
 
     private void verifyEntityUpdate(EntityType type, Object entity) {
         switch (type) {
-            case STACK -> assertTrue(((Stack) entity).name.contains("-updated"));
-            case TEAM -> assertTrue(((Team) entity).description.contains("(updated)"));
-            case BLUEPRINT -> assertTrue(((Blueprint) entity).description.contains("(updated)"));
-            case CLOUD_PROVIDER -> assertTrue(((CloudProvider) entity).displayName.contains("(updated)"));
+            case STACK -> assertTrue(((Stack) entity).getName().contains("-updated"));
+            case TEAM -> assertTrue(((Team) entity).getDescription().contains("(updated)"));
+            case BLUEPRINT -> assertTrue(((Blueprint) entity).getDescription().contains("(updated)"));
+            case CLOUD_PROVIDER -> assertTrue(((CloudProvider) entity).getDisplayName().contains("(updated)"));
             case API_KEY -> {} // isActive toggle verified by retrieval
             case PROPERTY_SCHEMA -> {} // isRequired toggle verified by retrieval
         }
@@ -580,11 +578,11 @@ public class DatabaseOperationParityPropertyTest {
 
     private UUID getEntityId(Object entity) {
         return switch (entity) {
-            case Stack s -> s.id;
-            case Team t -> t.id;
-            case Blueprint b -> b.id;
-            case CloudProvider cp -> cp.id;
-            case PropertySchema ps -> ps.id;
+            case Stack s -> s.getId();
+            case Team t -> t.getId();
+            case Blueprint b -> b.getId();
+            case CloudProvider cp -> cp.getId();
+            case PropertySchema ps -> ps.getId();
             case ApiKey ak -> null; // API keys don't have UUID id
             default -> throw new IllegalArgumentException("Unknown entity type");
         };

@@ -4,6 +4,13 @@ import { loginRequest } from './authConfig';
 import type { User } from './types/auth';
 import { InteractionRequiredAuthError } from '@azure/msal-browser';
 
+// Demo mode callback - will be set by the app to update demo mode state
+let demoModeCallback: ((enabled: boolean) => void) | null = null;
+
+export const setDemoModeCallback = (callback: (enabled: boolean) => void): void => {
+  demoModeCallback = callback;
+};
+
 const AUTH_CONFIG = {
   apiBaseUrl: '/api/v1'
 };
@@ -199,6 +206,13 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}, userE
   };
 
   const response = await fetch(url, { ...defaultOptions, ...options });
+
+  // Check for demo mode header in response
+  const demoModeHeader = response.headers.get('X-Demo-Mode');
+  if (demoModeHeader && demoModeCallback) {
+    const isDemoMode = demoModeHeader.toLowerCase() === 'true';
+    demoModeCallback(isDemoMode);
+  }
 
   // Handle authentication errors with retry
   if (response.status === 401 && !apiKey) {

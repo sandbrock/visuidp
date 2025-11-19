@@ -79,6 +79,10 @@ module "lambda_api" {
   enable_versioning = var.enable_lambda_versioning
   alias_name        = var.lambda_alias_name
 
+  # Performance optimization
+  provisioned_concurrent_executions = var.lambda_provisioned_concurrency
+  reserved_concurrent_executions    = var.lambda_reserved_concurrency
+
   # Environment variables
   environment_variables = {
     DYNAMODB_TABLE_NAME    = module.dynamodb.table_name
@@ -218,4 +222,27 @@ module "monitoring" {
   alarm_email              = var.alarm_email
 
   tags = local.common_tags
+}
+
+# Cost Management Module
+module "cost_management" {
+  source = "./modules/cost-management"
+
+  environment           = var.environment
+  alert_email_addresses = var.cost_alert_emails
+
+  # Budget limits
+  monthly_budget_limit = var.monthly_budget_limit
+  daily_budget_limit   = var.daily_budget_limit
+
+  # Alarm thresholds
+  billing_alarm_threshold   = var.billing_alarm_threshold
+  lambda_cost_threshold     = var.lambda_cost_threshold
+  dynamodb_cost_threshold   = var.dynamodb_cost_threshold
+  cloudfront_cost_threshold = var.cloudfront_cost_threshold
+
+  # Optional features
+  enable_service_cost_alarms = var.enable_service_cost_alarms
+  enable_anomaly_detection   = var.enable_anomaly_detection
+  anomaly_threshold          = var.anomaly_threshold
 }

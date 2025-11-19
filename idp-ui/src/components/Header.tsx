@@ -3,6 +3,7 @@ import type { User } from '../types/auth';
 import { isAdmin } from '../types/auth';
 import { ThemeToggle } from './ThemeToggle';
 import { ProfileMenu } from './ProfileMenu';
+import { DemoModeBadge } from './DemoModeBadge';
 import './Header.css';
 
 interface HeaderProps {
@@ -50,6 +51,7 @@ export const Header = ({ user }: HeaderProps) => {
           </nav>
         </div>
         <div className="user-info">
+          <DemoModeBadge />
           <ThemeToggle />
           <ProfileMenu user={user} />
         </div>

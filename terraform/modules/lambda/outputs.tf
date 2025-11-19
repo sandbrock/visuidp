@@ -54,3 +54,28 @@ output "alias_invoke_arn" {
   description = "Invoke ARN of the Lambda alias"
   value       = var.enable_versioning ? aws_lambda_alias.live[0].invoke_arn : ""
 }
+
+output "provisioned_concurrency" {
+  description = "Number of provisioned concurrent executions"
+  value       = var.provisioned_concurrent_executions
+}
+
+output "reserved_concurrency" {
+  description = "Reserved concurrent executions limit"
+  value       = var.reserved_concurrent_executions
+}
+
+output "memory_size" {
+  description = "Configured memory size in MB"
+  value       = aws_lambda_function.main.memory_size
+}
+
+output "timeout" {
+  description = "Configured timeout in seconds"
+  value       = aws_lambda_function.main.timeout
+}
+
+output "architecture" {
+  description = "Lambda architecture"
+  value       = var.architecture
+}

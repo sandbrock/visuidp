@@ -203,6 +203,7 @@ async fn handle_generate_lambda(
                         success: false,
                         message: format!("Failed to fetch blueprint: {}", e.user_message()),
                         files: None,
+                        s3_keys: None,
                         variables: None,
                         error: Some(format!("{:?}", e)),
                     };
@@ -220,6 +221,7 @@ async fn handle_generate_lambda(
                         success: false,
                         message: format!("Failed to fetch stack: {}", e.user_message()),
                         files: None,
+                        s3_keys: None,
                         variables: None,
                         error: Some(format!("{:?}", e)),
                     };

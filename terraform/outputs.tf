@@ -127,6 +127,27 @@ output "parameter_store_names" {
   value       = module.parameter_store.parameter_names
 }
 
+# Cost Management Outputs
+output "cost_alerts_topic_arn" {
+  description = "ARN of the SNS topic for cost alerts"
+  value       = module.cost_management.cost_alerts_topic_arn
+}
+
+output "monthly_budget_name" {
+  description = "Name of the monthly budget"
+  value       = module.cost_management.monthly_budget_name
+}
+
+output "billing_alarm_name" {
+  description = "Name of the billing alarm"
+  value       = module.cost_management.billing_alarm_name
+}
+
+output "cost_anomaly_monitor_arn" {
+  description = "ARN of the cost anomaly monitor (if enabled)"
+  value       = module.cost_management.anomaly_monitor_arn
+}
+
 # Environment Information
 output "environment" {
   description = "Deployment environment"

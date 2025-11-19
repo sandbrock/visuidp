@@ -1,0 +1,51 @@
+.demo-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: help;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.demo-mode-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Size variants */
+.demo-mode-badge.small {
+  padding: 2px 8px;
+  font-size: 10px;
+}
+
+.demo-mode-badge.large {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .demo-mode-badge {
+    background: #5a3d8a;
+    border: 1px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .demo-mode-badge {
+    transition: none;
+  }
+
+  .demo-mode-badge:hover {
+    transform: none;
+  }
+}

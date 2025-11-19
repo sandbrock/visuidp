@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MsalProvider } from '@azure/msal-react';
 import { msalInstance } from './contexts/MsalContext';
-import { getCurrentUser } from './auth';
+import { getCurrentUser, setDemoModeCallback } from './auth';
 import { setupTokenRefresh } from './utils/tokenRefresh';
 import type { User } from './types/auth';
 import { Loading } from './components/Loading';
@@ -10,6 +10,8 @@ import { Login } from './components/Login';
 import { Header } from './components/Header';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { DemoModeProvider, useDemoMode } from './contexts/DemoModeContext';
+import { DemoModeBanner } from './components/DemoModeBanner';
 import './App.css';
 
 // Lazy load route components for code splitting
@@ -28,12 +30,17 @@ const ResourceTypeManagement = lazy(() => import('./components/ResourceTypeManag
 const ResourceTypeMappingManagement = lazy(() => import('./components/ResourceTypeMappingManagement'));
 const PropertySchemaEditor = lazy(() => import('./components/PropertySchemaEditor'));
 
-function App() {
+// Inner component that has access to demo mode context
+function AppContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setDemoMode, isDemoMode } = useDemoMode();
 
   useEffect(() => {
+    // Set up demo mode callback to update context when API responses indicate demo mode
+    setDemoModeCallback(setDemoMode);
+
     const checkAuth = async () => {
       try {
         const userData = await getCurrentUser();
@@ -58,7 +65,16 @@ function App() {
     
     // Cleanup on unmount
     return cleanup;
-  }, []);
+  }, [setDemoMode]);
+
+  // Add/remove body class for demo mode styling
+  useEffect(() => {
+    if (isDemoMode) {
+      document.body.classList.add('demo-mode-active');
+    } else {
+      document.body.classList.remove('demo-mode-active');
+    }
+  }, [isDemoMode]);
 
   if (loading) {
     return (
@@ -99,6 +115,7 @@ function App() {
       <ThemeProvider>
         <BrowserRouter basename="/ui">
           <div className="app">
+            <DemoModeBanner />
             <Header user={user} />
             <main className="main-content">
               <div className="content-container">
@@ -176,6 +193,15 @@ function App() {
         </BrowserRouter>
       </ThemeProvider>
     </MsalProvider>
+  );
+}
+
+// Main App component with DemoModeProvider
+function App() {
+  return (
+    <DemoModeProvider>
+      <AppContent />
+    </DemoModeProvider>
   );
 }
 
