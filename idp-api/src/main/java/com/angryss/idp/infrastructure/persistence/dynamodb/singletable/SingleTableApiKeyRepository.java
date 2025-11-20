@@ -142,6 +142,43 @@ public class SingleTableApiKeyRepository implements ApiKeyRepository {
     }
     
     @Override
+    public List<ApiKey> findByCreatedByEmail(String createdByEmail) {
+        if (createdByEmail == null) {
+            return Collections.emptyList();
+        }
+        
+        ScanRequest request = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("entityType = :entityType AND createdByEmail = :createdByEmail")
+                .expressionAttributeValues(Map.of(
+                    ":entityType", AttributeValue.builder().s("ApiKey").build(),
+                    ":createdByEmail", AttributeValue.builder().s(createdByEmail).build()
+                ))
+                .build();
+        
+        return executeScan(request, "findByCreatedByEmail: " + createdByEmail);
+    }
+    
+    @Override
+    public List<ApiKey> findByUserEmailAndIsActive(String userEmail, Boolean isActive) {
+        if (userEmail == null || isActive == null) {
+            return Collections.emptyList();
+        }
+        
+        ScanRequest request = ScanRequest.builder()
+                .tableName(tableName)
+                .filterExpression("entityType = :entityType AND userEmail = :userEmail AND isActive = :isActive")
+                .expressionAttributeValues(Map.of(
+                    ":entityType", AttributeValue.builder().s("ApiKey").build(),
+                    ":userEmail", AttributeValue.builder().s(userEmail).build(),
+                    ":isActive", AttributeValue.builder().bool(isActive).build()
+                ))
+                .build();
+        
+        return executeScan(request, "findByUserEmailAndIsActive: " + userEmail + ", " + isActive);
+    }
+    
+    @Override
     public List<ApiKey> findByKeyType(ApiKeyType keyType) {
         if (keyType == null) {
             return Collections.emptyList();
@@ -177,7 +214,6 @@ public class SingleTableApiKeyRepository implements ApiKeyRepository {
         return executeScan(request, "findByIsActive: " + isActive);
     }
     
-    @Override
     public List<ApiKey> findExpiredKeys() {
         String now = LocalDateTime.now().toString();
         

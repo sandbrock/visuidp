@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,8 +204,8 @@ public class SingleTableEntityMapper {
         if (blueprint.getSupportedCloudProviders() != null && !blueprint.getSupportedCloudProviders().isEmpty()) {
             List<AttributeValue> providerIds = new ArrayList<>();
             for (CloudProvider provider : blueprint.getSupportedCloudProviders()) {
-                if (provider.getId() != null) {
-                    providerIds.add(stringAttr(provider.getId().toString()));
+                if (provider.id != null) {
+                    providerIds.add(stringAttr(provider.id.toString()));
                 }
             }
             if (!providerIds.isEmpty()) {

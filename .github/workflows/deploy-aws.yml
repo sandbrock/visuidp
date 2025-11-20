@@ -2,19 +2,10 @@ name: Deploy to AWS
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
 
 env:
-  AWS_REGION: us-east-1
-  TERRAFORM_VERSION: 1.5.0
+  AWS_REGION: us-west-2
+  OPENTOFU_VERSION: 1.8.8
 
 jobs:
   # Build and test all components
@@ -218,7 +209,7 @@ jobs:
           
           echo "Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
   
-  # Deploy with Terraform
+  # Deploy with OpenTofu
   deploy:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
@@ -238,10 +229,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
       
       - name: Determine environment
         id: env
@@ -254,34 +245,34 @@ jobs:
             echo "environment=dev" >> $GITHUB_OUTPUT
           fi
       
-      - name: Terraform Init
+      - name: OpenTofu Init
         working-directory: terraform
         run: |
-          terraform init \
+          tofu init \
             -backend-config="key=visuidp/aws-deployment/${{ steps.env.outputs.environment }}/terraform.tfstate"
       
-      - name: Terraform Plan
+      - name: OpenTofu Plan
         working-directory: terraform
         run: |
-          terraform plan \
+          tofu plan \
             -var-file="${{ steps.env.outputs.environment }}.tfvars" \
             -var="image_tag=${{ github.sha }}" \
             -out=tfplan
       
-      - name: Terraform Apply
+      - name: OpenTofu Apply
         working-directory: terraform
         if: github.event_name != 'pull_request'
-        run: terraform apply -auto-approve tfplan
+        run: tofu apply -auto-approve tfplan
       
-      - name: Get Terraform Outputs
+      - name: Get OpenTofu Outputs
         id: tf-outputs
         working-directory: terraform
         if: github.event_name != 'pull_request'
         run: |
-          echo "api_url=$(terraform output -raw api_gateway_url)" >> $GITHUB_OUTPUT
-          echo "cloudfront_url=$(terraform output -raw cloudfront_url)" >> $GITHUB_OUTPUT
-          echo "s3_bucket=$(terraform output -raw ui_bucket_name)" >> $GITHUB_OUTPUT
-          echo "cloudfront_distribution=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "api_url=$(tofu output -raw api_gateway_url)" >> $GITHUB_OUTPUT
+          echo "cloudfront_url=$(tofu output -raw cloudfront_url)" >> $GITHUB_OUTPUT
+          echo "s3_bucket=$(tofu output -raw ui_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution=$(tofu output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
       
       - name: Download UI dist
         if: github.event_name != 'pull_request'
@@ -332,19 +323,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-          terraform_wrapper: false
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
+          tofu_wrapper: false
       
       - name: Get deployment URLs
         id: urls
         working-directory: terraform
         run: |
-          terraform init -backend-config="key=visuidp/aws-deployment/${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}/terraform.tfstate"
-          echo "api_url=$(terraform output -raw api_gateway_url)" >> $GITHUB_OUTPUT
-          echo "cloudfront_url=$(terraform output -raw cloudfront_url)" >> $GITHUB_OUTPUT
+          tofu init -backend-config="key=visuidp/aws-deployment/${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}/terraform.tfstate"
+          echo "api_url=$(tofu output -raw api_gateway_url)" >> $GITHUB_OUTPUT
+          echo "cloudfront_url=$(tofu output -raw cloudfront_url)" >> $GITHUB_OUTPUT
       
       - name: Run smoke tests
         env:

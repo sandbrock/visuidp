@@ -31,6 +31,9 @@ public class CloudProvider extends PanacheEntityBase {
     @Column(columnDefinition = "TEXT")
     public String description;
 
+    @Column(length = 50)
+    public String type;
+
     @NotNull(message = "Enabled status is required")
     @Column(nullable = false)
     public Boolean enabled = false;

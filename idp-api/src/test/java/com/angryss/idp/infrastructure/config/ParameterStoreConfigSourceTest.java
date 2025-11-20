@@ -4,6 +4,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.StreamSupport;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,9 +21,8 @@ class ParameterStoreConfigSourceTest {
     @Test
     void testConfigSourceIsRegistered() {
         // Verify that ParameterStoreConfigSource is registered
-        boolean found = ConfigProvider.getConfig()
-            .getConfigSources()
-            .stream()
+        boolean found = StreamSupport.stream(
+            ConfigProvider.getConfig().getConfigSources().spliterator(), false)
             .anyMatch(source -> source.getName().equals("ParameterStoreConfigSource"));
         
         assertTrue(found, "ParameterStoreConfigSource should be registered");
@@ -32,9 +33,8 @@ class ParameterStoreConfigSourceTest {
         // Verify that ParameterStoreConfigSource has correct ordinal (275)
         // This ensures it has higher priority than application.properties (250)
         // but lower than environment variables (300)
-        int ordinal = ConfigProvider.getConfig()
-            .getConfigSources()
-            .stream()
+        int ordinal = StreamSupport.stream(
+            ConfigProvider.getConfig().getConfigSources().spliterator(), false)
             .filter(source -> source.getName().equals("ParameterStoreConfigSource"))
             .findFirst()
             .map(source -> source.getOrdinal())
