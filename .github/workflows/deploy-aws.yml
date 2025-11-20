@@ -17,6 +17,7 @@ on:
 env:
   AWS_REGION: us-west-2
   OPENTOFU_VERSION: 1.8.8
+  AWS_ACCOUNT_ID: '602351392913'
 
 jobs:
   # Build and test all components
@@ -160,6 +161,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       matrix:
         component: [api, cli]
@@ -168,11 +172,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Configure AWS credentials
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/configure-credentials@main
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ORGANIZATION_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       
       - name: Login to Amazon ECR
@@ -220,46 +223,44 @@ jobs:
     runs-on: ubuntu-latest
     needs: package
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Configure AWS credentials
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/configure-credentials@main
+      - name: Deploy Infrastructure
+        id: deploy
+        uses: angryss/idp-github-actions-templates/.github/actions/aws/opentofu/deploy@main
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Initialize OpenTofu
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/opentofu/init@main
-        with:
+          target-account: visuidp
           working-directory: terraform
-          tofu-version: ${{ env.OPENTOFU_VERSION }}
-          backend-config: '-backend-config="key=visuidp/aws-deployment/terraform.tfstate"'
+          organization-role-arn: ${{ secrets.AWS_ORGANIZATION_ROLE_ARN }}
+          state-key: visuidp/aws-deployment/terraform.tfstate
+          additional-variables: |
+            {
+              "image_tag": "${{ github.sha }}"
+            }
       
-      - name: Plan OpenTofu Changes
-        id: plan
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/opentofu/plan@main
-        with:
-          working-directory: terraform
-          target-account-alias: visuidp
-          org-profile: default
-          lock-timeout: 30s
-      
-      - name: Apply OpenTofu Changes
-        if: github.event_name != 'pull_request'
+      - name: Apply Infrastructure
+        if: steps.deploy.outputs.plan-has-changes == 'true'
         uses: angryss/idp-github-actions-templates/.github/actions/aws/opentofu/apply@main
         with:
           working-directory: terraform
-          plan-file: tfplan
           target-account-alias: visuidp
+      
+      - name: Setup OpenTofu
+        if: steps.deploy.outputs.plan-has-changes == 'true'
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
       
       - name: Get OpenTofu Outputs
         id: tf-outputs
         working-directory: terraform
-        if: github.event_name != 'pull_request'
+        if: steps.deploy.outputs.plan-has-changes == 'true'
         run: |
           echo "api_url=$(tofu output -raw api_gateway_url)" >> $GITHUB_OUTPUT
           echo "cloudfront_url=$(tofu output -raw cloudfront_url)" >> $GITHUB_OUTPUT
@@ -267,14 +268,14 @@ jobs:
           echo "cloudfront_distribution=$(tofu output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
       
       - name: Download UI dist
-        if: github.event_name != 'pull_request'
+        if: steps.deploy.outputs.plan-has-changes == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ui-dist
           path: idp-ui/dist
       
       - name: Deploy UI to S3
-        if: github.event_name != 'pull_request'
+        if: steps.deploy.outputs.plan-has-changes == 'true'
         working-directory: idp-ui
         env:
           S3_BUCKET: ${{ steps.tf-outputs.outputs.s3_bucket }}
@@ -287,7 +288,7 @@ jobs:
             --skip-build
       
       - name: Save deployment info
-        if: github.event_name != 'pull_request'
+        if: steps.deploy.outputs.plan-has-changes == 'true'
         run: |
           echo "Deployment completed successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -302,24 +303,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || !inputs.skip-smoke-tests)
+    permissions:
+      id-token: write
+      contents: read
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Configure AWS credentials
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/configure-credentials@main
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ORGANIZATION_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       
-      - name: Initialize OpenTofu
-        uses: angryss/idp-github-actions-templates/.github/actions/aws/opentofu/init@main
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
         with:
-          working-directory: terraform
-          tofu-version: ${{ env.OPENTOFU_VERSION }}
-          backend-config: '-backend-config="key=visuidp/aws-deployment/terraform.tfstate"'
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
+      
+      - name: Initialize OpenTofu
+        working-directory: terraform
+        run: |
+          tofu init -backend-config="key=visuidp/aws-deployment/terraform.tfstate"
       
       - name: Get deployment URLs
         id: urls
