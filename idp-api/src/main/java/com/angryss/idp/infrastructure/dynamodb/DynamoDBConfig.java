@@ -1,6 +1,8 @@
 package com.angryss.idp.infrastructure.dynamodb;
 
+import io.quarkus.arc.properties.IfBuildProperty;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -8,12 +10,14 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 /**
  * Configuration class for DynamoDB access.
  * Provides table names and client access for repositories.
+ * Only active when idp.database.provider is set to "dynamodb".
  */
 @ApplicationScoped
+@IfBuildProperty(name = "idp.database.provider", stringValue = "dynamodb")
 public class DynamoDBConfig {
     
     @Inject
-    DynamoDbClient dynamoDbClient;
+    Instance<DynamoDbClient> dynamoDbClient;
     
     @ConfigProperty(name = "idp.database.dynamodb.table-prefix", defaultValue = "visuidp")
     String tablePrefix;
@@ -24,9 +28,10 @@ public class DynamoDBConfig {
     /**
      * Get the DynamoDB client instance.
      * No connection pooling needed - AWS SDK handles this internally.
+     * Returns null if DynamoDB is not configured (e.g., in PostgreSQL-only tests).
      */
     public DynamoDbClient getClient() {
-        return dynamoDbClient;
+        return dynamoDbClient.isResolvable() ? dynamoDbClient.get() : null;
     }
     
     /**

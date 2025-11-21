@@ -1,5 +1,6 @@
 package com.angryss.idp.presentation.controllers;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -8,11 +9,12 @@ import jakarta.ws.rs.core.Response;
  * Test controller for triggering various error conditions.
  * This controller is used by property-based tests to verify error logging behavior.
  * 
- * WARNING: This controller should only be enabled in test environments.
+ * Available in all environments for testing purposes.
  */
 @Path("/v1/test-errors")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@PermitAll
 public class ErrorTestController {
 
     /**

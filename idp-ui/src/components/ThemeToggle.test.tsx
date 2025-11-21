@@ -64,7 +64,7 @@ describe('ThemeToggle Component', () => {
       );
 
       const button = screen.getByRole('button');
-      expect(button.textContent).toContain('⚡');
+      expect(button.textContent).toContain('⬢');
     });
   });
 

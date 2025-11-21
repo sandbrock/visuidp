@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { Header } from './Header';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { DemoModeProvider } from '../contexts/DemoModeContext';
 import type { User } from '../types/auth';
 import * as auth from '../auth';
 
@@ -52,9 +53,11 @@ describe('Header Integration Tests', () => {
   const renderHeader = (user: User = mockUser) => {
     return render(
       <BrowserRouter>
-        <ThemeProvider>
-          <Header user={user} />
-        </ThemeProvider>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <Header user={user} />
+          </ThemeProvider>
+        </DemoModeProvider>
       </BrowserRouter>
     );
   };

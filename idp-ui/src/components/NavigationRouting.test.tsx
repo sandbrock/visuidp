@@ -6,6 +6,7 @@ import { Header } from './Header';
 import { ApiKeysManagement } from './ApiKeysManagement';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { apiService } from '../services/api';
 import type { User } from '../types/auth';
 import type { ApiKeyResponse } from '../types/apiKey';
@@ -89,11 +90,13 @@ describe('Navigation and Routing Behavior Tests', () => {
   describe('API Keys Link Visibility in Header', () => {
     it('should display API Keys link in Header for all authenticated users', () => {
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={mockRegularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -109,11 +112,13 @@ describe('Navigation and Routing Behavior Tests', () => {
       };
 
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={regularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -122,11 +127,13 @@ describe('Navigation and Routing Behavior Tests', () => {
 
     it('should display API Keys link for admin users', () => {
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={mockAdminUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -135,11 +142,13 @@ describe('Navigation and Routing Behavior Tests', () => {
 
     it('should position API Keys link between Stacks and Admin links', () => {
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={mockAdminUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const allLinks = screen.getAllByRole('link');
@@ -168,7 +177,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       // Initially on home page
@@ -198,7 +208,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -223,7 +234,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       // Initially on infrastructure page
@@ -246,7 +258,8 @@ describe('Navigation and Routing Behavior Tests', () => {
           <MemoryRouter initialEntries={['/api-keys']}>
             <Header user={mockRegularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -260,7 +273,8 @@ describe('Navigation and Routing Behavior Tests', () => {
           <MemoryRouter initialEntries={['/']}>
             <Header user={mockRegularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -281,7 +295,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -311,7 +326,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /🔑 api keys/i });
@@ -394,7 +410,8 @@ describe('Navigation and Routing Behavior Tests', () => {
               />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       // Start on personal API keys page

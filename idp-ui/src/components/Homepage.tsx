@@ -27,9 +27,14 @@ export const Homepage = ({ user }: HomepageProps) => {
 
   // Load blueprints and restore selection from localStorage on mount
   useEffect(() => {
+    let mounted = true;
+    
     const loadBlueprints = async () => {
       try {
         const data = await apiService.getBlueprints(user.email);
+        
+        if (!mounted) return;
+        
         setBlueprints(data);
 
         // Restore blueprint selection from localStorage
@@ -51,6 +56,10 @@ export const Homepage = ({ user }: HomepageProps) => {
     };
 
     loadBlueprints();
+    
+    return () => {
+      mounted = false;
+    };
   }, [user.email]);
 
   const handleBlueprintChange = (blueprintId: string | null) => {

@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Header } from './Header';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { DemoModeProvider } from '../contexts/DemoModeContext';
 import type { User } from '../types/auth';
 
 describe('Header Layout and Styling', () => {
@@ -34,15 +35,21 @@ describe('Header Layout and Styling', () => {
     document.documentElement.removeAttribute('data-theme');
   });
 
+  const renderHeader = (user: User = mockUser) => {
+    return render(
+      <BrowserRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <Header user={user} />
+          </ThemeProvider>
+        </DemoModeProvider>
+      </BrowserRouter>
+    );
+  };
+
   describe('User Info Section Layout', () => {
     it('should render user-info section with ThemeToggle and ProfileMenu', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       const userInfoSection = document.querySelector('.user-info');
       expect(userInfoSection).toBeInTheDocument();
@@ -57,13 +64,7 @@ describe('Header Layout and Styling', () => {
     });
 
     it('should have proper CSS classes for layout', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       const header = document.querySelector('.app-header');
       expect(header).toBeInTheDocument();
@@ -79,13 +80,7 @@ describe('Header Layout and Styling', () => {
     });
 
     it('should not render old user email or logout button', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       // Old elements should not exist
       const userEmail = document.querySelector('.user-email');
@@ -100,13 +95,7 @@ describe('Header Layout and Styling', () => {
     it('should render correctly in light theme', () => {
       localStorageMock['theme'] = 'light';
 
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
       
@@ -117,13 +106,7 @@ describe('Header Layout and Styling', () => {
     it('should render correctly in dark theme', () => {
       localStorageMock['theme'] = 'dark';
 
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
       
@@ -134,13 +117,7 @@ describe('Header Layout and Styling', () => {
     it('should render correctly in frankenstein theme', () => {
       localStorageMock['theme'] = 'frankenstein';
 
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       expect(document.documentElement.getAttribute('data-theme')).toBe('frankenstein');
       
@@ -151,13 +128,7 @@ describe('Header Layout and Styling', () => {
 
   describe('Navigation Structure', () => {
     it('should render navigation links', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       expect(screen.getByText('Dashboard')).toBeInTheDocument();
       expect(screen.getByText('Blueprints')).toBeInTheDocument();
@@ -165,13 +136,7 @@ describe('Header Layout and Styling', () => {
     });
 
     it('should not show API Keys link in main navigation', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       // API Keys should not be in the header nav
       const headerNav = document.querySelector('.header-nav');
@@ -184,13 +149,7 @@ describe('Header Layout and Styling', () => {
 
   describe('Responsive Behavior', () => {
     it('should have responsive classes', () => {
-      render(
-        <BrowserRouter>
-          <ThemeProvider>
-            <Header user={mockUser} />
-          </ThemeProvider>
-        </BrowserRouter>
-      );
+      renderHeader();
 
       const headerContent = document.querySelector('.header-content');
       expect(headerContent).toBeInTheDocument();

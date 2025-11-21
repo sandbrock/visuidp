@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { ApiKeysManagement } from './ApiKeysManagement';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { apiService } from '../services/api';
 import * as auth from '../auth';
 import type { User } from '../types/auth';
@@ -211,11 +212,13 @@ describe('Personal API Keys Route Integration Tests', () => {
   describe('Navigation from Header', () => {
     it('should display API Keys link in Header for regular users', () => {
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={mockRegularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /api keys/i });
@@ -225,11 +228,13 @@ describe('Personal API Keys Route Integration Tests', () => {
 
     it('should display API Keys link in Header for admin users', () => {
       render(
-        <ThemeProvider>
-          <MemoryRouter>
+        <DemoModeProvider>
+          <ThemeProvider>
+            <MemoryRouter>
             <Header user={mockAdminUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /api keys/i });
@@ -250,7 +255,8 @@ describe('Personal API Keys Route Integration Tests', () => {
               <Route path="/api-keys" element={<ApiKeysManagement user={mockRegularUser} mode="personal" />} />
             </Routes>
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       // Initially on home page
@@ -272,7 +278,8 @@ describe('Personal API Keys Route Integration Tests', () => {
           <MemoryRouter initialEntries={['/api-keys']}>
             <Header user={mockRegularUser} />
           </MemoryRouter>
-        </ThemeProvider>
+          </ThemeProvider>
+        </DemoModeProvider>
       );
 
       const apiKeysLink = screen.getByRole('link', { name: /api keys/i });

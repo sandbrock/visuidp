@@ -400,7 +400,7 @@ describe('Button Functionality Across All Themes', () => {
     it('should render danger button with correct CSS class', () => {
       render(
         <ThemeProvider>
-          <AngryButton cssClass="e-danger">Delete</AngryButton>
+          <AngryButton variant="danger">Delete</AngryButton>
         </ThemeProvider>
       );
 
@@ -412,7 +412,7 @@ describe('Button Functionality Across All Themes', () => {
     it('should render outline button with correct CSS class', () => {
       render(
         <ThemeProvider>
-          <AngryButton cssClass="e-outline">Cancel</AngryButton>
+          <AngryButton style="outline">Cancel</AngryButton>
         </ThemeProvider>
       );
 
@@ -438,8 +438,8 @@ describe('Button Functionality Across All Themes', () => {
         <ThemeProvider>
           <div>
             <AngryButton isPrimary={true}>Primary</AngryButton>
-            <AngryButton cssClass="e-danger">Danger</AngryButton>
-            <AngryButton cssClass="e-outline">Outline</AngryButton>
+            <AngryButton variant="danger">Danger</AngryButton>
+            <AngryButton style="outline">Outline</AngryButton>
             <AngryButton>Secondary</AngryButton>
           </div>
         </ThemeProvider>
@@ -565,7 +565,7 @@ describe('Button Functionality Across All Themes', () => {
 
         const { unmount } = render(
           <ThemeProvider>
-            <AngryButton isPrimary={true} cssClass="e-small">
+            <AngryButton isPrimary={true} size="small">
               Button
             </AngryButton>
           </ThemeProvider>
@@ -585,7 +585,8 @@ describe('Button Functionality Across All Themes', () => {
     it('should render button with icon', () => {
       render(
         <ThemeProvider>
-          <AngryButton iconCss="icon-class">
+          <AngryButton>
+            <span className="icon-class">🔍</span>
             With Icon
           </AngryButton>
         </ThemeProvider>
@@ -631,7 +632,7 @@ describe('Button Functionality Across All Themes', () => {
         <ThemeProvider>
           <AngryButton 
             isPrimary={true} 
-            cssClass="e-small" 
+            size="small" 
             className="custom-class"
           >
             Combined

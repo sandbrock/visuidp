@@ -107,10 +107,10 @@ ON CONFLICT (blueprint_id, cloud_provider_id) DO NOTHING;
 -- Microservice with Database Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Primary Database', 'PostgreSQL database for microservices', 'b2e5f6a7-8c9d-4b3e-8d02-1234567890a2', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01', 
+    ('b1000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Primary Database', 'PostgreSQL database for microservices', 'b2e5f6a7-8c9d-4b3e-8d02-1234567890a2', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01', 
      '{"engine": "postgres", "engineVersion": "14.7", "instanceClass": "db.t3.small", "allocatedStorage": 20, "multiAZ": false, "backupRetentionPeriod": 7, "storageEncrypted": true, "publiclyAccessible": false}'::jsonb, 
      true, NOW(), NOW()),
-    ('br000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', 'Container Cluster', 'ECS cluster for microservices', 'a1f4e5c6-7d8b-4a2f-9c01-1234567890a1', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', 'Container Cluster', 'ECS cluster for microservices', 'a1f4e5c6-7d8b-4a2f-9c01-1234567890a1', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"capacityProvider": "FARGATE", "enableContainerInsights": true}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -118,7 +118,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Serverless API Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002', 'API Storage', 'S3 bucket for API assets', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002', 'API Storage', 'S3 bucket for API assets', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"storageClass": "STANDARD", "versioning": "Enabled", "encryption": "AES256", "publicAccessBlock": true}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -126,7 +126,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Static Website Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000003', 'Website Storage', 'S3 bucket for static website', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000003', 'Website Storage', 'S3 bucket for static website', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"storageClass": "STANDARD", "versioning": "Enabled", "encryption": "AES256", "publicAccessBlock": false}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -134,7 +134,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Event-Driven Service Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000004', 'Message Queue', 'SQS queue for event processing', 'c3f6a7b8-9d0e-4c4d-7e03-1234567890a3', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000004', 'Message Queue', 'SQS queue for event processing', 'c3f6a7b8-9d0e-4c4d-7e03-1234567890a3', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"serviceType": "SQS", "messageRetentionPeriod": 345600, "visibilityTimeout": 30, "fifoQueue": false}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -142,7 +142,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Data Pipeline Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000005', 'Data Lake Storage', 'S3 bucket for data lake', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000005', 'Data Lake Storage', 'S3 bucket for data lake', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"storageClass": "INTELLIGENT_TIERING", "versioning": "Enabled", "encryption": "aws:kms", "publicAccessBlock": true, "lifecycleDays": 90}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -150,7 +150,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Container Cluster Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000006', 'Kubernetes Cluster', 'ECS cluster for containers', 'a1f4e5c6-7d8b-4a2f-9c01-1234567890a1', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000006', 'Kubernetes Cluster', 'ECS cluster for containers', 'a1f4e5c6-7d8b-4a2f-9c01-1234567890a1', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"capacityProvider": "FARGATE", "enableContainerInsights": true}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -158,10 +158,10 @@ ON CONFLICT (id) DO NOTHING;
 -- Web Application Blueprint Resources
 INSERT INTO blueprint_resources (id, blueprint_id, name, description, resource_type_id, cloud_provider_id, configuration, is_active, created_at, updated_at)
 VALUES 
-    ('br000000-0000-0000-0000-000000000008', 'b0000000-0000-0000-0000-000000000007', 'Application Database', 'PostgreSQL for web app', 'b2e5f6a7-8c9d-4b3e-8d02-1234567890a2', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000008', 'b0000000-0000-0000-0000-000000000007', 'Application Database', 'PostgreSQL for web app', 'b2e5f6a7-8c9d-4b3e-8d02-1234567890a2', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"engine": "postgres", "engineVersion": "14.7", "instanceClass": "db.t3.medium", "allocatedStorage": 50, "multiAZ": true, "backupRetentionPeriod": 14, "storageEncrypted": true, "publiclyAccessible": false}'::jsonb,
      true, NOW(), NOW()),
-    ('br000000-0000-0000-0000-000000000009', 'b0000000-0000-0000-0000-000000000007', 'Asset Storage', 'S3 bucket for web assets', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
+    ('b1000000-0000-0000-0000-000000000009', 'b0000000-0000-0000-0000-000000000007', 'Asset Storage', 'S3 bucket for web assets', 'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa', '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',
      '{"storageClass": "STANDARD", "versioning": "Enabled", "encryption": "AES256", "publicAccessBlock": false}'::jsonb,
      true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
@@ -173,7 +173,7 @@ ON CONFLICT (id) DO NOTHING;
 -- AWS Stack 1: User Service (Microservice with Database)
 INSERT INTO stacks (id, name, description, cloud_name, route_path, repository_url, stack_type, programming_language, is_public, created_by, team_id, blueprint_id, configuration, created_at, updated_at)
 VALUES 
-    ('s0000000-0000-0000-0000-000000000001', 
+    ('a0000000-0000-0000-0000-000000000001', 
      'User Service', 
      'RESTful API for user management with PostgreSQL database on AWS ECS',
      'demo-user-service-aws',
@@ -192,7 +192,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Azure Stack 2: Payment API (Serverless)
 INSERT INTO stacks (id, name, description, cloud_name, route_path, repository_url, stack_type, programming_language, is_public, created_by, team_id, blueprint_id, configuration, created_at, updated_at)
 VALUES 
-    ('s0000000-0000-0000-0000-000000000002',
+    ('a0000000-0000-0000-0000-000000000002',
      'Payment API',
      'Serverless payment processing API on Azure Functions with Cosmos DB',
      'demo-payment-api-azure',
@@ -211,7 +211,7 @@ ON CONFLICT (id) DO NOTHING;
 -- GCP Stack 3: Marketing Website (Static Website)
 INSERT INTO stacks (id, name, description, cloud_name, route_path, repository_url, stack_type, programming_language, is_public, created_by, team_id, blueprint_id, configuration, created_at, updated_at)
 VALUES 
-    ('s0000000-0000-0000-0000-000000000003',
+    ('a0000000-0000-0000-0000-000000000003',
      'Marketing Website',
      'Static marketing website hosted on GCP Cloud Storage with CDN',
      'demo-marketing-site-gcp',
@@ -230,7 +230,7 @@ ON CONFLICT (id) DO NOTHING;
 -- AWS Stack 4: Order Processing (Event-Driven)
 INSERT INTO stacks (id, name, description, cloud_name, route_path, repository_url, stack_type, programming_language, is_public, created_by, team_id, blueprint_id, configuration, created_at, updated_at)
 VALUES 
-    ('s0000000-0000-0000-0000-000000000004',
+    ('a0000000-0000-0000-0000-000000000004',
      'Order Processing',
      'Event-driven order processing service using AWS Lambda and SQS',
      'demo-order-proc-aws',
@@ -249,7 +249,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Azure Stack 5: Analytics Pipeline (Data Pipeline)
 INSERT INTO stacks (id, name, description, cloud_name, route_path, repository_url, stack_type, programming_language, is_public, created_by, team_id, blueprint_id, configuration, created_at, updated_at)
 VALUES 
-    ('s0000000-0000-0000-0000-000000000005',
+    ('a0000000-0000-0000-0000-000000000005',
      'Analytics Pipeline',
      'Data analytics pipeline on Azure with Data Lake and Databricks',
      'demo-analytics-azure',
@@ -272,18 +272,18 @@ ON CONFLICT (id) DO NOTHING;
 -- User Service Stack Resources (AWS)
 INSERT INTO stack_resources (id, name, description, stack_id, resource_type_id, cloud_provider_id, configuration, created_at, updated_at)
 VALUES 
-    ('sr000000-0000-0000-0000-000000000001',
+    ('51000000-0000-0000-0000-000000000001',
      'User Cache',
      'Redis cache for user session data',
-     's0000000-0000-0000-0000-000000000001',
+     'a0000000-0000-0000-0000-000000000001',
      'd4f7b8c9-0e1f-5d6e-9f04-1234567890a4',  -- Cache resource type
      '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',  -- AWS
      '{"engine": "redis", "nodeType": "cache.t3.micro", "numCacheNodes": 1, "engineVersion": "7.0"}'::jsonb,
      NOW(), NOW()),
-    ('sr000000-0000-0000-0000-000000000002',
+    ('51000000-0000-0000-0000-000000000002',
      'User Database',
      'PostgreSQL database for user data',
-     's0000000-0000-0000-0000-000000000001',
+     'a0000000-0000-0000-0000-000000000001',
      '2121c807-7d81-4edd-99ea-36010c63bf27',  -- Relational Database resource type
      '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',  -- AWS
      '{"engine": "postgres", "instanceClass": "db.t3.micro", "allocatedStorage": 20, "databaseName": "userdb"}'::jsonb,
@@ -293,18 +293,18 @@ ON CONFLICT (id) DO NOTHING;
 -- Payment API Stack Resources (Azure)
 INSERT INTO stack_resources (id, name, description, stack_id, resource_type_id, cloud_provider_id, configuration, created_at, updated_at)
 VALUES 
-    ('sr000000-0000-0000-0000-000000000003',
+    ('51000000-0000-0000-0000-000000000003',
      'Payment Database',
      'Cosmos DB for payment transactions',
-     's0000000-0000-0000-0000-000000000002',
+     'a0000000-0000-0000-0000-000000000002',
      '9dac0bed-3804-418f-a22d-7946a5cf1885',  -- NoSQL Database resource type
      '3b2c1d4e-5f6a-7b8c-9d0e-1f2a3b4c5d02',  -- Azure
      '{"accountType": "Standard", "consistencyLevel": "Session", "throughput": 400}'::jsonb,
      NOW(), NOW()),
-    ('sr000000-0000-0000-0000-000000000004',
+    ('51000000-0000-0000-0000-000000000004',
      'Payment Queue',
      'Service Bus queue for payment events',
-     's0000000-0000-0000-0000-000000000002',
+     'a0000000-0000-0000-0000-000000000002',
      '8ae6e952-f9cb-448f-be8e-8a439f2ae306',  -- Queue resource type
      '3b2c1d4e-5f6a-7b8c-9d0e-1f2a3b4c5d02',  -- Azure
      '{"maxDeliveryCount": 10, "lockDuration": "PT5M", "requiresDuplicateDetection": true}'::jsonb,
@@ -314,10 +314,10 @@ ON CONFLICT (id) DO NOTHING;
 -- Marketing Website Stack Resources (GCP)
 INSERT INTO stack_resources (id, name, description, stack_id, resource_type_id, cloud_provider_id, configuration, created_at, updated_at)
 VALUES 
-    ('sr000000-0000-0000-0000-000000000005',
+    ('51000000-0000-0000-0000-000000000005',
      'Website Assets',
      'Cloud Storage bucket for website files',
-     's0000000-0000-0000-0000-000000000003',
+     'a0000000-0000-0000-0000-000000000003',
      'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa',  -- Storage resource type (BOTH category)
      '9c8b7a6d-5e4f-3a2b-1c0d-9e8f7a6b5c03',  -- GCP
      '{"storageClass": "STANDARD", "location": "US", "publicAccess": true, "website": {"mainPageSuffix": "index.html"}}'::jsonb,
@@ -327,18 +327,18 @@ ON CONFLICT (id) DO NOTHING;
 -- Order Processing Stack Resources (AWS)
 INSERT INTO stack_resources (id, name, description, stack_id, resource_type_id, cloud_provider_id, configuration, created_at, updated_at)
 VALUES 
-    ('sr000000-0000-0000-0000-000000000006',
+    ('51000000-0000-0000-0000-000000000006',
      'Order Queue',
      'SQS queue for order events',
-     's0000000-0000-0000-0000-000000000004',
+     'a0000000-0000-0000-0000-000000000004',
      '8ae6e952-f9cb-448f-be8e-8a439f2ae306',  -- Queue resource type
      '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',  -- AWS
      '{"visibilityTimeout": 300, "messageRetentionPeriod": 1209600, "receiveMessageWaitTime": 20}'::jsonb,
      NOW(), NOW()),
-    ('sr000000-0000-0000-0000-000000000007',
+    ('51000000-0000-0000-0000-000000000007',
      'Order Database',
      'DynamoDB table for order state',
-     's0000000-0000-0000-0000-000000000004',
+     'a0000000-0000-0000-0000-000000000004',
      '9dac0bed-3804-418f-a22d-7946a5cf1885',  -- NoSQL Database resource type
      '8f0a5f8c-4b9d-4b3a-9a7a-2c1a6f5f1a01',  -- AWS
      '{"billingMode": "PAY_PER_REQUEST", "pointInTimeRecovery": true, "streamEnabled": true}'::jsonb,
@@ -348,18 +348,18 @@ ON CONFLICT (id) DO NOTHING;
 -- Analytics Pipeline Stack Resources (Azure)
 INSERT INTO stack_resources (id, name, description, stack_id, resource_type_id, cloud_provider_id, configuration, created_at, updated_at)
 VALUES 
-    ('sr000000-0000-0000-0000-000000000008',
+    ('51000000-0000-0000-0000-000000000008',
      'Raw Data Storage',
      'Blob storage for raw analytics data',
-     's0000000-0000-0000-0000-000000000005',
+     'a0000000-0000-0000-0000-000000000005',
      'aaa5ec27-6cc5-4329-953a-e7ec17f4d5aa',  -- Storage resource type (BOTH category)
      '3b2c1d4e-5f6a-7b8c-9d0e-1f2a3b4c5d02',  -- Azure
      '{"accountTier": "Standard", "replicationType": "LRS", "accessTier": "Hot", "hierarchicalNamespace": true}'::jsonb,
      NOW(), NOW()),
-    ('sr000000-0000-0000-0000-000000000009',
+    ('51000000-0000-0000-0000-000000000009',
      'Analytics Database',
      'SQL Database for processed analytics',
-     's0000000-0000-0000-0000-000000000005',
+     'a0000000-0000-0000-0000-000000000005',
      '2121c807-7d81-4edd-99ea-36010c63bf27',  -- Relational Database resource type
      '3b2c1d4e-5f6a-7b8c-9d0e-1f2a3b4c5d02',  -- Azure
      '{"edition": "Standard", "serviceObjective": "S2", "maxSizeBytes": 268435456000}'::jsonb,
